@@ -119,7 +119,7 @@ def generate_animation(animation_config):
         generate_animation_for_world(world_config['file'], world_config['duration'])
 
     # Generates list of animations
-    _generate_animation_page(animation_config['worlds'])
+    # _generate_animation_page(animation_config['worlds'])
 
     # Push animation to benchmark-storage branch
     current_branch_name = get_current_branch_name()

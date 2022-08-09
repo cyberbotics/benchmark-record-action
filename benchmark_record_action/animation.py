@@ -139,4 +139,8 @@ def generate_animation(animation_config):
         else:
             os.remove(path)
 
+    for path in Path('').glob('*'):
+        path = str(path)
+        print('path: ', path)
+
     benchmark_record_action.utils.git.push()

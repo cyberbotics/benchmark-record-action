@@ -40,6 +40,7 @@ def push(message='Updated benchmark recordings', force=True):
         os.environ['GITHUB_TOKEN'],
         os.environ['GITHUB_REPOSITORY']
     )
+    print('PUSH TO GITHUB REPOSITORY: ', github_repository)
 
     subprocess.check_output(['git', 'add', '-A'])
     subprocess.check_output(['git', 'commit', '-m', message])

@@ -52,7 +52,7 @@ def _get_animation_directories():
     return directories
 
 
-def _generate_animation_page(worlds_config):
+def _generate_animation_file(worlds_config):
     template = None
 
     # Generate details
@@ -119,7 +119,7 @@ def generate_animation(animation_config):
         generate_animation_for_world(world_config['file'], world_config['duration'])
 
     # Generates list of animations
-    # _generate_animation_page(animation_config['worlds'])
+    _generate_animation_file(animation_config['worlds'])
 
     # Push animation to benchmark-storage branch
     current_branch_name = get_current_branch_name()
@@ -131,6 +131,7 @@ def generate_animation(animation_config):
 
     # Delete files that are not necessary
     animation_directories = _get_animation_directories()
+    print('ANIMATION DIRECTORIES: ', animation_directories)
     for path in Path('').glob('*'):
         path = str(path)
         if path not in animation_directories + ['index.html', '.git']:

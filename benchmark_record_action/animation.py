@@ -134,6 +134,7 @@ def generate_animation(animation_config):
     #animation_directories = _get_animation_directories()
     for path in Path('').glob('*'):
         path = str(path)
+        print('PATH: ', path)
         if os.path.isdir(path):
             shutil.rmtree(path)
         else:

@@ -121,7 +121,7 @@ def generate_animation(animation_config):
     # Generates list of animations
     _generate_animation_page(animation_config['worlds'])
 
-    # Push animation to storage branch
+    # Push animation to gh-pages branch
     current_branch_name = get_current_branch_name()
     benchmark_record_action.utils.git.push_directory_to_branch(
         '/tmp/animation',

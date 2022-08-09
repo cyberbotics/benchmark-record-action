@@ -53,8 +53,8 @@ def push(message='Updated benchmark recordings', force=True):
         print(f'@ git push {github_repository}')
 
 
-def push_directory_to_branch(source_directory, destination_directory='.', destination_branch='storage', clean=False):
-    """Publishes an arbitrary dictionary to a new branch (usually `storage`)."""
+def push_directory_to_branch(source_directory, destination_directory='.', destination_branch='gh-pages', clean=False):
+    """Publishes an arbitrary dictionary to a new branch (usually `gh-pages`)."""
 
     _init()
 
@@ -62,7 +62,7 @@ def push_directory_to_branch(source_directory, destination_directory='.', destin
     print('DESTINATION BRANCH: ', destination_branch)
 
     subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
-    #subprocess.check_output(['git', 'reset', '--hard'])
+    subprocess.check_output(['git', 'reset', '--hard'])
     subprocess.check_output(f'git checkout {destination_branch} || git checkout -b {destination_branch}', shell=True)
 
     os.makedirs(destination_directory, exist_ok=True)

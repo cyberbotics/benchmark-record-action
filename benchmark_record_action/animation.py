@@ -47,6 +47,7 @@ def _generate_animation_recorder_vrml(duration, output):
 def _get_animation_directories():
     directories = []
     for path in glob('*'):
+        print('path: ', path)
         if os.path.isdir(path) and os.path.isfile(os.path.join(path, 'index.html')):
             directories.append(path)
     return directories
@@ -130,8 +131,8 @@ def generate_animation(animation_config):
     )
 
     # Delete files that are not necessary
-    """ animation_directories = _get_animation_directories()
-    for path in Path('').glob('*'):
+    animation_directories = _get_animation_directories()
+    """" for path in Path('').glob('*'):
         path = str(path)
         if path not in animation_directories + ['index.html', '.git']:
             if os.path.isdir(path):

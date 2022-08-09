@@ -20,8 +20,6 @@ import subprocess
 import yaml
 from benchmark_record_action.utils.webots import load_config
 from benchmark_record_action.animation import generate_animation
-from benchmark_record_action.competition import generate_competition
-from benchmark_record_action.competitor import generate_competitor_preview
 
 
 def main():

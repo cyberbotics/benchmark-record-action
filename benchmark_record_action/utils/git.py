@@ -32,7 +32,7 @@ def _init():
         subprocess.check_output(['git', 'config', '--global', 'user.email', email])
 
 
-def push(message='Updated animation', force=True):
+def push(message='Updated benchmark recordings', force=True):
     _init()
 
     github_repository = 'https://{}:{}@github.com/{}'.format(
@@ -57,6 +57,9 @@ def push_directory_to_branch(source_directory, destination_directory='.', destin
     """Publishes an arbitrary dictionary to a new branch (usually `storage`)."""
 
     _init()
+
+    print('DESTINATION DIRECTORY: ', destination_directory)
+    print('DESTINATION BRANCH: ', destination_branch)
 
     subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
     subprocess.check_output(['git', 'reset', '--hard'])

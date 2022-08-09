@@ -53,8 +53,8 @@ def push(message='Updated benchmark recordings', force=True):
         print(f'@ git push {github_repository}')
 
 
-def push_directory_to_branch(source_directory, destination_directory='.', destination_branch='gh-pages', clean=False):
-    """Publishes an arbitrary dictionary to a new branch (usually `gh-pages`)."""
+def push_directory_to_branch(source_directory, destination_directory='.', destination_branch='benchmark-storage', clean=False):
+    """Publishes an arbitrary dictionary to a new branch (usually `benchmark-storage`)."""
 
     _init()
 

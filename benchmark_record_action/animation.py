@@ -125,7 +125,7 @@ def generate_animation(animation_config):
     current_branch_name = get_current_branch_name()
     benchmark_record_action.utils.git.push_directory_to_branch(
         '/tmp/animation',
-        destination_directory=current_branch_name,
+        destination_directory='storage/AxjD2FU',
         clean=True
     )
 

@@ -40,7 +40,6 @@ def push(message='Updated benchmark recordings', force=True):
         os.environ['GITHUB_TOKEN'],
         os.environ['GITHUB_REPOSITORY']
     )
-    print('PUSH TO GITHUB REPOSITORY: ', github_repository)
 
     subprocess.check_output(['git', 'add', '-A'])
     subprocess.check_output(['git', 'commit', '-m', message])
@@ -59,13 +58,9 @@ def push_directory_to_branch(source_directory, destination_directory='.', destin
 
     _init()
 
-    print('DESTINATION DIRECTORY: ', destination_directory)
-    print('DESTINATION BRANCH: ', destination_branch)
-
     subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
-    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/root/repo'])
     subprocess.check_output(['git', 'reset', '--hard'])
-    subprocess.check_output(f'git checkout {destination_branch} || git checkout -b {destination_branch}', shell=True)
+    #subprocess.check_output(f'git checkout {destination_branch} || git checkout -b {destination_branch}', shell=True)
 
     os.makedirs(destination_directory, exist_ok=True)
     if clean:

@@ -125,13 +125,11 @@ def generate_animation(animation_config):
     current_branch_name = get_current_branch_name()
     benchmark_record_action.utils.git.push_directory_to_branch(
         '/tmp/animation',
-        destination_directory=current_branch_name,
-        clean=True
+        destination_directory='/storage/A23JB2x'
     )
 
     # Delete files that are not necessary
     animation_directories = _get_animation_directories()
-    print('ANIMATION DIRECTORIES: ', animation_directories)
     for path in Path('').glob('*'):
         path = str(path)
         if path not in animation_directories + ['index.html', '.git']:

@@ -132,13 +132,13 @@ def generate_animation(animation_config):
 
     # Delete files that are not necessary
     #animation_directories = _get_animation_directories()
-    for path in Path('').glob('*'):
+    """ for path in Path('').glob('*'):
         path = str(path)
         print('PATH: ', path)
         if os.path.isdir(path):
             shutil.rmtree(path)
         else:
-            os.remove(path)
+            os.remove(path) """
 
     for path in Path('').glob('*'):
         path = str(path)

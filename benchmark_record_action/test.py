@@ -23,20 +23,23 @@ from benchmark_record_action.config import RESOURCES_DIRECTORY
 import benchmark_record_action.utils.git as git
 
 def test_push():
-    print("Listing directories and files in repository: ", os.environ['GITHUB_REF'])
+    print("Listing directories and files in repository: ", os.environ['GITHUB_REPOSITORY'], " (on branch: ", os.environ['GITHUB_REF'].split('/')[-1], ")")
     for path in Path('').glob('*'):
         path = str(path)
         print('path: ', path)
 
-    print("Moving directory:")
+    print("\nMoving directory...")
 
     for path in Path('').glob('*'):
         path = str(path)
         if path == 'AxjD2FU':
             shutil.move(path, 'storage')
 
-    print("Listing files after move:")
+    print("\nListing files after move:")
     for path in Path('').glob('*'):
         path = str(path)
         print('path: ', path)
+
+    print("Commit ad push changes to branch: ", os.environ['GITHUB_REF'].split('/')[-1])
+    git.push(message="change file location")
 

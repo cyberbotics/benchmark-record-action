@@ -20,12 +20,12 @@ import subprocess
 import yaml
 from benchmark_record_action.utils.webots import load_config
 from benchmark_record_action.animation import generate_animation
-from benchmark_record_action.test import test_push
+import benchmark_record_action.test as test
 
 
 def main():
     # Test push
-    test_push()
+    test.get_competitors()
     return
 
     # Load config

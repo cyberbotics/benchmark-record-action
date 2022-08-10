@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
 import re
 import os
 import shutil
@@ -34,6 +35,7 @@ class Competitor:
         self.controller_path = None
         self.controller_name = None
 
+
 def benchmark(config):
     world_config = config['world']
 
@@ -42,11 +44,13 @@ def benchmark(config):
     clone_competitor_controllers(competitors)
     run_competitor_controllers(world_config, competitors)
 
+
 def init():
     print("\nInitializing safe directories...")
     subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
     subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/root/repo'])
     print("done")
+
 
 def get_competitors():
     print("\nGetting competitor list...")
@@ -62,6 +66,7 @@ def get_competitors():
                 )
     print("done")
     return competitors
+
 
 def clone_competitor_controllers(competitors):
     print("\nCloning competitor controllers...")
@@ -80,13 +85,21 @@ def clone_competitor_controllers(competitors):
             subprocess.check_output(f'cd ../..', shell=True)
         else:
             subprocess.check_output(f'git clone {repo} {competitor.controller_path}', shell=True)
+
+        python_filename = os.path.join(competitor.controller_path, 'controller.py')
+        if os.path.exists(python_filename):
+            os.rename(python_filename, os.path.join(competitor.controller_path, f'{competitor.controller_name}.py'))
     print("done")
+
 
 def run_competitor_controllers(world_config, competitors):
     print("\nRunning competitor controllers...")
     for competitor in competitors:
         set_controller_name_to_world(world_config['file'], competitor.controller_name)
+        record_benchmark_animation(world_config, competitor)
+
     print("done")
+
 
 def set_controller_name_to_world(world_file, controller_name):
     print("  ", controller_name ,": Setting new controller in world...")
@@ -98,8 +111,65 @@ def set_controller_name_to_world(world_file, controller_name):
     with open(world_file, 'w') as f:
         f.write(new_world_content)
 
-def generate_benchmark_animation():
-    print("\nGenerating animation...")
+
+def generate_animation_recorder_vrml(duration, output):
+    return (
+        f'Robot {{\n'
+        f'  name "animation_recorder_supervisor"\n'
+        f'  controller "animation_recorder"\n'
+        f'  controllerArgs [\n'
+        f'    "--duration={duration}"\n'
+        f'    "--output={output}"\n'
+        f'  ]\n'
+        f'  children [\n'
+        f'    Receiver {{\n'
+        f'      channel 1024\n'
+        f'    }}\n'
+        f'  ]\n'
+        f'  supervisor TRUE\n'
+        f'}}\n'
+    )
+
+
+def record_benchmark_animation(world_config, competitor):
+    print("  ", competitor.controller_name, ": Recording animation...")
+
+    # Create storage directory for animation
+    world_name = world_config['file'].split('/')[1]
+    destination_directory = '/tmp/animation'
+    subprocess.check_output(['mkdir', '-p', destination_directory])
+
+    # Append `animation_recorder` controller
+    animation_recorder_vrml = generate_animation_recorder_vrml(
+        duration = world_config['duration'],
+        output = os.path.join(os.path.abspath('.'), destination_directory, world_name.replace('.wbt', '.html'))
+    )
+    with open(world_config['file'], 'r') as f:
+        world_content = f.read()
+    with open(world_config['file'], 'w') as f:
+        f.write(world_content + animation_recorder_vrml)
+
+    # Runs simulation in Webots
+    out = subprocess.Popen(
+        ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', world_config['file']],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    while not out.poll():
+        stdoutdata = out.stdout.readline()
+        if stdoutdata:
+            print("  ", stdoutdata.decode('utf-8'))
+        else:
+            break
+    # Removes `animation_recorder` controller
+    with open(world_config['file'], 'w') as f:
+        f.write(world_content)
+
+    # Copy files to new directory
+    """ new_destination_directory = os.path.join('storage', 'Wb_' + id_to_storage_string(int(competitor.id)))
+    subprocess.check_output(['mkdir', '-p', destination_directory])
+    subprocess.check_output(f'mv {destination_directory}/* {new_destination_directory}', shell=True) """
+
 
 def remove_competitor_controllers():
     print("\nRemoving competitor controllers directory...")
@@ -126,6 +196,7 @@ def test_push():
     print("Commit ad push changes to branch: ", os.environ['GITHUB_REF'].split('/')[-1])
     git.push(message="change file location")
 
+
 def id_to_storage_string(id):
     s = int(str(UINT32_MAX - id).zfill(10)[::-1])
     storage_string = ""
@@ -133,6 +204,7 @@ def id_to_storage_string(id):
         b = (s >> (6 * i)) & 63
         storage_string += CHARACTER_SET[b]
     return storage_string
+
 
 def storage_string_to_id(storage_string):
     n = 0

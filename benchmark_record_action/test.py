@@ -41,7 +41,14 @@ def storage_string_to_id(storage_string):
     return id
 
 def get_competitors():
-    print(str(Path('').glob('competitors.txt')))
+    if Path('/competitors.txt').exists():
+        print('found /competitors.txt')
+        with Path('/competitors.txt').open() as f: print(f.readline())
+    elif Path('competitors.txt').exists():
+        print('found competitors.txt')
+        with Path('competitors.txt').open() as f: print(f.readline())
+    else:
+        print('found nothing.')
 
 def test_push():
     print("Listing directories and files in repository: ", os.environ['GITHUB_REPOSITORY'], " (on branch: ", os.environ['GITHUB_REF'].split('/')[-1], ")")

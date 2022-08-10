@@ -20,12 +20,22 @@ from glob import glob
 from pathlib import Path
 import subprocess
 from benchmark_record_action.config import RESOURCES_DIRECTORY
-import benchmark_record_action.utils.git
+import benchmark_record_action.utils.git as git
 
 def test_push():
-  print('This is a test.')
-  for path in Path('').glob('*'):
-          path = str(path)
-          print('path: ', path)
+    print("Listing directories and files in repository: ", os.environ['GITHUB_REF'])
+    for path in Path('').glob('*'):
+        path = str(path)
+        print('path: ', path)
 
+    print("Moving directory:")
+
+    for path in Path('').glob('*'):
+        if str(path) == 'AxjD2FU':
+            shutil.move(path, 'storage')
+
+    print("Listing files after move:")
+    for path in Path('').glob('*'):
+        path = str(path)
+        print('path: ', path)
 

@@ -31,7 +31,8 @@ def test_push():
     print("Moving directory:")
 
     for path in Path('').glob('*'):
-        if str(path) == 'AxjD2FU':
+        path = str(path)
+        if path == 'AxjD2FU':
             shutil.move(path, 'storage')
 
     print("Listing files after move:")

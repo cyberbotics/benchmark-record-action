@@ -41,6 +41,7 @@ def push(message='Updated benchmark recordings', force=True):
         os.environ['GITHUB_REPOSITORY']
     )
 
+    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
     subprocess.check_output(['git', 'add', '-A'])
     subprocess.check_output(['git', 'commit', '-m', message])
     if not is_debug():

@@ -24,12 +24,10 @@ import benchmark_record_action.test as test
 
 
 def main():
-    # Test push
-    test.get_competitors()
-    return
-
     # Load config
     config = load_config()
+    test.benchmark(config)
+    return
 
     # Fire init-hook (usually dependencies)
     if 'init' in config:

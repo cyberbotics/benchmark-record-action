@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 import os
 import shutil
 from glob import glob
@@ -25,30 +26,84 @@ import benchmark_record_action.utils.git as git
 UINT32_MAX = 4294967295
 CHARACTER_SET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
 
-def id_to_storage_string(id):
-    s = int(str(UINT32_MAX - id).zfill(10)[::-1])
-    storage_string = ""
-    for i in range(6):
-        b = (s >> (6 * i)) & 63
-        storage_string += CHARACTER_SET[b]
-    return storage_string
+class Competitor:
+    def __init__(self, id, controller_repository):
+        self.id = id
+        self.username = controller_repository.split('/')[0]
+        self.repository_name = controller_repository.split('/')[1]
+        self.controller_path = None
+        self.controller_name = None
 
-def storage_string_to_id(storage_string):
-    n = 0
-    for i in range(6):
-        n += CHARACTER_SET.find(storage_string[i]) << (6 * i)
-    id = UINT32_MAX - int(str(n).zfill(10)[::-1])
-    return id
+def benchmark(config):
+    world_config = config['world']
+
+    init()
+    competitors = get_competitors()
+    clone_competitor_controllers(competitors)
+    run_competitor_controllers(world_config, competitors)
+
+def init():
+    print("\nInitializing safe directories...")
+    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
+    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/root/repo'])
+    print("done")
 
 def get_competitors():
-    if Path('/competitors.txt').exists():
-        print('found /competitors.txt')
-        with Path('/competitors.txt').open() as f: print(f.readline())
-    elif Path('competitors.txt').exists():
-        print('found competitors.txt')
-        with Path('competitors.txt').open() as f: print(f.readline())
-    else:
-        print('found nothing.')
+    print("\nGetting competitor list...")
+    if Path('competitors.txt').exists():
+        competitors = []
+        with Path('competitors.txt').open() as f:
+            for competitor in f.readlines():
+                competitors.append(
+                    Competitor(
+                        id = competitor.split(":")[0],
+                        controller_repository = competitor.split(":")[1]
+                    )
+                )
+    print("done")
+    return competitors
+
+def clone_competitor_controllers(competitors):
+    print("\nCloning competitor controllers...")
+    for competitor in competitors:
+        competitor.controller_name = "competitor_" + competitor.id + "_" + competitor.username
+        competitor.controller_path = os.path.join('controllers', competitor.controller_name)
+        repo = 'https://{}:{}@github.com/{}/{}'.format(
+            os.environ['BOT_USERNAME'],
+            os.environ['BOT_PAT_KEY'],
+            competitor.username,
+            competitor.repository_name
+        )
+        if Path(competitor.controller_path).exists():
+            subprocess.check_output(f'cd {competitor.controller_path}', shell=True)
+            subprocess.check_output(f'git pull', shell=True)
+            subprocess.check_output(f'cd ../..', shell=True)
+        else:
+            subprocess.check_output(f'git clone {repo} {competitor.controller_path}', shell=True)
+    print("done")
+
+def run_competitor_controllers(world_config, competitors):
+    print("\nRunning competitor controllers...")
+    for competitor in competitors:
+        set_controller_name_to_world(world_config['file'], competitor.controller_name)
+    print("done")
+
+def set_controller_name_to_world(world_file, controller_name):
+    print("  ", controller_name ,": Setting new controller in world...")
+    world_content = None
+    with open(world_file, 'r') as f:
+        world_content = f.read()
+    controller_expression = re.compile(rf'(DEF BENCHMARK_ROBOT.*?controller\ \")(.*?)(\")', re.MULTILINE | re.DOTALL)
+    new_world_content = re.sub(controller_expression, rf'\1{controller_name}\3', world_content)
+    with open(world_file, 'w') as f:
+        f.write(new_world_content)
+
+def generate_benchmark_animation():
+    print("\nGenerating animation...")
+
+def remove_competitor_controllers():
+    print("\nRemoving competitor controllers directory...")
+
 
 def test_push():
     print("Listing directories and files in repository: ", os.environ['GITHUB_REPOSITORY'], " (on branch: ", os.environ['GITHUB_REF'].split('/')[-1], ")")
@@ -71,3 +126,17 @@ def test_push():
     print("Commit ad push changes to branch: ", os.environ['GITHUB_REF'].split('/')[-1])
     git.push(message="change file location")
 
+def id_to_storage_string(id):
+    s = int(str(UINT32_MAX - id).zfill(10)[::-1])
+    storage_string = ""
+    for i in range(6):
+        b = (s >> (6 * i)) & 63
+        storage_string += CHARACTER_SET[b]
+    return storage_string
+
+def storage_string_to_id(storage_string):
+    n = 0
+    for i in range(6):
+        n += CHARACTER_SET.find(storage_string[i]) << (6 * i)
+    id = UINT32_MAX - int(str(n).zfill(10)[::-1])
+    return id

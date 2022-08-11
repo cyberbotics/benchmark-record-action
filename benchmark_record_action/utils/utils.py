@@ -15,18 +15,7 @@
 # limitations under the License.
 
 import os
-import shutil
 
 
 def is_debug():
     return 'DEBUG' in os.environ and os.environ['DEBUG']
-
-
-def remove_anything(path):
-    """Deletes whatever the `path` value is, folder or file."""
-    if os.path.isfile(path) or os.path.islink(path):
-        os.unlink(path)
-    elif os.path.isdir(path):
-        shutil.rmtree(path)
-    else:
-        print(f'`{path}` is not folder or file!')

@@ -23,6 +23,7 @@ import subprocess
 from benchmark_record_action.animation import record_animation
 import benchmark_record_action.utils.git as git
 
+
 UINT32_MAX = 4294967295
 CHARACTER_SET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
 

@@ -97,19 +97,24 @@ def clone_competitor_controllers(competitors):
 def run_competitor_controllers(world_config, competitors):
     print("\nRunning competitor controllers...")
 
+    # Save original world file
+    with open(world_config['file'], 'r') as f:
+        world_content = f.read()
+
+    # Run controllers and record animations
     for competitor in competitors:
-        set_controller_name_to_world(world_config['file'], competitor.controller_name)
+        set_controller_name_to_world(world_config['file'], world_content, competitor.controller_name)
         record_benchmark_animation(world_config, competitor)
+
+    # Revert to original world file
+    with open(world_config['file'], 'w') as f:
+        f.write(world_content)
 
     print("done")
 
 
-def set_controller_name_to_world(world_file, controller_name):
+def set_controller_name_to_world(world_file, world_content, controller_name):
     print("  ", controller_name ,": Setting new controller in world...")
-
-    world_content = None
-    with open(world_file, 'r') as f:
-        world_content = f.read()
 
     controller_expression = re.compile(rf'(DEF BENCHMARK_ROBOT.*?controller\ \")(.*?)(\")', re.MULTILINE | re.DOTALL)
     new_world_content = re.sub(controller_expression, rf'\1{controller_name}\3', world_content)
@@ -126,7 +131,7 @@ def record_benchmark_animation(world_config, competitor):
 
     # Copy files to new directory
     if run_flag:
-        new_destination_directory = os.path.join('storage', 'Wb_' + id_to_storage_string(int(competitor.id)))
+        new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor.id)
         print("  ", competitor.controller_name, ": Copying files to", new_destination_directory)
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
         subprocess.check_output(f'mv {destination_directory}/* {new_destination_directory}', shell=True)

@@ -20,7 +20,7 @@ import os
 
 def generate_animation_recorder_vrml(duration, output):
     return (
-        f'Robot {{\n'
+        f'DEF ANIMATION_RECORDER_SUPERVISOR Robot {{\n'
         f'  name "animation_recorder_supervisor"\n'
         f'  controller "animation_recorder"\n'
         f'  controllerArgs [\n'

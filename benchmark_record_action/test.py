@@ -43,6 +43,8 @@ def benchmark(config):
     competitors = get_competitors()
     clone_competitor_controllers(competitors)
     run_competitor_controllers(world_config, competitors)
+    remove_competitor_controllers()
+    push_modifications()
 
 
 def init():
@@ -79,13 +81,7 @@ def clone_competitor_controllers(competitors):
             competitor.username,
             competitor.repository_name
         )
-        if Path(competitor.controller_path).exists():
-            subprocess.check_output(f'cd {competitor.controller_path}', shell=True)
-            subprocess.check_output(f'git pull', shell=True)
-            subprocess.check_output(f'cd ../..', shell=True)
-        else:
-            subprocess.check_output(f'git clone {repo} {competitor.controller_path}', shell=True)
-
+        subprocess.check_output(f'git clone {repo} {competitor.controller_path}', shell=True)
         python_filename = os.path.join(competitor.controller_path, 'controller.py')
         if os.path.exists(python_filename):
             os.rename(python_filename, os.path.join(competitor.controller_path, f'{competitor.controller_name}.py'))
@@ -97,7 +93,6 @@ def run_competitor_controllers(world_config, competitors):
     for competitor in competitors:
         set_controller_name_to_world(world_config['file'], competitor.controller_name)
         record_benchmark_animation(world_config, competitor)
-
     print("done")
 
 
@@ -151,14 +146,16 @@ def record_benchmark_animation(world_config, competitor):
 
     # Runs simulation in Webots
     out = subprocess.Popen(
-        ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', world_config['file']],
+        ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', 'worlds/robot_programming.wbt'],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
+    run_flag = False
     while not out.poll():
         stdoutdata = out.stdout.readline()
         if stdoutdata:
-            print("  ", stdoutdata.decode('utf-8'))
+            if not run_flag: run_flag = True
+            #print(stdoutdata.decode('utf-8'))
         else:
             break
     # Removes `animation_recorder` controller
@@ -166,14 +163,40 @@ def record_benchmark_animation(world_config, competitor):
         f.write(world_content)
 
     # Copy files to new directory
-    """ new_destination_directory = os.path.join('storage', 'Wb_' + id_to_storage_string(int(competitor.id)))
-    subprocess.check_output(['mkdir', '-p', destination_directory])
-    subprocess.check_output(f'mv {destination_directory}/* {new_destination_directory}', shell=True) """
+    if run_flag:
+        new_destination_directory = os.path.join('storage', 'Wb_' + id_to_storage_string(int(competitor.id)))
+        print("  ", competitor.controller_name, ": Copying files to", new_destination_directory)
+        subprocess.check_output(['mkdir', '-p', new_destination_directory])
+        subprocess.check_output(f'mv {destination_directory}/* {new_destination_directory}', shell=True)
+        cleanup_storage_files(competitor.controller_name, new_destination_directory)
+    else:
+        print("  ", competitor.controller_name, ": Error: could not run controller")
 
+    print("  ", competitor.controller_name, ": done")
+
+def cleanup_storage_files(name, directory):
+    print("  ", name, ": Clean-up files in", directory)
+    for path in Path(directory).glob('*'):
+        path = str(path)
+        if path.endswith('.html') or path.endswith('.css'):
+            os.remove(path)
+        elif path.endswith('.json'):
+            os.rename(path, directory + '/animation.json')
+        elif path.endswith('.x3d'):
+            os.rename(path, directory + '/scene.x3d')
 
 def remove_competitor_controllers():
-    print("\nRemoving competitor controllers directory...")
+    print("\nRemoving competitor controller directories...")
+    for path in Path('controllers').glob('*'):
+        controller = str(path).split('/')[1]
+        if controller.startswith('competitor'):
+            shutil.rmtree(path)
+    print("done")
 
+def push_modifications():
+    print("\nCommitting and pushing updates...")
+    git.push(message="record and update benchmark animations")
+    print("done")
 
 def test_push():
     print("Listing directories and files in repository: ", os.environ['GITHUB_REPOSITORY'], " (on branch: ", os.environ['GITHUB_REF'].split('/')[-1], ")")

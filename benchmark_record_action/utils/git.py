@@ -21,9 +21,12 @@ import requests
 from benchmark_record_action.utils.utils import is_debug, remove_anything
 
 
-def _init():
+def init():
     username = os.environ['GITHUB_ACTOR']
     user_info = requests.get(f'https://api.github.com/users/{username}').json()
+
+    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
+    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/root/repo'])
 
     result = subprocess.run('git config --list | grep user.name', shell=True, check=False)
     if result.returncode != 0:
@@ -33,7 +36,7 @@ def _init():
 
 
 def push(message='Updated benchmark recordings', force=True):
-    _init()
+    init()
 
     github_repository = 'https://{}:{}@github.com/{}'.format(
         os.environ['GITHUB_ACTOR'],
@@ -57,7 +60,7 @@ def push(message='Updated benchmark recordings', force=True):
 def push_directory_to_branch(source_directory, destination_directory='.', destination_branch='benchmark-storage', clean=False):
     """Publishes an arbitrary dictionary to a new branch (usually `benchmark-storage`)."""
 
-    _init()
+    init()
 
     subprocess.check_output(['git', 'reset', '--hard'])
     #subprocess.check_output(f'git checkout {destination_branch} || git checkout -b {destination_branch}', shell=True)

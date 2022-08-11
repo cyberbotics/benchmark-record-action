@@ -16,7 +16,7 @@ git clone https://github.com/cyberbotics/robot-programming-benchmark.git $HOME/r
 Run:
 ```bash
 docker run \
-    -v $HOME/MasterThesis/benchmark/robot-programming-benchmark:/root/repo \
+    -v $HOME/robot-programming-benchmark:/root/repo \
     -w /root/repo \
     -e DEBUG=true \
     -it benchmark-record-action

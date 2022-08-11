@@ -14,32 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-import os
-import subprocess
-import yaml
 from benchmark_record_action.utils.webots import load_config
-from benchmark_record_action.animation import generate_animation
-import benchmark_record_action.test as test
+from benchmark_record_action.benchmark import benchmark
 
 
 def main():
     # Load config
     config = load_config()
-    test.benchmark(config)
-    return
-
-    # Fire init-hook (usually dependencies)
-    if 'init' in config:
-        out = subprocess.check_output(config['init'], shell=True)
-        print(out.decode('utf-8'))
 
     # Continue parsing
     if 'type' not in config or config['type'] != 'benchmark':
         print('You have to specify `type` parameter in `webots.yaml` and set it to `benchmark`')
+        return
 
-    # generate animation from benchmark
-    generate_animation(config['animation'])
+    # Run benchmark
+    benchmark(config)
 
 
 if __name__ == "__main__":

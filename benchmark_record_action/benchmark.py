@@ -14,14 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
 import re
 import os
 import shutil
 from glob import glob
 from pathlib import Path
 import subprocess
-from benchmark_record_action.config import RESOURCES_DIRECTORY
+from benchmark_record_action.animation import record_animation
 import benchmark_record_action.utils.git as git
 
 UINT32_MAX = 4294967295
@@ -37,25 +36,27 @@ class Competitor:
 
 
 def benchmark(config):
+    # get world configuration
     world_config = config['world']
 
-    init()
+    # Initialite Git
+    git.init()
+
+    # Get competitors
     competitors = get_competitors()
+
+    # Clone and run controllers
     clone_competitor_controllers(competitors)
     run_competitor_controllers(world_config, competitors)
     remove_competitor_controllers()
-    push_modifications()
 
-
-def init():
-    print("\nInitializing safe directories...")
-    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
-    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/root/repo'])
-    print("done")
+    # Commit and Push updates
+    git.push(message="record and update benchmark animations")
 
 
 def get_competitors():
     print("\nGetting competitor list...")
+
     if Path('competitors.txt').exists():
         competitors = []
         with Path('competitors.txt').open() as f:
@@ -66,12 +67,15 @@ def get_competitors():
                         controller_repository = competitor.split(":")[1]
                     )
                 )
+
     print("done")
+
     return competitors
 
 
 def clone_competitor_controllers(competitors):
     print("\nCloning competitor controllers...")
+
     for competitor in competitors:
         competitor.controller_name = "competitor_" + competitor.id + "_" + competitor.username
         competitor.controller_path = os.path.join('controllers', competitor.controller_name)
@@ -85,82 +89,39 @@ def clone_competitor_controllers(competitors):
         python_filename = os.path.join(competitor.controller_path, 'controller.py')
         if os.path.exists(python_filename):
             os.rename(python_filename, os.path.join(competitor.controller_path, f'{competitor.controller_name}.py'))
+
     print("done")
 
 
 def run_competitor_controllers(world_config, competitors):
     print("\nRunning competitor controllers...")
+
     for competitor in competitors:
         set_controller_name_to_world(world_config['file'], competitor.controller_name)
         record_benchmark_animation(world_config, competitor)
+
     print("done")
 
 
 def set_controller_name_to_world(world_file, controller_name):
     print("  ", controller_name ,": Setting new controller in world...")
+
     world_content = None
     with open(world_file, 'r') as f:
         world_content = f.read()
+
     controller_expression = re.compile(rf'(DEF BENCHMARK_ROBOT.*?controller\ \")(.*?)(\")', re.MULTILINE | re.DOTALL)
     new_world_content = re.sub(controller_expression, rf'\1{controller_name}\3', world_content)
+
     with open(world_file, 'w') as f:
         f.write(new_world_content)
-
-
-def generate_animation_recorder_vrml(duration, output):
-    return (
-        f'Robot {{\n'
-        f'  name "animation_recorder_supervisor"\n'
-        f'  controller "animation_recorder"\n'
-        f'  controllerArgs [\n'
-        f'    "--duration={duration}"\n'
-        f'    "--output={output}"\n'
-        f'  ]\n'
-        f'  children [\n'
-        f'    Receiver {{\n'
-        f'      channel 1024\n'
-        f'    }}\n'
-        f'  ]\n'
-        f'  supervisor TRUE\n'
-        f'}}\n'
-    )
 
 
 def record_benchmark_animation(world_config, competitor):
     print("  ", competitor.controller_name, ": Recording animation...")
 
-    # Create storage directory for animation
-    world_name = world_config['file'].split('/')[1]
     destination_directory = '/tmp/animation'
-    subprocess.check_output(['mkdir', '-p', destination_directory])
-
-    # Append `animation_recorder` controller
-    animation_recorder_vrml = generate_animation_recorder_vrml(
-        duration = world_config['duration'],
-        output = os.path.join(os.path.abspath('.'), destination_directory, world_name.replace('.wbt', '.html'))
-    )
-    with open(world_config['file'], 'r') as f:
-        world_content = f.read()
-    with open(world_config['file'], 'w') as f:
-        f.write(world_content + animation_recorder_vrml)
-
-    # Runs simulation in Webots
-    out = subprocess.Popen(
-        ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', 'worlds/robot_programming.wbt'],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    run_flag = False
-    while not out.poll():
-        stdoutdata = out.stdout.readline()
-        if stdoutdata:
-            if not run_flag: run_flag = True
-            #print(stdoutdata.decode('utf-8'))
-        else:
-            break
-    # Removes `animation_recorder` controller
-    with open(world_config['file'], 'w') as f:
-        f.write(world_content)
+    run_flag = record_animation(world_config, destination_directory)
 
     # Copy files to new directory
     if run_flag:
@@ -174,8 +135,8 @@ def record_benchmark_animation(world_config, competitor):
 
     print("  ", competitor.controller_name, ": done")
 
+
 def cleanup_storage_files(name, directory):
-    print("  ", name, ": Clean-up files in", directory)
     for path in Path(directory).glob('*'):
         path = str(path)
         if path.endswith('.html') or path.endswith('.css'):
@@ -185,39 +146,12 @@ def cleanup_storage_files(name, directory):
         elif path.endswith('.x3d'):
             os.rename(path, directory + '/scene.x3d')
 
+
 def remove_competitor_controllers():
-    print("\nRemoving competitor controller directories...")
     for path in Path('controllers').glob('*'):
         controller = str(path).split('/')[1]
         if controller.startswith('competitor'):
             shutil.rmtree(path)
-    print("done")
-
-def push_modifications():
-    print("\nCommitting and pushing updates...")
-    git.push(message="record and update benchmark animations")
-    print("done")
-
-def test_push():
-    print("Listing directories and files in repository: ", os.environ['GITHUB_REPOSITORY'], " (on branch: ", os.environ['GITHUB_REF'].split('/')[-1], ")")
-    for path in Path('').glob('*'):
-        path = str(path)
-        print('path: ', path)
-
-    print("\nMoving directory...")
-
-    for path in Path('').glob('*'):
-        path = str(path)
-        if path == 'AxjD2FU':
-            shutil.move(path, 'storage')
-
-    print("\nListing files after move:")
-    for path in Path('').glob('*'):
-        path = str(path)
-        print('path: ', path)
-
-    print("Commit ad push changes to branch: ", os.environ['GITHUB_REF'].split('/')[-1])
-    git.push(message="change file location")
 
 
 def id_to_storage_string(id):

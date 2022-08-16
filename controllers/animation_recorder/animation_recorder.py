@@ -52,7 +52,7 @@ def main():
               receiver.nextPacket()
 
       if done:
-          for _ in range(10):
+          for _ in range(50):
               robot.step(timestep)
       robot.animationStopRecording()
 

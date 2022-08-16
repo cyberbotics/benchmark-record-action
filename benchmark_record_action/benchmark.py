@@ -20,12 +20,9 @@ import shutil
 from glob import glob
 from pathlib import Path
 import subprocess
-from benchmark_record_action.animation import record_animation
+from benchmark_record_action.animation import record_animations
 import benchmark_record_action.utils.git as git
 
-
-UINT32_MAX = 4294967295
-CHARACTER_SET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
 
 class Competitor:
     def __init__(self, id, controller_repository):
@@ -102,9 +99,7 @@ def run_competitor_controllers(world_config, competitors):
         world_content = f.read()
 
     # Run controllers and record animations
-    for competitor in competitors:
-        set_controller_name_to_world(world_config['file'], world_content, competitor.controller_name)
-        record_benchmark_animation(world_config, competitor)
+    record_benchmark_animations(world_config, competitors)
 
     # Revert to original world file
     with open(world_config['file'], 'w') as f:
@@ -113,33 +108,19 @@ def run_competitor_controllers(world_config, competitors):
     print("done")
 
 
-def set_controller_name_to_world(world_file, world_content, controller_name):
-    print("  ", controller_name ,": Setting new controller in world...")
-
-    controller_expression = re.compile(rf'(DEF BENCHMARK_ROBOT.*?controller\ \")(.*?)(\")', re.MULTILINE | re.DOTALL)
-    new_world_content = re.sub(controller_expression, rf'\1{controller_name}\3', world_content)
-
-    with open(world_file, 'w') as f:
-        f.write(new_world_content)
-
-
-def record_benchmark_animation(world_config, competitor):
-    print("  ", competitor.controller_name, ": Recording animation...")
-
+def record_benchmark_animations(world_config, competitors):
+    controllers = []
+    for competitor in competitors:
+        controllers.append(competitor.controller_name)
     destination_directory = '/tmp/animation'
-    run_flag = record_animation(world_config, destination_directory)
+    record_animations(world_config, destination_directory, controllers)
 
     # Copy files to new directory
-    if run_flag:
+    for competitor in competitors:
         new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor.id)
-        print("  ", competitor.controller_name, ": Copying files to", new_destination_directory)
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
-        subprocess.check_output(f'mv {destination_directory}/* {new_destination_directory}', shell=True)
+        subprocess.check_output(f'mv {destination_directory}/{competitor.controller_name}.* {new_destination_directory}', shell=True)
         cleanup_storage_files(competitor.controller_name, new_destination_directory)
-    else:
-        print("  ", competitor.controller_name, ": Error: could not run controller")
-
-    print("  ", competitor.controller_name, ": done")
 
 
 def cleanup_storage_files(name, directory):
@@ -158,20 +139,3 @@ def remove_competitor_controllers():
         controller = str(path).split('/')[1]
         if controller.startswith('competitor'):
             shutil.rmtree(path)
-
-
-def id_to_storage_string(id):
-    s = int(str(UINT32_MAX - id).zfill(10)[::-1])
-    storage_string = ""
-    for i in range(6):
-        b = (s >> (6 * i)) & 63
-        storage_string += CHARACTER_SET[b]
-    return storage_string
-
-
-def storage_string_to_id(storage_string):
-    n = 0
-    for i in range(6):
-        n += CHARACTER_SET.find(storage_string[i]) << (6 * i)
-    id = UINT32_MAX - int(str(n).zfill(10)[::-1])
-    return id

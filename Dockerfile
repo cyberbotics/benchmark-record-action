@@ -1,4 +1,4 @@
-FROM cyberbotics/webots.cloud:R2022b
+FROM cyberbotics/webots.cloud:R2022b-numpy
 
 RUN apt-get update && \
     apt-get install -y \

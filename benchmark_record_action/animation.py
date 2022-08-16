@@ -18,7 +18,7 @@ import subprocess
 import os
 
 
-def generate_animation_recorder_vrml(duration, output):
+def generate_animation_recorder_vrml(duration, output, controllers):
     return (
         f'DEF ANIMATION_RECORDER_SUPERVISOR Robot {{\n'
         f'  name "animation_recorder_supervisor"\n'
@@ -26,6 +26,7 @@ def generate_animation_recorder_vrml(duration, output):
         f'  controllerArgs [\n'
         f'    "--duration={duration}"\n'
         f'    "--output={output}"\n'
+        f'    "--controllers={controllers}"\n'
         f'  ]\n'
         f'  children [\n'
         f'    Receiver {{\n'
@@ -36,15 +37,15 @@ def generate_animation_recorder_vrml(duration, output):
         f'}}\n'
     )
 
-def record_animation(world_config, destination_directory):
-    # Get world name and create directory
-    world_name = world_config['file'].split('/')[1]
+def record_animations(world_config, destination_directory, controllers):
+    # Create temporary directory
     subprocess.check_output(['mkdir', '-p', destination_directory])
 
     # Append `animation_recorder` controller
     animation_recorder_vrml = generate_animation_recorder_vrml(
-        duration = world_config['duration'],
-        output = os.path.join(os.path.abspath('.'), destination_directory, world_name.replace('.wbt', '.html'))
+        duration = world_config['max-duration'],
+        output = os.path.join(os.path.abspath('.'), destination_directory),
+        controllers = controllers,
     )
     with open(world_config['file'], 'r') as f:
         world_content = f.read()
@@ -57,17 +58,14 @@ def record_animation(world_config, destination_directory):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
-    run_flag = False
     while not out.poll():
         stdoutdata = out.stdout.readline()
         if stdoutdata:
-            if not run_flag: run_flag = True
-            print(stdoutdata.decode('utf-8'))
+            #print(stdoutdata.decode('utf-8'))
+            continue
         else:
             break
+
     # Removes `animation_recorder` controller
     with open(world_config['file'], 'w') as f:
         f.write(world_content)
-
-    # Return
-    return run_flag

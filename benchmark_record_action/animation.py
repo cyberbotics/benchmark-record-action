@@ -62,7 +62,7 @@ def record_animation(world_config, destination_directory):
         stdoutdata = out.stdout.readline()
         if stdoutdata:
             if not run_flag: run_flag = True
-            #print(stdoutdata.decode('utf-8'))
+            print(stdoutdata.decode('utf-8'))
         else:
             break
     # Removes `animation_recorder` controller

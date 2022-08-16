@@ -45,7 +45,7 @@ def main():
     robot.animationStopRecording()
     for _ in range(10):
         robot.step(timestep)
-    print('The animation is saved')
+    print('Time limit reached. The animation is saved.')
     robot.simulationQuit(0)
 
 

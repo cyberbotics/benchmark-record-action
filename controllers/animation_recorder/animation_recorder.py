@@ -51,6 +51,9 @@ def main():
                   done = True
               receiver.nextPacket()
 
+      if done:
+          for _ in range(10):
+              robot.step(timestep)
       robot.animationStopRecording()
 
       if done:

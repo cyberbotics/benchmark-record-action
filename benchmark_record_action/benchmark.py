@@ -117,53 +117,40 @@ def record_benchmark_animations(world_config, competitors):
         controllers.append(competitor.controller_name)
         id_column.append(competitor.id)
         repository_column.append(competitor.controller_repository)
-
     competitor_dict = dict(zip(id_column, repository_column))
-  
     destination_directory = 'tmp/animation'
+
+    # Record animations and save performances
     record_animations(world_config, destination_directory, controllers)
 
     # Get results
-    performances = False
-    if Path(destination_directory + '/competitors.txt').exists():
-        with Path(destination_directory + '/competitors.txt').open() as f:
-            performances = f.readlines()
+    with Path(destination_directory + '/competitors.txt').open() as f:
+        performances = f.readlines()
 
     # Delete old files
     cleanup_storage_files('storage', True)
 
     # Move animations and performances
     updated_competitors = ""
-    if performances:
-        for performance in performances:
-            competitor_id = performance.split(':')[0]
-            competitor_repository = competitor_dict.get(competitor_id)
-            performance = performance.split(':')[1]
-            performance_string = performance.split(':')[2]
-            date = performance.split(':')[3]
-            updated_competitors += competitor_id + ':' + competitor_repository + ':' + performance + ':' + performance_string + ':' + date
+    for performance in performances:
+        competitor_id = performance.split(':')[0]
+        competitor_repository = competitor_dict.get(competitor_id)
+        performance_value = performance.split(':')[1]
+        performance_string = performance.split(':')[2]
+        date = performance.split(':')[3]
+        updated_competitors += competitor_id + ':' + competitor_repository + ':' + performance_value + ':' + \
+            performance_string + ':' + date
 
-            new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor.id)
-            subprocess.check_output(['mkdir', '-p', new_destination_directory])
-            subprocess.check_output(f'mv {destination_directory}/{competitor.controller_name}.* {new_destination_directory}', shell=True)
-            cleanup_storage_files(new_destination_directory, False)
-
-        with Path(destination_directory + '/competitors.txt').open() as f:
-            f.write(updated_competitors)
-        subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
-
-        #cleanup_storage_files(destination_directory, True)
-
-
-    # Copy files to new directory
-    for i, competitor in enumerate(competitors):
-        new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor.id)
+        controller_name = "competitor_" + competitor_id + "_" + competitor_repository.split('/')[0]
+        new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor_id)
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
-        subprocess.check_output(f'mv {destination_directory}/{competitor.controller_name}.* {new_destination_directory}', shell=True)
+        subprocess.check_output(f'mv {destination_directory}/{controller_name}.* {new_destination_directory}', shell=True)
         cleanup_storage_files(new_destination_directory, False)
 
-    """ if Path(destination_directory + '/competitors.txt').exists():
-        subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True) """
+    with open(destination_directory + '/competitors.txt', 'w') as f:
+        f.write(updated_competitors)
+    subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
+    shutil.rmtree('tmp')
 
 
 def cleanup_storage_files(directory, all):

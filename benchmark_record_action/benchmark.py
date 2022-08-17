@@ -130,11 +130,10 @@ def record_benchmark_animations(world_config, competitors):
     # Delete old files
     for path in Path('storage').glob('*'):
         path = str(path)
-        if path != 'storage/preview':
-            if os.path.isdir(path):
-                shutil.rmtree(path)
-            else:
-                os.remove(path)
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        else:
+            os.remove(path)
 
     # Move animations and performances
     updated_competitors = ""

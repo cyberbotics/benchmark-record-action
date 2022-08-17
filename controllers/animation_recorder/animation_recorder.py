@@ -64,6 +64,8 @@ def main():
 
       robot.simulationReset()
 
+      robot.getFromDef("BENCHMARK_SUPERVISOR").restartController()
+
     for _ in range(10):
         robot.step(timestep)
     robot.simulationQuit(0)

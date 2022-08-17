@@ -23,7 +23,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--duration', type=float, default=120, help='Duration of the animation in seconds')
     parser.add_argument('--output', default='../../animation/index.html', help='Path at which the animation will be saved')
-    parser.add_argument('--controllers', default='<generic>', help='List of controllers to run')
+    parser.add_argument('--controllers', default="['<generic>']", help='List of controllers to run')
     args = parser.parse_args()
 
     robot = Supervisor()

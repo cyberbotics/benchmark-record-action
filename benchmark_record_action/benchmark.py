@@ -119,16 +119,16 @@ def record_benchmark_animations(world_config, competitors):
         new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor.id)
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
         subprocess.check_output(f'mv {destination_directory}/{competitor.controller_name}.* {new_destination_directory}', shell=True)
-        cleanup_storage_files(competitor.controller_name, new_destination_directory)
+        cleanup_storage_files(new_destination_directory)
 
     if Path(destination_directory + '/competitors.txt').exists():
         subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
 
 
-def cleanup_storage_files(name, directory):
+def cleanup_storage_files(directory):
     for path in Path(directory).glob('*'):
         path = str(path)
-        if path.endswith('.html') or path.endswith('.css') or path.endswith('.txt'):
+        if path.endswith('.html') or path.endswith('.css'):
             os.remove(path)
         elif path.endswith('.json'):
             os.rename(path, directory + '/animation.json')

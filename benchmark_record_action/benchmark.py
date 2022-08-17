@@ -42,6 +42,7 @@ def benchmark(config):
     competitors = get_competitors()
 
     # Clone and run controllers
+    remove_competitor_controllers()
     clone_competitor_controllers(competitors)
     run_competitor_controllers(world_config, competitors)
     remove_competitor_controllers()
@@ -113,18 +114,25 @@ def record_benchmark_animations(world_config, competitors):
     destination_directory = '/tmp/animation'
     record_animations(world_config, destination_directory, controllers)
 
+    with Path(destination_directory).open as f:
+        performances = f.readlines().split('\n')
+
     # Copy files to new directory
-    for competitor in competitors:
+    for i, competitor in enumerate(competitors):
         new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor.id)
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
         subprocess.check_output(f'mv {destination_directory}/{competitor.controller_name}.* {new_destination_directory}', shell=True)
         cleanup_storage_files(competitor.controller_name, new_destination_directory)
+        print(performances[i])
+
+    """ with open('competitors.txt', 'w') as f:
+        f.write(performance_txt) """
 
 
 def cleanup_storage_files(name, directory):
     for path in Path(directory).glob('*'):
         path = str(path)
-        if path.endswith('.html') or path.endswith('.css'):
+        if path.endswith('.html') or path.endswith('.css') or path.endswith('.txt'):
             os.remove(path)
         elif path.endswith('.json'):
             os.rename(path, directory + '/animation.json')

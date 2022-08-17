@@ -31,8 +31,6 @@ def main():
 
     robot = Supervisor()
 
-    rankings_output = os.path.join(args.output)
-
     for controller in list(args.controllers[2:-2].split("', '")):
         timestep = int(robot.getBasicTimeStep())
         receiver = robot.getDevice('receiver')
@@ -52,7 +50,8 @@ def main():
         while not done and robot.step(timestep) != -1 and step_i < n_steps:
             step_i += 1
             if receiver.getQueueLength() > 0:
-                if receiver.getData().decode('utf-8') == 'done':
+                if receiver.getData().decode('utf-8').startswith('success:'):
+                    success_message = receiver.getData().decode('utf-8')
                     done = True
                 receiver.nextPacket()
 
@@ -64,24 +63,19 @@ def main():
         if done:
             message = "Benchmark completed."
             competitor_id = controller.split('_')[1]
-            performance = '0.8834'
-            performance_string = '88%'
-            date = datetime.today().strftime('%Y-%m-%d')
-            ranking = competitor_id + ':' + performance + ':' + performance_string + ':' + date
-            with open('ranking.txt', 'a') as f:
-                f.write(ranking + '\n')
+            performance = success_message.split(':')[2]
+            performance_string = success_message.split(':')[3]
+            performance_line = competitor_id + ':' + performance + ':' + performance_string + ':' + datetime.today().strftime('%Y-%m-%d')
         else:
+            performance_line = competitor_id + ':0:failed:' + datetime.today().strftime('%Y-%m-%d')
             message = "Time limit reached."
         print(message, 'The animation has been saved.')
 
+        with open(args.output + '/performance.txt', 'a') as f:
+            f.write(performance_line + '\n')
+
         robot.simulationReset()
-
         robot.getFromDef("BENCHMARK_SUPERVISOR").restartController()
-
-    if Path('ranking.txt').exists():
-        with open('ranking.txt', 'r') as f:
-            for ranking in f.readlines():
-                print("RANKING:", ranking)
 
     for _ in range(10):
         robot.step(timestep)

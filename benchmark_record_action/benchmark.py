@@ -111,13 +111,8 @@ def record_benchmark_animations(world_config, competitors):
     controllers = []
     for competitor in competitors:
         controllers.append(competitor.controller_name)
-    destination_directory = '/tmp/animation'
-    record_animations(world_config, destination_directory, controllers)
-
-    performance_txt = ""
-    if Path(destination_directory + '/performances.txt').exists():
-        with Path(destination_directory + '/performances.txt').open() as f:
-            performances = f.readlines()
+    destination_directory = 'tmp/animation'
+    record_animations(world_config, destination_directory, competitor)
 
     # Copy files to new directory
     for i, competitor in enumerate(competitors):
@@ -125,13 +120,9 @@ def record_benchmark_animations(world_config, competitors):
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
         subprocess.check_output(f'mv {destination_directory}/{competitor.controller_name}.* {new_destination_directory}', shell=True)
         cleanup_storage_files(competitor.controller_name, new_destination_directory)
-        performance_txt = competitor.id + ':' + performances[i].split(':')[1] + ':' + performances[i].split(':')[2] + ':' + performances[i].split(':')[3]
-        print(performances[i])
-        print(performance_txt)
 
-
-    """ with open('competitors.txt', 'w') as f:
-        f.write(performance_txt) """
+    if Path(destination_directory + '/competitors.txt').exists():
+        subprocess.check_output(f'cp -f competitors.txt {destination_directory}/competitors.txt', shell=True)
 
 
 def cleanup_storage_files(name, directory):

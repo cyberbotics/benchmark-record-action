@@ -27,11 +27,15 @@ def main():
     parser.add_argument('--duration', type=float, default=120, help='Duration of the animation in seconds')
     parser.add_argument('--output', default='../../animation/index.html', help='Path at which the animation will be saved')
     parser.add_argument('--controllers', default="['<generic>']", help='List of controllers to run')
+    parser.add_argument('--controller_paths', default="['']", help='List of controller paths vorresponding to each controller')
     args = parser.parse_args()
 
     robot = Supervisor()
 
-    for controller in list(args.controllers[2:-2].split("', '")):
+    controllers = list(controllers[2:-2].split("', '"))
+    controller_paths = list(controller_paths[2:-2].split("', '"))
+
+    for controller, controller_path in zip(controllers, controller_paths):
         timestep = int(robot.getBasicTimeStep())
         receiver = robot.getDevice('receiver')
         receiver.enable(timestep)
@@ -65,13 +69,14 @@ def main():
             competitor_id = controller.split('_')[1]
             performance = success_message.split(':')[2]
             performance_string = success_message.split(':')[3]
-            performance_line = competitor_id + ':' + performance + ':' + performance_string + ':' + datetime.today().strftime('%Y-%m-%d')
+            performance_line = competitor_id + ':' + controller_path + ':' + performance + ':' + \
+                performance_string + ':' + datetime.today().strftime('%Y-%m-%d')
         else:
-            performance_line = competitor_id + ':0:failed:' + datetime.today().strftime('%Y-%m-%d')
+            performance_line = competitor_id + ':' + controller_path + ':0:failed:' + datetime.today().strftime('%Y-%m-%d')
             message = "Time limit reached."
         print(message, 'The animation has been saved.')
 
-        with open(args.output + '/performances.txt', 'a') as f:
+        with open(args.output + '/competitors.txt', 'a') as f:
             f.write(performance_line + '\n')
 
         robot.simulationReset()

@@ -122,7 +122,7 @@ def record_benchmark_animations(world_config, competitors):
         cleanup_storage_files(competitor.controller_name, new_destination_directory)
 
     if Path(destination_directory + '/competitors.txt').exists():
-        subprocess.check_output(f'cp -f competitors.txt {destination_directory}/competitors.txt', shell=True)
+        subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
 
 
 def cleanup_storage_files(name, directory):

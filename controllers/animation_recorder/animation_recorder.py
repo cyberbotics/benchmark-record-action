@@ -19,7 +19,6 @@ import os
 from glob import glob
 from pathlib import Path
 from datetime import datetime
-from ...benchmark_record_action.benchmark import Competitor
 from controller import Supervisor
 
 

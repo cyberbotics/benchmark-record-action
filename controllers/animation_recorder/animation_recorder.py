@@ -16,6 +16,10 @@
 
 import argparse
 import os
+from glob import glob
+from pathlib import Path
+from datetime import datetime
+from ...benchmark_record_action.benchmark import Competitor
 from controller import Supervisor
 
 
@@ -28,43 +32,57 @@ def main():
 
     robot = Supervisor()
 
+    rankings_output = os.path.join(args.output)
+
     for controller in list(args.controllers[2:-2].split("', '")):
-      timestep = int(robot.getBasicTimeStep())
-      receiver = robot.getDevice('receiver')
-      receiver.enable(timestep)
+        timestep = int(robot.getBasicTimeStep())
+        receiver = robot.getDevice('receiver')
+        receiver.enable(timestep)
 
-      benchmark_robot = robot.getFromDef('BENCHMARK_ROBOT')
-      benchmark_robot.getField('controller').setSFString(controller)
+        benchmark_robot = robot.getFromDef('BENCHMARK_ROBOT')
+        benchmark_robot.getField('controller').setSFString(controller)
 
-      output = os.path.join(args.output, controller + '.html')
+        animations_output = os.path.join(args.output, controller + '.html')
 
-      robot.step(timestep)
-      robot.animationStartRecording(output)
+        robot.step(timestep)
+        robot.animationStartRecording(animations_output)
 
-      step_i = 0
-      done = False
-      n_steps = (1000 * args.duration) / robot.getBasicTimeStep()
-      while not done and robot.step(timestep) != -1 and step_i < n_steps:
-          step_i += 1
-          if receiver.getQueueLength() > 0:
-              if receiver.getData().decode('utf-8') == 'done':
-                  done = True
-              receiver.nextPacket()
+        step_i = 0
+        done = False
+        n_steps = (1000 * args.duration) / robot.getBasicTimeStep()
+        while not done and robot.step(timestep) != -1 and step_i < n_steps:
+            step_i += 1
+            if receiver.getQueueLength() > 0:
+                if receiver.getData().decode('utf-8') == 'done':
+                    done = True
+                receiver.nextPacket()
 
-      if done:
-          for _ in range(50):
-              robot.step(timestep)
-      robot.animationStopRecording()
+        if done:
+            for _ in range(50):
+                robot.step(timestep)
+        robot.animationStopRecording()
 
-      if done:
-          message = "Benchmark completed."
-      else:
-          message = "Time limit reached."
-      print(message, 'The animation has been saved.')
+        if done:
+            message = "Benchmark completed."
+            competitor_id = controller.split('_')[1]
+            performance = '0.8834'
+            performance_string = '88%'
+            date = datetime.today().strftime('%Y-%m-%d')
+            ranking = competitor_id + ':' + performance + ':' + performance_string + ':' + date
+            with open('ranking.txt', 'w') as f:
+                f.write(ranking + '\n')
+        else:
+            message = "Time limit reached."
+        print(message, 'The animation has been saved.')
 
-      robot.simulationReset()
+        robot.simulationReset()
 
-      robot.getFromDef("BENCHMARK_SUPERVISOR").restartController()
+        robot.getFromDef("BENCHMARK_SUPERVISOR").restartController()
+
+    if Path('ranking.txt').exists():
+        with open('ranking.txt', 'r') as f:
+            for ranking in f.readlines():
+                print("RANKING:", ranking)
 
     for _ in range(10):
         robot.step(timestep)

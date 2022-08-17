@@ -124,6 +124,7 @@ def record_benchmark_animations(world_config, competitors):
     record_animations(world_config, destination_directory, controllers)
 
     # Get results
+    performances = False
     if Path(destination_directory + '/competitors.txt').exists():
         with Path(destination_directory + '/competitors.txt').open() as f:
             performances = f.readlines()
@@ -131,10 +132,11 @@ def record_benchmark_animations(world_config, competitors):
     # Delete old files
     #cleanup_storage_files('storage')
 
-    for performance in performances:
-        competitor_id = performance.split(':')[0]
-        repo = competitor_dict[competitor_id]
-        print("CONTROLLER REPO:", repo)
+    if performances:
+        for performance in performances:
+            competitor_id = performance.split(':')[0]
+            repo = competitor_dict[competitor_id]
+            print("CONTROLLER REPO:", repo)
 
     # Copy files to new directory
     for i, competitor in enumerate(competitors):

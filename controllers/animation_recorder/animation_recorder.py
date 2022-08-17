@@ -68,7 +68,7 @@ def main():
             performance_string = '88%'
             date = datetime.today().strftime('%Y-%m-%d')
             ranking = competitor_id + ':' + performance + ':' + performance_string + ':' + date
-            with open('ranking.txt', 'w') as f:
+            with open('ranking.txt', 'a') as f:
                 f.write(ranking + '\n')
         else:
             message = "Time limit reached."

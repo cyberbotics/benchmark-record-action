@@ -152,7 +152,7 @@ def record_benchmark_animations(world_config, competitors):
             f.write(updated_competitors)
         subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
 
-        cleanup_storage_files(destination_directory, True)
+        #cleanup_storage_files(destination_directory, True)
 
 
     # Copy files to new directory

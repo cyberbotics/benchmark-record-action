@@ -61,7 +61,7 @@ def record_animations(world_config, destination_directory, controllers):
     while not out.poll():
         stdoutdata = out.stdout.readline()
         if stdoutdata:
-            #print(stdoutdata.decode('utf-8'))
+            print(stdoutdata.decode('utf-8'))
             continue
         else:
             break

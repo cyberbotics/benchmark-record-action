@@ -14,10 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 import os
 import shutil
-from glob import glob
 from pathlib import Path
 import subprocess
 from benchmark_record_action.animation import record_animations

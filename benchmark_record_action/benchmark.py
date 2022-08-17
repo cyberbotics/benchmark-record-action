@@ -128,7 +128,13 @@ def record_benchmark_animations(world_config, competitors):
         performances = f.readlines()
 
     # Delete old files
-    cleanup_storage_files('storage', True)
+    for path in Path('storage').glob('*'):
+        path = str(path)
+        if path != 'preview':
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
 
     # Move animations and performances
     updated_competitors = ""
@@ -145,7 +151,7 @@ def record_benchmark_animations(world_config, competitors):
         new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor_id)
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
         subprocess.check_output(f'mv {destination_directory}/{controller_name}.* {new_destination_directory}', shell=True)
-        cleanup_storage_files(new_destination_directory, False)
+        cleanup_storage_files(new_destination_directory)
 
     with open(destination_directory + '/competitors.txt', 'w') as f:
         f.write(updated_competitors)
@@ -153,16 +159,11 @@ def record_benchmark_animations(world_config, competitors):
     shutil.rmtree('tmp')
 
 
-def cleanup_storage_files(directory, all):
+def cleanup_storage_files(directory):
     if Path(directory).exists():
         for path in Path(directory).glob('*'):
             path = str(path)
-            if all:
-                if os.path.isdir(path):
-                    shutil.rmtree(path)
-                else:
-                    os.remove(path)
-            elif path.endswith('.html') or path.endswith('.css'):
+            if path.endswith('.html') or path.endswith('.css'):
                 os.remove(path)
             elif path.endswith('.json'):
                 os.rename(path, directory + '/animation.json')

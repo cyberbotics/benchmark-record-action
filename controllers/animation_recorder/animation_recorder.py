@@ -31,7 +31,9 @@ def main():
 
     robot = Supervisor()
 
-    for controller in list(args.controllers[2:-2].split("', '")):
+    controllers = list(args.controllers[2:-2].split("', '"))
+
+    for controller in controllers:
         timestep = int(robot.getBasicTimeStep())
         receiver = robot.getDevice('receiver')
         receiver.enable(timestep)

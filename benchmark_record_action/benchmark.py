@@ -114,7 +114,8 @@ def record_benchmark_animations(world_config, competitors):
     destination_directory = '/tmp/animation'
     record_animations(world_config, destination_directory, controllers)
 
-    with Path(destination_directory).open as f:
+    performance_txt = ""
+    with Path(destination_directory + '/performance.txt').open() as f:
         performances = f.readlines().split('\n')
 
     # Copy files to new directory
@@ -123,7 +124,10 @@ def record_benchmark_animations(world_config, competitors):
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
         subprocess.check_output(f'mv {destination_directory}/{competitor.controller_name}.* {new_destination_directory}', shell=True)
         cleanup_storage_files(competitor.controller_name, new_destination_directory)
+        performance_txt = competitor.id + ':' + performances[i].split(':')[1] + ':' + performances[i].split(':')[2] + ':' + performances[i].split(':')[3]
         print(performances[i])
+        print(performance_txt)
+
 
     """ with open('competitors.txt', 'w') as f:
         f.write(performance_txt) """

@@ -71,7 +71,7 @@ def main():
             message = "Time limit reached."
         print(message, 'The animation has been saved.')
 
-        with open(args.output + '/performance.txt', 'a') as f:
+        with open(args.output + '/performances.txt', 'a') as f:
             f.write(performance_line + '\n')
 
         robot.simulationReset()

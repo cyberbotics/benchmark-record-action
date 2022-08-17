@@ -138,9 +138,9 @@ def record_benchmark_animations(world_config, competitors):
         for performance in performances:
             competitor_id = performance.split(':')[0]
             competitor_repository = competitor_dict.get(competitor_id)
-            performance = competitor_id = performance.split(':')[1]
-            performance_string = competitor_id = performance.split(':')[2]
-            date = competitor_id = performance.split(':')[3]
+            performance = performance.split(':')[1]
+            performance_string = performance.split(':')[2]
+            date = performance.split(':')[3]
             updated_competitors += competitor_id + ':' + competitor_repository + ':' + performance + ':' + performance_string + ':' + date
 
             new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor.id)

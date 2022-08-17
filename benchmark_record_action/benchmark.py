@@ -130,14 +130,30 @@ def record_benchmark_animations(world_config, competitors):
             performances = f.readlines()
 
     # Delete old files
-    #cleanup_storage_files('storage', True)
+    cleanup_storage_files('storage', True)
 
+    # Move animations and performances
+    updated_competitors = ""
     if performances:
         for performance in performances:
             competitor_id = performance.split(':')[0]
-            print("COMPETITOR ID:", competitor_id)
-            repo = competitor_dict.get(competitor_id)
-            print("CORRESPONDING CONTROLLER REPO:", repo)
+            competitor_repository = competitor_dict.get(competitor_id)
+            performance = competitor_id = performance.split(':')[1]
+            performance_string = competitor_id = performance.split(':')[2]
+            date = competitor_id = performance.split(':')[3]
+            updated_competitors += competitor_id + ':' + competitor_repository + ':' + performance + ':' + performance_string + ':' + date
+
+            new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor.id)
+            subprocess.check_output(['mkdir', '-p', new_destination_directory])
+            subprocess.check_output(f'mv {destination_directory}/{competitor.controller_name}.* {new_destination_directory}', shell=True)
+            cleanup_storage_files(new_destination_directory, False)
+
+        with Path(destination_directory + '/competitors.txt').open() as f:
+            f.write(updated_competitors)
+        subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
+
+        cleanup_storage_files(destination_directory, True)
+
 
     # Copy files to new directory
     for i, competitor in enumerate(competitors):
@@ -151,16 +167,20 @@ def record_benchmark_animations(world_config, competitors):
 
 
 def cleanup_storage_files(directory, all):
-    for path in Path(directory).glob('*'):
-        path = str(path)
-        if all:
-            os.remove(path)
-        elif path.endswith('.html') or path.endswith('.css'):
-            os.remove(path)
-        elif path.endswith('.json'):
-            os.rename(path, directory + '/animation.json')
-        elif path.endswith('.x3d'):
-            os.rename(path, directory + '/scene.x3d')
+    if Path(directory).exists():
+        for path in Path(directory).glob('*'):
+            path = str(path)
+            if all:
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+                else:
+                    os.remove(path)
+            elif path.endswith('.html') or path.endswith('.css'):
+                os.remove(path)
+            elif path.endswith('.json'):
+                os.rename(path, directory + '/animation.json')
+            elif path.endswith('.x3d'):
+                os.rename(path, directory + '/scene.x3d')
 
 
 def remove_competitor_controllers():

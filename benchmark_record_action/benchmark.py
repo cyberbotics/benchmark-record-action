@@ -115,8 +115,9 @@ def record_benchmark_animations(world_config, competitors):
     record_animations(world_config, destination_directory, controllers)
 
     performance_txt = ""
-    with Path(destination_directory + '/performance.txt').open() as f:
-        performances = f.readlines().split('\n')
+    if Path(destination_directory + '/performances.txt').exists():
+        with Path(destination_directory + '/performances.txt').open() as f:
+            performances = f.readlines().split('\n')
 
     # Copy files to new directory
     for i, competitor in enumerate(competitors):

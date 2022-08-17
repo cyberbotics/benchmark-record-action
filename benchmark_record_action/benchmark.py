@@ -130,20 +130,21 @@ def record_benchmark_animations(world_config, competitors):
             performances = f.readlines()
 
     # Delete old files
-    #cleanup_storage_files('storage')
+    #cleanup_storage_files('storage', True)
 
     if performances:
         for performance in performances:
             competitor_id = performance.split(':')[0]
+            print("COMPETITOR ID:", competitor_id)
             repo = competitor_dict[competitor_id]
-            print("CONTROLLER REPO:", repo)
+            print("CORRESPONDING CONTROLLER REPO:", repo)
 
     # Copy files to new directory
     for i, competitor in enumerate(competitors):
         new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor.id)
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
         subprocess.check_output(f'mv {destination_directory}/{competitor.controller_name}.* {new_destination_directory}', shell=True)
-        cleanup_storage_files(new_destination_directory)
+        cleanup_storage_files(new_destination_directory, False)
 
     """ if Path(destination_directory + '/competitors.txt').exists():
         subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True) """

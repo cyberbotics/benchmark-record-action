@@ -112,7 +112,7 @@ def record_benchmark_animations(world_config, competitors):
     for competitor in competitors:
         controllers.append(competitor.controller_name)
     destination_directory = 'tmp/animation'
-    record_animations(world_config, destination_directory, competitors)
+    record_animations(world_config, destination_directory, controllers)
 
     # Copy files to new directory
     for i, competitor in enumerate(competitors):
@@ -121,8 +121,8 @@ def record_benchmark_animations(world_config, competitors):
         subprocess.check_output(f'mv {destination_directory}/{competitor.controller_name}.* {new_destination_directory}', shell=True)
         cleanup_storage_files(new_destination_directory)
 
-    if Path(destination_directory + '/competitors.txt').exists():
-        subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
+    """ if Path(destination_directory + '/competitors.txt').exists():
+        subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True) """
 
 
 def cleanup_storage_files(directory):

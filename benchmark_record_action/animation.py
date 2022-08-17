@@ -18,7 +18,7 @@ import subprocess
 import os
 
 
-def generate_animation_recorder_vrml(duration, output, controllers, controller_paths):
+def generate_animation_recorder_vrml(duration, output, controllers):
     return (
         f'DEF ANIMATION_RECORDER_SUPERVISOR Robot {{\n'
         f'  name "animation_recorder_supervisor"\n'
@@ -27,7 +27,6 @@ def generate_animation_recorder_vrml(duration, output, controllers, controller_p
         f'    "--duration={duration}"\n'
         f'    "--output={output}"\n'
         f'    "--controllers={controllers}"\n'
-        f'    "--controller_paths={controller_paths}"\n'
         f'  ]\n'
         f'  children [\n'
         f'    Receiver {{\n'
@@ -38,14 +37,7 @@ def generate_animation_recorder_vrml(duration, output, controllers, controller_p
         f'}}\n'
     )
 
-def record_animations(world_config, destination_directory, competitors):
-    # variables
-    controllers = []
-    controller_paths = []
-    for competitor in competitors:
-        controllers.append(competitor.controller_name)
-        controller_paths.append(competitor.controller_path)
-
+def record_animations(world_config, destination_directory, controllers):
     # Create temporary directory
     subprocess.check_output(['mkdir', '-p', destination_directory])
 
@@ -54,7 +46,6 @@ def record_animations(world_config, destination_directory, competitors):
         duration = world_config['max-duration'],
         output = os.path.join(os.path.abspath('.'), destination_directory),
         controllers = controllers,
-        controller_paths = controller_paths
     )
     with open(world_config['file'], 'r') as f:
         world_content = f.read()

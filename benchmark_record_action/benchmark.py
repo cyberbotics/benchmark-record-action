@@ -27,6 +27,7 @@ class Competitor:
         self.id = id
         self.username = controller_repository.split('/')[0]
         self.repository_name = controller_repository.split('/')[1]
+        self.controller_repository = controller_repository
         self.controller_path = None
         self.controller_name = None
 
@@ -108,8 +109,32 @@ def run_competitor_controllers(world_config, competitors):
 
 
 def record_benchmark_animations(world_config, competitors):
+    # Variables and dictionary
+    controllers = []
+    id_column = []
+    repository_column = []
+    for competitor in competitors:
+        controllers.append(competitor.controller_name)
+        id_column.append(competitor.id)
+        repository_column.append(competitor.controller_repository)
+
+    competitor_dict = dict(zip(id_column, repository_column))
+  
     destination_directory = 'tmp/animation'
-    record_animations(world_config, destination_directory, competitors)
+    record_animations(world_config, destination_directory, controllers)
+
+    # Get results
+    if Path(destination_directory + '/competitors.txt').exists():
+        with Path(destination_directory + '/competitors.txt').open() as f:
+            performances = f.readlines()
+
+    # Delete old files
+    #cleanup_storage_files('storage')
+
+    for performance in performances:
+        competitor_id = performance.split(':')[0]
+        repo = competitor_dict[competitor_id]
+        print("CONTROLLER REPO:", repo)
 
     # Copy files to new directory
     for i, competitor in enumerate(competitors):
@@ -122,10 +147,12 @@ def record_benchmark_animations(world_config, competitors):
         subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True) """
 
 
-def cleanup_storage_files(directory):
+def cleanup_storage_files(directory, all):
     for path in Path(directory).glob('*'):
         path = str(path)
-        if path.endswith('.html') or path.endswith('.css'):
+        if all:
+            os.remove(path)
+        elif path.endswith('.html') or path.endswith('.css'):
             os.remove(path)
         elif path.endswith('.json'):
             os.rename(path, directory + '/animation.json')

@@ -37,17 +37,7 @@ def generate_animation_recorder_vrml(duration, output, controllers):
         f'}}\n'
     )
 
-def record_animations(world_config, destination_directory, competitors):
-    # Get controllers
-    controllers = []
-    controller_paths = []
-    for competitor in competitors:
-        controllers.append(competitor.controller_name)
-        controller_paths.append(competitor.controller_path)
-
-    print(controllers)
-    print(controller_paths)
-
+def record_animations(world_config, destination_directory, controllers):
     # Create temporary directory
     subprocess.check_output(['mkdir', '-p', destination_directory])
 

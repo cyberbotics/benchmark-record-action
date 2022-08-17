@@ -136,7 +136,7 @@ def record_benchmark_animations(world_config, competitors):
         for performance in performances:
             competitor_id = performance.split(':')[0]
             print("COMPETITOR ID:", competitor_id)
-            repo = competitor_dict[competitor_id]
+            repo = competitor_dict.get(competitor_id)
             print("CORRESPONDING CONTROLLER REPO:", repo)
 
     # Copy files to new directory

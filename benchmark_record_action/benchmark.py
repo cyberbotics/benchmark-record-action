@@ -108,11 +108,8 @@ def run_competitor_controllers(world_config, competitors):
 
 
 def record_benchmark_animations(world_config, competitors):
-    controllers = []
-    for competitor in competitors:
-        controllers.append(competitor.controller_name)
     destination_directory = 'tmp/animation'
-    record_animations(world_config, destination_directory, controllers)
+    record_animations(world_config, destination_directory, competitors)
 
     # Copy files to new directory
     for i, competitor in enumerate(competitors):

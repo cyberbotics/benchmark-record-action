@@ -40,19 +40,18 @@ def benchmark(config):
     git.init()
 
     # Get competitors
-    competitors = get_competitors()
+    competitors = _get_competitors()
 
     # Clone and run controllers
-    remove_competitor_controllers()
-    clone_competitor_controllers(competitors)
-    run_competitor_controllers(world_config, competitors)
-    remove_competitor_controllers()
+    _clone_competitor_controllers(competitors)
+    _run_competitor_controllers(world_config, competitors)
+    _remove_competitor_controllers()
 
     # Commit and Push updates
     git.push(message="record and update benchmark animations")
 
 
-def get_competitors():
+def _get_competitors():
     print("\nGetting competitor list...")
 
     if Path('competitors.txt').exists():
@@ -71,7 +70,7 @@ def get_competitors():
     return competitors
 
 
-def clone_competitor_controllers(competitors):
+def _clone_competitor_controllers(competitors):
     print("\nCloning competitor controllers...")
 
     for competitor in competitors:
@@ -91,7 +90,7 @@ def clone_competitor_controllers(competitors):
     print("done")
 
 
-def run_competitor_controllers(world_config, competitors):
+def _run_competitor_controllers(world_config, competitors):
     print("\nRunning competitor controllers...")
 
     # Save original world file
@@ -99,7 +98,7 @@ def run_competitor_controllers(world_config, competitors):
         world_content = f.read()
 
     # Run controllers and record animations
-    record_benchmark_animations(world_config, competitors)
+    _record_benchmark_animations(world_config, competitors)
 
     # Revert to original world file
     with open(world_config['file'], 'w') as f:
@@ -108,7 +107,7 @@ def run_competitor_controllers(world_config, competitors):
     print("done")
 
 
-def record_benchmark_animations(world_config, competitors):
+def _record_benchmark_animations(world_config, competitors):
     # Variables and dictionary
     controllers = []
     id_column = []
@@ -150,15 +149,17 @@ def record_benchmark_animations(world_config, competitors):
         new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor_id)
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
         subprocess.check_output(f'mv {destination_directory}/{controller_name}.* {new_destination_directory}', shell=True)
-        cleanup_storage_files(new_destination_directory)
+        _cleanup_storage_files(new_destination_directory)
 
     with open(destination_directory + '/competitors.txt', 'w') as f:
         f.write(updated_competitors)
     subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
+
+    # Remove tmp file
     shutil.rmtree('tmp')
 
 
-def cleanup_storage_files(directory):
+def _cleanup_storage_files(directory):
     if Path(directory).exists():
         for path in Path(directory).glob('*'):
             path = str(path)
@@ -170,7 +171,7 @@ def cleanup_storage_files(directory):
                 os.rename(path, directory + '/scene.x3d')
 
 
-def remove_competitor_controllers():
+def _remove_competitor_controllers():
     for path in Path('controllers').glob('*'):
         controller = str(path).split('/')[1]
         if controller.startswith('competitor'):

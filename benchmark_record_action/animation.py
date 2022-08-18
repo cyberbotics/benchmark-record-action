@@ -47,7 +47,7 @@ def record_animations(world_config, destination_directory, controllers):
         duration = world_config['max-duration'],
         output = os.path.join(os.path.abspath('.'), destination_directory),
         controllers = controllers,
-        controllers = world_config['metric']
+        metric = world_config['metric']
     )
     with open(world_config['file'], 'r') as f:
         world_content = f.read()

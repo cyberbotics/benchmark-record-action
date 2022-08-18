@@ -1,0 +1,8 @@
+name: 'Benchmark Record'
+description: 'Build and publish Webots animation and save Benchmark score every 12 hours'
+branding:
+  icon: 'play'
+  color: 'red'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

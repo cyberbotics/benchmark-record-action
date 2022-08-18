@@ -54,7 +54,7 @@ def record_animations(world_config, destination_directory, controllers):
 
     # Runs simulation in Webots
     out = subprocess.Popen(
-        ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', 'worlds/robot_programming.wbt'],
+        ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', world_config['file']],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )

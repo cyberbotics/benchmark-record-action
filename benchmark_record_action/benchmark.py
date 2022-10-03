@@ -18,6 +18,7 @@ import os
 import shutil
 from pathlib import Path
 import subprocess
+import requests
 from benchmark_record_action.animation import record_animations
 import benchmark_record_action.utils.git as git
 
@@ -76,6 +77,7 @@ def _clone_competitor_controllers(competitors):
     for competitor in competitors:
         competitor.controller_name = "competitor_" + competitor.id + "_" + competitor.username
         competitor.controller_path = os.path.join('controllers', competitor.controller_name)
+        """
         repo = 'https://{}:{}@github.com/{}/{}'.format(
             os.environ['BOT_USERNAME'],
             os.environ['BOT_PAT_KEY'],
@@ -83,9 +85,16 @@ def _clone_competitor_controllers(competitors):
             competitor.repository_name
         )
         subprocess.check_output(f'git clone {repo} {competitor.controller_path}', shell=True)
-        python_filename = os.path.join(competitor.controller_path, 'controller.py')
+
+        python_filename = os.path.join(competitor.controller_path, 'move.py')
         if os.path.exists(python_filename):
-            os.rename(python_filename, os.path.join(competitor.controller_path, f'{competitor.controller_name}.py'))
+            os.rename(python_filename, os.path.join(competitor.controller_path, f'{competitor.controller_name}.py'))"""
+        
+        response = requests.get(f'https://raw.githubusercontent.com/{competitor.username}/{competitor.repository_name}/main/controllers/move/move.py',
+                                headers={'Authorization': f"token {os.environ['GITHUB_TOKEN']}"})
+        python_filename = os.path.join(competitor.controller_path, f'{competitor.controller_name}.py')
+        with open(f'{competitor.controller_name}.py', 'wb') as f:
+            f.write(response.content)
 
     print("done")
 

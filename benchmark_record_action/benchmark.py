@@ -94,7 +94,9 @@ def _clone_competitor_controllers(competitors):
                                 headers={'Authorization': f"token {os.environ['GITHUB_TOKEN']}"})
         if not os.path.exists(dirname):
             os.makedirs(competitor.controller_path)
+        print(competitor.controller_path)
         python_filename = os.path.join(competitor.controller_path, f'{competitor.controller_name}.py')
+        print(python_filename)
         with open(python_filename, 'wb') as f:
             f.write(response.content)
 

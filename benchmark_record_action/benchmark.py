@@ -92,7 +92,7 @@ def _clone_competitor_controllers(competitors):
         
         response = requests.get(f'https://raw.githubusercontent.com/{competitor.username}/{competitor.repository_name}/main/controllers/edit_me/edit_me.py',
                                 headers={'Authorization': f"token {os.environ['GITHUB_TOKEN']}"})
-        if not os.path.exists(dirname):
+        if not os.path.exists(competitor.controller_path):
             os.makedirs(competitor.controller_path)
         print(competitor.controller_path)
         python_filename = os.path.join(competitor.controller_path, f'{competitor.controller_name}.py')

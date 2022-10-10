@@ -73,6 +73,7 @@ def _get_competitors():
 
 def _clone_competitor_controllers(competitors):
     print("\nCloning competitor controllers...")
+    default_controller_name = 'edit_me'
 
     for competitor in competitors:
         competitor.controller_name = "competitor_" + competitor.id + "_" + competitor.username
@@ -101,23 +102,22 @@ def _clone_competitor_controllers(competitors):
         """
 
         # Copy controller folder to correctly named controller folder (using subversion)
-        out = subprocess.Popen(
-            ['svn', 'export', f'https://github.com/{competitor.username}/{competitor.repository_name}/trunk/controllers/edit_me',
+        out = subprocess.check_output(
+            ['svn', 'export', f'https://github.com/{competitor.username}/{competitor.repository_name}/trunk/controllers/{default_controller_name}',
                 competitor.controller_path,
-                '--username', os.environ['BOT_USERNAME'], '--password', os.environ['GITHUB_TOKEN'], '--quiet', '--non-interactive'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+                '--username', os.environ['BOT_USERNAME'], '--password', os.environ['GITHUB_TOKEN'], '--quiet', '--non-interactive']
+                #stderr=subprocess.STDOUT
             )
-        while not out.poll():
-            stdoutdata = out.stdout.readline()
-            if stdoutdata:
-                print(stdoutdata.decode('utf-8'))
-                continue
-            else:
-                break
-        python_filename = os.path.join(competitor.controller_path, 'edit_me.py')
-        if os.path.exists(python_filename):
-            os.rename(python_filename, os.path.join(competitor.controller_path, f'{competitor.controller_name}.py'))
+        
+        # Rename controller files to the correct name
+        for filename in os.listdir(competitor.controller_path):
+            name, ext = os.path.splitext(filename)
+
+            if name == default_controller_name:
+                os.rename(
+                    f'{competitor.controller_path}/{filename}',
+                    f'{competitor.controller_path}/{competitor.controller_name}{ext}'
+                    )
 
 
     print("done")

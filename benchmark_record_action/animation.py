@@ -55,34 +55,32 @@ def record_animations(world_config, destination_directory, controllers):
         f.write(world_content + animation_recorder_vrml)
 
     # Runs simulation in Webots
-    """
-    out = subprocess.Popen(
+    # real-time stdout of webots (still buggy)
+    
+    webots_process = subprocess.Popen(
         ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', world_config['file']],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         encoding='utf-8'
     )
 
-    while True:
-        realtime_output = out.stdout.readline()
-
-        if realtime_output == '' and out.poll() is not None:
-            break
-
-        if realtime_output:
-            print(realtime_output.strip(), flush=True)
+    while webots_process.poll() is None:
+        realtime_output = webots_process.stdout.readline()
+        print(realtime_output.replace('\n', ''))
     
-    print(f'out.stdout -> {out.stdout}')
-    print(f'out.stdout readline-> {out.stdout.readline()}')
+    print(f'out.stdout -> {webots_process.stdout}')
+    print(f'out.stdout readline-> {webots_process.stdout.readline()}')
+    
+    
+    # no stdout output
     """
-
     webots_process = subprocess.run(
         ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', world_config['file']],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         encoding='utf-8'
     )
-
+    """
     # Removes `animation_recorder` controller
     with open(world_config['file'], 'w') as f:
         f.write(world_content)

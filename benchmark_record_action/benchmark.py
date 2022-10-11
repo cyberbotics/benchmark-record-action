@@ -18,7 +18,6 @@ import os
 import shutil
 from pathlib import Path
 import subprocess
-#import requests
 from benchmark_record_action.animation import record_animations
 import benchmark_record_action.utils.git as git
 

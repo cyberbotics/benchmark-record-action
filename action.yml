@@ -3,6 +3,18 @@ description: 'Build and publish Webots animation and save Benchmark score every 
 branding:
   icon: 'play'
   color: 'red'
+inputs:
+  github_token:
+    description: 'Token needed to push animations to remote'
+    required: false
+    default: ${{ secrets.GITHUB_TOKEN }}
+  bot_pat_key:
+    description: 'Token needed to fetch competitors controllers'
+    required: false
+    default: ${{ secrets.GITHUB_TOKEN }}
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  args:
+    - ${{ inputs.github_token }}
+    - ${{ inputs.bot_pat_key }}

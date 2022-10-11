@@ -9,5 +9,8 @@ if [ ! -z "${DEBUG}" ]; then
     export BOT_PAT_KEY='token123'
 fi
 
+export GITHUB_TOKEN=$1
+export BOT_PAT_KEY=$2
+
 # Start
 python3 -m benchmark_record_action

@@ -58,16 +58,19 @@ def record_animations(world_config, destination_directory, controllers):
     out = subprocess.Popen(
         ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', world_config['file']],
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT
+        stderr=subprocess.STDOUT,
+        encoding='utf-8'
     )
 
-    while out.poll() == None:
-        stdoutdata = out.stdout.readline()
-        if stdoutdata:
-            print(stdoutdata.decode('utf-8'))
+    while True:
+        realtime_output = out.stdout.readline()
+
+        if realtime_output == '' and out.poll() is not None:
+            break
+
+        if realtime_output:
+            print(out.strip(), flush=True)
     
-    final_out = out.stdout.readline()
-    print(f'final out -> {final_out.decode("utf-8")}')
     print(f'out.stdout -> {out.stdout}')
     print(f'out.stdout readline-> {out.stdout.readline()}')
 

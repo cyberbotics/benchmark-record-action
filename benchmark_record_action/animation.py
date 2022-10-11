@@ -55,8 +55,7 @@ def record_animations(world_config, destination_directory, controllers):
         f.write(world_content + animation_recorder_vrml)
 
     # Runs simulation in Webots
-    # real-time stdout of webots (still buggy)
-    
+    # real-time stdout of webots
     webots_process = subprocess.Popen(
         ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', world_config['file']],
         stdout=subprocess.PIPE,
@@ -68,11 +67,8 @@ def record_animations(world_config, destination_directory, controllers):
         realtime_output = webots_process.stdout.readline()
         print(realtime_output.replace('\n', ''))
     
-    print(f'out.stdout -> {webots_process.stdout}')
-    print(f'out.stdout readline-> {webots_process.stdout.readline()}')
     
-    
-    # no stdout output
+    # hide stdout
     """
     webots_process = subprocess.run(
         ['xvfb-run', 'webots', '--stdout', '--stderr', '--batch', '--mode=fast', '--no-rendering', world_config['file']],
@@ -81,6 +77,7 @@ def record_animations(world_config, destination_directory, controllers):
         encoding='utf-8'
     )
     """
+    
     # Removes `animation_recorder` controller
     with open(world_config['file'], 'w') as f:
         f.write(world_content)

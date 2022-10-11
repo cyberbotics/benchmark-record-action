@@ -69,7 +69,7 @@ def record_animations(world_config, destination_directory, controllers):
             break
 
         if realtime_output:
-            print(out.strip(), flush=True)
+            print(realtime_output.strip(), flush=True)
     
     print(f'out.stdout -> {out.stdout}')
     print(f'out.stdout readline-> {out.stdout.readline()}')

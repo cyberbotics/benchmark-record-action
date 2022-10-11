@@ -4,7 +4,7 @@ branding:
   icon: 'play'
   color: 'red'
 inputs:
-  github_token:
+  token:
     description: 'Token needed to push animations to remote'
     required: false
     default: ${{ github.token }}
@@ -16,5 +16,5 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.github_token }}
+    - ${{ inputs.token }}
     - ${{ inputs.bot_pat_key }}

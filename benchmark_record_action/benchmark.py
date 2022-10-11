@@ -33,6 +33,7 @@ class Competitor:
 
 
 def benchmark(config):
+    print(os.environ)
     # get world configuration
     world_config = config['world']
 

@@ -70,6 +70,8 @@ def record_animations(world_config, destination_directory, controllers):
     
     out.wait()
 
+    print(out.poll())
+
     # Removes `animation_recorder` controller
     with open(world_config['file'], 'w') as f:
         f.write(world_content)

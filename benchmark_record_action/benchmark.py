@@ -97,7 +97,7 @@ def _clone_competitor_controllers(competitors):
                     )
 
 
-    print("done")
+    print("done fetching controllers")
 
 
 def _run_competitor_controllers(world_config, competitors):
@@ -114,7 +114,7 @@ def _run_competitor_controllers(world_config, competitors):
     with open(world_config['file'], 'w') as f:
         f.write(world_content)
 
-    print("done")
+    print("done running competitors' controllers")
 
 
 def _record_benchmark_animations(world_config, competitors):
@@ -167,6 +167,8 @@ def _record_benchmark_animations(world_config, competitors):
 
     # Remove tmp file
     shutil.rmtree('tmp')
+
+    print('done recording animations')
 
 
 def _cleanup_storage_files(directory):

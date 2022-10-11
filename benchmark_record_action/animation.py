@@ -67,6 +67,8 @@ def record_animations(world_config, destination_directory, controllers):
             continue
         else:
             break
+    
+    out.wait()
 
     # Removes `animation_recorder` controller
     with open(world_config['file'], 'w') as f:

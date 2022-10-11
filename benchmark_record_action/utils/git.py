@@ -45,7 +45,7 @@ def push(message='Updated benchmark recordings', force=True):
 
     subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
     subprocess.check_output(['git', 'add', '-A'])
-    subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT)
+    print(subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT))
     if not is_debug():
         params = ['git', 'push']
         if force:

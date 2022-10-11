@@ -83,7 +83,7 @@ def _clone_competitor_controllers(competitors):
         out = subprocess.check_output(
             ['svn', 'export', f'https://github.com/{competitor.username}/{competitor.repository_name}/trunk/controllers/{default_controller_name}',
                 competitor.controller_path,
-                '--username', os.environ['BOT_USERNAME'], '--password', os.environ['BOT_PAT_KEY'], '--quiet', '--non-interactive']
+                '--username', 'Benchmark_Evaluator', '--password', os.environ['BOT_PAT_KEY'], '--quiet', '--non-interactive']
                 #stderr=subprocess.STDOUT
             )
         

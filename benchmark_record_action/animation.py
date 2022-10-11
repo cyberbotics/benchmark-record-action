@@ -60,8 +60,8 @@ def record_animations(world_config, destination_directory, controllers):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
-    
-    while not out.poll():
+
+    while out.poll() != None:
         stdoutdata = out.stdout.readline()
         if stdoutdata:
             print(stdoutdata.decode('utf-8'))

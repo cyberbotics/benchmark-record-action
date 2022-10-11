@@ -4,17 +4,17 @@ branding:
   icon: 'play'
   color: 'red'
 inputs:
-  token:
+  push_token:
     description: 'Token needed to push animations to remote'
     required: false
     default: ${{ github.token }}
-  bot_pat_key:
+  pull_token:
     description: 'Token needed to fetch competitors controllers'
     required: false
     default: ${{ github.token }}
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  args:
-    - ${{ inputs.token }}
-    - ${{ inputs.bot_pat_key }}
+  #args:
+  #  - ${{ inputs.token }}
+  #  - ${{ inputs.bot_pat_key }}

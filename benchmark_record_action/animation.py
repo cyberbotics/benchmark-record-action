@@ -60,17 +60,16 @@ def record_animations(world_config, destination_directory, controllers):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
+    
     while not out.poll():
         stdoutdata = out.stdout.readline()
         if stdoutdata:
             print(stdoutdata.decode('utf-8'))
-            continue
         else:
-            break
+            pass
     
-    out.wait()
-
-    print(out.poll())
+    final_out = out.stdout.readline()
+    print(final_out.decode('utf-8'))
 
     # Removes `animation_recorder` controller
     with open(world_config['file'], 'w') as f:

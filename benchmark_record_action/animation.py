@@ -67,7 +67,9 @@ def record_animations(world_config, destination_directory, controllers):
             print(stdoutdata.decode('utf-8'))
     
     final_out = out.stdout.readline()
-    print(final_out.decode('utf-8'))
+    print(f'final out -> {final_out.decode('utf-8')}')
+    print(f'out.stdout -> {out.stdout}')
+    print(f'out.stdout readline-> {out.stdout.readline()}')
 
     # Removes `animation_recorder` controller
     with open(world_config['file'], 'w') as f:

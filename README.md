@@ -17,7 +17,7 @@ Each line in `competitors.txt` file has the following format: `id*:controller_re
 
 ### 2. Clone the competitor controllers
 
-We clone **controller repositories** into the Benchmark's `controller/` directory and rename them as: `competitor_{id}_{username}/competitor_{id}_{username}.py` .
+We clone the **controller folder** of each competitor using subversion into the Benchmark's `controller/` directory and rename them as: `competitor_{id}_{username}/competitor_{id}_{username}.py` .
 > the `{username}` variable is obtained from the **controller repository**
 
 ### 3. Run Webots and record Benchmarks

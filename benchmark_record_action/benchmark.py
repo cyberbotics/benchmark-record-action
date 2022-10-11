@@ -78,34 +78,12 @@ def _clone_competitor_controllers(competitors):
     for competitor in competitors:
         competitor.controller_name = "competitor_" + competitor.id + "_" + competitor.username
         competitor.controller_path = os.path.join('controllers', competitor.controller_name)
-        """ folder copy by checking out repo containing only controller file
-        repo = 'https://{}:{}@github.com/{}/{}'.format(
-            os.environ['BOT_USERNAME'],
-            os.environ['BOT_PAT_KEY'],
-            competitor.username,
-            competitor.repository_name
-        )
-        subprocess.check_output(f'git clone {repo} {competitor.controller_path}', shell=True)
-
-        python_filename = os.path.join(competitor.controller_path, 'move.py')
-        if os.path.exists(python_filename):
-            os.rename(python_filename, os.path.join(competitor.controller_path, f'{competitor.controller_name}.py'))"""
-        """ file copy using github api
-        response = requests.get(f'https://raw.githubusercontent.com/{competitor.username}/{competitor.repository_name}/main/controllers/edit_me/edit_me.py',
-                                headers={'Authorization': f"token {os.environ['GITHUB_TOKEN']}"})
-        
-        if not os.path.exists(competitor.controller_path):
-            os.makedirs(competitor.controller_path)
-        python_filename = os.path.join(competitor.controller_path, f'{competitor.controller_name}.py')
-        with open(python_filename, 'wb') as f:
-            f.write(response.content)
-        """
 
         # Copy controller folder to correctly named controller folder (using subversion)
         out = subprocess.check_output(
             ['svn', 'export', f'https://github.com/{competitor.username}/{competitor.repository_name}/trunk/controllers/{default_controller_name}',
                 competitor.controller_path,
-                '--username', os.environ['BOT_USERNAME'], '--password', os.environ['GITHUB_TOKEN'], '--quiet', '--non-interactive']
+                '--username', os.environ['BOT_USERNAME'], '--password', os.environ['BOT_PAT_KEY'], '--quiet', '--non-interactive']
                 #stderr=subprocess.STDOUT
             )
         

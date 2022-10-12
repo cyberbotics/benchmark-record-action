@@ -67,7 +67,7 @@ def _get_competitors():
         return competitors
     
     # if it is a general evaluation
-    else Path('competitors.txt').exists():
+    elif Path('competitors.txt').exists():
         competitors = []
         with Path('competitors.txt').open() as f:
             for competitor in f.readlines():

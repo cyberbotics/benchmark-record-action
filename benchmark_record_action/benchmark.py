@@ -48,6 +48,8 @@ def benchmark(config):
     _run_competitor_controllers(world_config, competitors)
     _remove_competitor_controllers()
 
+    exit()
+
     # Commit and Push updates
     git.push(message="record and update benchmark animations")
 
@@ -154,96 +156,65 @@ def _record_benchmark_animations(world_config, competitors):
     with Path(destination_directory + '/competitors.txt').open() as f:
         performances = f.readlines()
     
-    if IS_INDIVIDUAL :
-        _replace_one_performance(performances, competitor_dict, destination_directory)
-    else:
-        _replace_all_performances(performances, competitor_dict, destination_directory)
+    _refresh_perf_and_animation(performances, competitor_dict, destination_directory)
 
     # Remove tmp file
     shutil.rmtree('tmp')
 
     print('done recording animations')
 
-def _replace_all_performances(performances, competitor_dict, destination_directory):
+def _refresh_perf_and_animation(performances, competitor_dict, destination_directory):
 
-    # Delete old files
-    for path in Path('storage').glob('*'):
-        path = str(path)
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-        else:
-            os.remove(path)
-
-    # Move animations and performances
-    updated_competitors = ""
-    for performance in performances:
-        competitor_id = performance.split(':')[0]
-        competitor_repository = competitor_dict.get(competitor_id)
-        performance_value = performance.split(':')[1]
-        performance_string = performance.split(':')[2]
-        date = performance.split(':')[3]
-
-        # performances
-        updated_competitors += f"{competitor_id}:{competitor_repository}:{performance_value}:{performance_string}:{date}"
-        
-        # animations
-        controller_name = "competitor_" + competitor_id + "_" + competitor_repository.split('/')[0]
-        new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor_id)
-        subprocess.check_output(['mkdir', '-p', new_destination_directory])
-        subprocess.check_output(f'mv {destination_directory}/{controller_name}.* {new_destination_directory}', shell=True)
-        _cleanup_storage_files(new_destination_directory)
-
-    with open(destination_directory + '/competitors.txt', 'w') as f:
-        f.write(updated_competitors)
-    subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
-
-def _replace_one_performance(performances, competitor_dict, destination_directory):
-    print("TODO: replace the correct performance and animation")
-    print(f'performances: {performances}')
-    
-    # Move animations and performances
-    updated_competitors = ""
-    for performance in performances:
-        competitor_id = performance.split(':')[0]
-        competitor_repository = competitor_dict.get(competitor_id)
-        performance_value = performance.split(':')[1]
-        performance_string = performance.split(':')[2]
-        date = performance.split(':')[3]
-
-        # performances
-        updated_competitors += f"{competitor_id}:{competitor_repository}:{performance_value}:{performance_string}:{date}"
-        
-        # animations
-        controller_name = "competitor_" + competitor_id + "_" + competitor_repository.split('/')[0]
-        new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor_id)
-        # remove old animation
-        subprocess.check_output(['rm', '-r', new_destination_directory])
-        subprocess.check_output(['mkdir', '-p', new_destination_directory])
-        subprocess.check_output(f'mv {destination_directory}/{controller_name}.* {new_destination_directory}', shell=True)
-        _cleanup_storage_files(new_destination_directory)
-
-    # performance replacement
-    print(f'competitor_id: {competitor_id}')
-    print(f'updated_competitors: {updated_competitors}')
-
-    replaced_content = ""
-    with open('competitors.txt', 'r') as f:
-        for line in f:
-            # stripping line break
-            line = line.strip()
-            test_id = line.split(':')[0]
-            # replacing the text if the line number is reached
-            if test_id == competitor_id:
-                new_line = updated_competitors.strip()
+    # Delete old files if general evaluation
+    if not IS_INDIVIDUAL:
+        for path in Path('storage').glob('*'):
+            path = str(path)
+            if os.path.isdir(path):
+                shutil.rmtree(path)
             else:
-                new_line = line
-            # concatenate the new string and add an end-line break
-            replaced_content = replaced_content + new_line + "\n"
+                os.remove(path)
+
+    # Move animations and format new performances
+    updated_competitors = _move_animations_and_format_perf(performances, competitor_dict, destination_directory)
+
+    # Only change the requested competitor's performance if individual evaluation
+    if IS_INDIVIDUAL:
+        tmp_competitors = ""
+        competitor_id = updated_competitors.split(':')[0]
+        with open('competitors.txt', 'r') as f:
+            for line in f:
+                # stripping line break
+                line = line.strip()
+                test_id = line.split(':')[0]
+                # replacing the text if the line number is reached
+                if test_id == competitor_id:
+                    new_line = updated_competitors.strip()
+                else:
+                    new_line = line
+                # concatenate the new string and add an end-line break
+                tmp_competitors = tmp_competitors + new_line + "\n"
+        updated_competitors = tmp_competitors
     
     with open('competitors.txt', 'w') as f:
-        f.write(replaced_content)
+        f.write(updated_competitors)
 
-def _format_performance
+def _move_animations_and_format_perf(performances, competitor_dict, destination_directory):
+    updated_competitors = ""
+    for performance in performances:
+        competitor_id, performance_value, performance_string, date = performance.split(':')
+        competitor_repository = competitor_dict.get(competitor_id)
+
+        # performances
+        updated_competitors += f"{competitor_id}:{competitor_repository}:{performance_value}:{performance_string}:{date}"
+        
+        # animations
+        controller_name = "competitor_" + competitor_id + "_" + competitor_repository.split('/')[0]
+        new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor_id)
+        if IS_INDIVIDUAL: subprocess.check_output(['rm', '-r', new_destination_directory])
+        subprocess.check_output(['mkdir', '-p', new_destination_directory])
+        subprocess.check_output(f'mv {destination_directory}/{controller_name}.* {new_destination_directory}', shell=True)
+        _cleanup_storage_files(new_destination_directory)
+    return updated_competitors
 
 def _cleanup_storage_files(directory):
     if Path(directory).exists():

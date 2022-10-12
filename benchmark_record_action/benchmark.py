@@ -200,7 +200,6 @@ def _replace_all_performances(performances):
 def _replace_one_performance(performances):
     print("TODO: replace the correct performance and animation")
     print(f'performances: {performances}')
-    print(f'competitors: {competitors}')
     
     # Move animations and performances
     updated_competitors = ""

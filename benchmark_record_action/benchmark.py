@@ -48,8 +48,6 @@ def benchmark(config):
     _run_competitor_controllers(world_config, competitors)
     _remove_competitor_controllers()
 
-    exit()
-
     # Commit and Push updates
     git.push(message="record and update benchmark animations")
 

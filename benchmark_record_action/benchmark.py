@@ -72,7 +72,6 @@ def _get_competitors():
 
 def _clone_competitor_controllers(competitors):
     print("\nCloning competitor controllers...")
-    default_controller_name = 'edit_me'
 
     for competitor in competitors:
         competitor.controller_name = "competitor_" + competitor.id + "_" + competitor.username
@@ -80,17 +79,22 @@ def _clone_competitor_controllers(competitors):
 
         # Copy controller folder to correctly named controller folder (using subversion)
         out = subprocess.check_output(
-            ['svn', 'export', f'https://github.com/{competitor.username}/{competitor.repository_name}/trunk/controllers/{default_controller_name}',
-                competitor.controller_path,
-                '--username', 'Benchmark_Evaluator', '--password', os.environ['INPUT_FETCH_TOKEN'], '--quiet', '--non-interactive']
-                #stderr=subprocess.STDOUT
+                [
+                    'svn', 'export', 'https://github.com/{}/{}/trunk/controllers/{}'.format(
+                        competitor.username, competitor.repository_name,
+                        os.environ['INPUT_DEFAULT_CONTROLLER_NAME']
+                    ),
+                    competitor.controller_path,
+                    '--username', 'Benchmark_Evaluator', '--password', os.environ['INPUT_FETCH_TOKEN'],
+                    '--quiet', '--non-interactive'
+                ]
             )
         
         # Rename controller files to the correct name
         for filename in os.listdir(competitor.controller_path):
             name, ext = os.path.splitext(filename)
 
-            if name == default_controller_name:
+            if name == os.environ['INPUT_DEFAULT_CONTROLLER_NAME']:
                 os.rename(
                     f'{competitor.controller_path}/{filename}',
                     f'{competitor.controller_path}/{competitor.controller_name}{ext}'

@@ -21,6 +21,7 @@ import subprocess
 from benchmark_record_action.animation import record_animations
 import benchmark_record_action.utils.git as git
 
+IS_INDIVIDUAL = (len(os.environ['INPUT_INDIVIDUAL_EVALUATION']) != 0)
 
 class Competitor:
     def __init__(self, id, controller_repository):
@@ -55,7 +56,7 @@ def _get_competitors():
     print("\nGetting competitor list...")
 
     # if it is an individual evaluation
-    if len(os.environ['INPUT_INDIVIDUAL_EVALUATION']) != 0 :
+    if IS_INDIVIDUAL :
         competitors = []
         competitor = os.environ['INPUT_INDIVIDUAL_EVALUATION']
         competitors.append(
@@ -153,7 +154,7 @@ def _record_benchmark_animations(world_config, competitors):
     with Path(destination_directory + '/competitors.txt').open() as f:
         performances = f.readlines()
     
-    if len(os.environ['INPUT_INDIVIDUAL_EVALUATION']) != 0 :
+    if IS_INDIVIDUAL :
         _replace_one_performance(performances, competitor_dict, destination_directory)
     else:
         _replace_all_performances(performances, competitor_dict, destination_directory)
@@ -183,8 +184,7 @@ def _replace_all_performances(performances, competitor_dict, destination_directo
         date = performance.split(':')[3]
 
         # performances
-        updated_competitors += competitor_id + ':' + competitor_repository + ':' + performance_value + ':' + \
-            performance_string + ':' + date
+        updated_competitors += f"{competitor_id}:{competitor_repository}:{performance_value}:{performance_string}:{date}"
         
         # animations
         controller_name = "competitor_" + competitor_id + "_" + competitor_repository.split('/')[0]
@@ -211,8 +211,7 @@ def _replace_one_performance(performances, competitor_dict, destination_director
         date = performance.split(':')[3]
 
         # performances
-        updated_competitors += competitor_id + ':' + competitor_repository + ':' + performance_value + ':' + \
-            performance_string + ':' + date
+        updated_competitors += f"{competitor_id}:{competitor_repository}:{performance_value}:{performance_string}:{date}"
         
         # animations
         controller_name = "competitor_" + competitor_id + "_" + competitor_repository.split('/')[0]
@@ -243,6 +242,8 @@ def _replace_one_performance(performances, competitor_dict, destination_director
     
     with open('competitors.txt', 'w') as f:
         f.write(replaced_content)
+
+def _format_performance
 
 def _cleanup_storage_files(directory):
     if Path(directory).exists():

@@ -33,8 +33,6 @@ class Competitor:
 
 
 def benchmark(config):
-    print(os.environ)
-    exit()
     # get world configuration
     world_config = config['world']
 
@@ -55,6 +53,16 @@ def benchmark(config):
 
 def _get_competitors():
     print("\nGetting competitor list...")
+
+    if len(os.environ['INPUT_INDIVIDUAL_EVALUATION']) != 0 :
+        competitors = []
+        competitor = os.environ['INPUT_INDIVIDUAL_EVALUATION']
+        competitors.append(
+            Competitor(
+                id = competitor.split(":")[0],
+                controller_repository = competitor.split(":")[1].replace("\n", "")
+        )
+        return competitors
 
     if Path('competitors.txt').exists():
         competitors = []

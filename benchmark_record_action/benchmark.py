@@ -54,6 +54,7 @@ def benchmark(config):
 def _get_competitors():
     print("\nGetting competitor list...")
 
+    # if it is an individual evaluation
     if len(os.environ['INPUT_INDIVIDUAL_EVALUATION']) != 0 :
         competitors = []
         competitor = os.environ['INPUT_INDIVIDUAL_EVALUATION']
@@ -64,8 +65,9 @@ def _get_competitors():
             )
         )
         return competitors
-
-    if Path('competitors.txt').exists():
+    
+    # if it is a general evaluation
+    else Path('competitors.txt').exists():
         competitors = []
         with Path('competitors.txt').open() as f:
             for competitor in f.readlines():
@@ -150,6 +152,18 @@ def _record_benchmark_animations(world_config, competitors):
     # Get results
     with Path(destination_directory + '/competitors.txt').open() as f:
         performances = f.readlines()
+    
+    if len(os.environ['INPUT_INDIVIDUAL_EVALUATION']) != 0 :
+        _replace_one_performance(performances)
+    else:
+        _replace_all_performances(performances)
+
+    # Remove tmp file
+    shutil.rmtree('tmp')
+
+    print('done recording animations')
+
+def _replace_all_performances(performances):
 
     # Delete old files
     for path in Path('storage').glob('*'):
@@ -180,11 +194,9 @@ def _record_benchmark_animations(world_config, competitors):
         f.write(updated_competitors)
     subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
 
-    # Remove tmp file
-    shutil.rmtree('tmp')
-
-    print('done recording animations')
-
+def _replace_one_performance(performances):
+    print("TODO: replace the correct performance and animation")
+    print(performances)
 
 def _cleanup_storage_files(directory):
     if Path(directory).exists():

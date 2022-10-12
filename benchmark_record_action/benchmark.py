@@ -61,11 +61,8 @@ def _get_competitors():
             Competitor(
                 id = competitor.split(":")[0],
                 controller_repository = competitor.split(":")[1].replace("\n", "")
+            )
         )
-        print(f'id: {competitors[0].id}')
-        print(f'controller_repository: {competitors[0].controller_repository}')
-        print(f'competitors: {competitors}')
-        
         return competitors
 
     if Path('competitors.txt').exists():

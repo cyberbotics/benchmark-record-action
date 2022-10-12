@@ -8,7 +8,7 @@ inputs:
     description: 'Token needed to push animations to remote'
     required: false
     default: ${{ github.token }}
-  pull_token:
+  fetch_token:
     description: 'Token needed to fetch competitors controllers'
     required: false
     default: ${{ github.token }}

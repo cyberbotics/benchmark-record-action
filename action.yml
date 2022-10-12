@@ -12,6 +12,9 @@ inputs:
     description: 'Token needed to fetch competitors controllers'
     required: false
     default: ${{ github.token }}
+  default_controller_name:
+    description: 'Default name of the controller that will be used for the benchmark'
+    default: ${{ edit_me }}
 runs:
   using: 'docker'
   image: 'Dockerfile'

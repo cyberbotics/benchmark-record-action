@@ -154,16 +154,16 @@ def _record_benchmark_animations(world_config, competitors):
         performances = f.readlines()
     
     if len(os.environ['INPUT_INDIVIDUAL_EVALUATION']) != 0 :
-        _replace_one_performance(performances)
+        _replace_one_performance(performances, competitor_dict)
     else:
-        _replace_all_performances(performances)
+        _replace_all_performances(performances, competitor_dict)
 
     # Remove tmp file
     shutil.rmtree('tmp')
 
     print('done recording animations')
 
-def _replace_all_performances(performances):
+def _replace_all_performances(performances, competitor_dict):
 
     # Delete old files
     for path in Path('storage').glob('*'):
@@ -197,7 +197,7 @@ def _replace_all_performances(performances):
         f.write(updated_competitors)
     subprocess.check_output(f'mv {destination_directory}/competitors.txt competitors.txt', shell=True)
 
-def _replace_one_performance(performances):
+def _replace_one_performance(performances, competitor_dict):
     print("TODO: replace the correct performance and animation")
     print(f'performances: {performances}')
     

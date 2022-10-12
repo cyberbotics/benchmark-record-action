@@ -33,6 +33,8 @@ class Competitor:
 
 
 def benchmark(config):
+    print(os.environ)
+    exit()
     # get world configuration
     world_config = config['world']
 
@@ -65,7 +67,7 @@ def _get_competitors():
                     )
                 )
 
-    print("done")
+    print("done getting competitor list")
 
     return competitors
 

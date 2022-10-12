@@ -8,13 +8,24 @@ inputs:
     description: 'Token needed to push animations to remote'
     required: false
     default: ${{ github.token }}
+
   fetch_token:
     description: 'Token needed to fetch competitors controllers'
     required: false
     default: ${{ github.token }}
+
   default_controller_name:
     description: 'Default name of the controller that will be used for the benchmark'
+    required: false
     default: edit_me
+
+  individual_evaluation:
+    description: |
+      "Indicates if an individual evaluation is requested, leave null if you want to evaluate everybody.
+        the format is the same as the competitors.txt: id:username/repoName"
+    required: false
+    default: null
+
 runs:
   using: 'docker'
   image: 'Dockerfile'

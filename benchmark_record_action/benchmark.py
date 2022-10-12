@@ -181,9 +181,12 @@ def _replace_all_performances(performances):
         performance_value = performance.split(':')[1]
         performance_string = performance.split(':')[2]
         date = performance.split(':')[3]
+
+        # performances
         updated_competitors += competitor_id + ':' + competitor_repository + ':' + performance_value + ':' + \
             performance_string + ':' + date
-
+        
+        # animations
         controller_name = "competitor_" + competitor_id + "_" + competitor_repository.split('/')[0]
         new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor_id)
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
@@ -196,7 +199,51 @@ def _replace_all_performances(performances):
 
 def _replace_one_performance(performances):
     print("TODO: replace the correct performance and animation")
-    print(performances)
+    print(f'performances: {performances}')
+    print(f'competitors: {competitors}')
+    
+    # Move animations and performances
+    updated_competitors = ""
+    for performance in performances:
+        competitor_id = performance.split(':')[0]
+        competitor_repository = competitor_dict.get(competitor_id)
+        performance_value = performance.split(':')[1]
+        performance_string = performance.split(':')[2]
+        date = performance.split(':')[3]
+
+        # performances
+        updated_competitors += competitor_id + ':' + competitor_repository + ':' + performance_value + ':' + \
+            performance_string + ':' + date
+        
+        # animations
+        controller_name = "competitor_" + competitor_id + "_" + competitor_repository.split('/')[0]
+        new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor_id)
+        # remove old animation
+        subprocess.check_output(['rm', '-r', new_destination_directory])
+        subprocess.check_output(['mkdir', '-p', new_destination_directory])
+        subprocess.check_output(f'mv {destination_directory}/{controller_name}.* {new_destination_directory}', shell=True)
+        _cleanup_storage_files(new_destination_directory)
+
+    # performance replacement
+    print(f'competitor_id: {competitor_id}')
+    print(f'updated_competitors: {updated_competitors}')
+
+    replaced_content = ""
+    with open('competitors.txt', 'r') as f:
+        for line in f:
+            # stripping line break
+            line = line.strip()
+            test_id = line.split(':')[0]
+            # replacing the text if the line number is reached
+            if test_id == competitor_id:
+                new_line = updated_competitors.strip()
+            else:
+                new_line = line
+            # concatenate the new string and add an end-line break
+            replaced_content = replaced_content + new_line + "\n"
+    
+    with open('competitors.txt', 'w') as f:
+        f.write(replaced_content)
 
 def _cleanup_storage_files(directory):
     if Path(directory).exists():

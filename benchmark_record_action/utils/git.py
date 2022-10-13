@@ -35,7 +35,6 @@ def init():
 
 
 def push(message='Updated benchmark recordings', force=True):
-    #init()
 
     github_repository = 'https://{}:{}@github.com/{}'.format(
         os.environ['GITHUB_ACTOR'],
@@ -43,19 +42,19 @@ def push(message='Updated benchmark recordings', force=True):
         os.environ['GITHUB_REPOSITORY']
     )
 
-    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
-    subprocess.check_output(['git', 'add', '-A'])
-
-    try:    # can easily return an error, makes debugging easier
+    # We push only if there are changes:
+    try:
+        subprocess.check_output(['git', 'diff', '--exit-code', './storage'])
+    except:
+        # If there are changes:
+        subprocess.check_output(['git', 'add', '-A'])
         subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
         
-    if not is_debug():
-        params = ['git', 'push']
-        if force:
-            params += ['-f']
-        params += [github_repository]
-        subprocess.check_output(params)
-    else:
-        print(f'@ git push {github_repository}')
+        if not is_debug():
+            params = ['git', 'push']
+            if force:
+                params += ['-f']
+            params += [github_repository]
+            subprocess.check_output(params)
+        else:
+            print(f'@ git push {github_repository}')

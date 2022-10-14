@@ -208,7 +208,10 @@ def _move_animations_and_format_perf(performances, competitor_dict, destination_
         # animations
         controller_name = "competitor_" + competitor_id + "_" + competitor_repository.split('/')[0]
         new_destination_directory = os.path.join('storage', 'wb_animation_' + competitor_id)
-        if IS_INDIVIDUAL: subprocess.check_output(['rm', '-r', new_destination_directory])
+
+        if IS_INDIVIDUAL:
+            subprocess.check_output(['rm', '-r', '-f', new_destination_directory])
+
         subprocess.check_output(['mkdir', '-p', new_destination_directory])
         subprocess.check_output(f'mv {destination_directory}/{controller_name}.* {new_destination_directory}', shell=True)
         _cleanup_storage_files(new_destination_directory)

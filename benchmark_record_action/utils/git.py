@@ -44,10 +44,10 @@ def push(message='Updated benchmark recordings', force=True):
 
     # We push only if there are changes:
     try:
-        subprocess.check_output(['git', 'diff', '--exit-code', './storage'])
+        subprocess.check_output(['git', 'add', '-A'])
+        subprocess.check_output(['git', 'diff', '--exit-code', '--cached', './storage'])
     except:
         # If there are changes:
-        subprocess.check_output(['git', 'add', '-A'])
         subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT)
         
         if not is_debug():

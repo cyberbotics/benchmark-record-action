@@ -58,7 +58,7 @@ def record_animations(world_config, destination_directory, controller_name):
             "docker", "build",
             "-t", "controller-docker",
             "-f", f"controllers/{controller_name}/controller_Dockerfile",
-            "--build-arg", f"CONTROLLER={DEFAULT_CONTROLLER}",
+            "--build-arg", f"DEFAULT_CONTROLLER={DEFAULT_CONTROLLER}",
             f"controllers/{controller_name}"
         ],
         stdout=subprocess.PIPE,

@@ -34,5 +34,7 @@ runs:
   using: 'composite'
   steps:
     - name: Run the python meta script
-      run: python3 -u "${{ github.action_path }}/benchmark_record_action -m"
+      run: |
+        ls -a ${{ github.action_path }}
+        python3 -u "${{ github.action_path }}/benchmark_record_action -m"
       shell: bash

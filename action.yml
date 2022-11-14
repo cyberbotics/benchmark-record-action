@@ -35,3 +35,4 @@ runs:
   steps:
     - name: Run the python meta script
       run: python3 -u "${{ github.action_path }}/benchmark_record_action -m"
+      shell: bash

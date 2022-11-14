@@ -41,7 +41,6 @@ def record_animations(world_config, destination_directory, controller_name):
     recorder_build = subprocess.Popen(
         [
             "docker", "build",
-            "--build-arg", f'PROJECT_PATH={os.environ["PROJECT_PATH"]}',
             "-t", "recorder-webots",
             "-f", "Dockerfile",
             "."
@@ -69,7 +68,7 @@ def record_animations(world_config, destination_directory, controller_name):
     webots_docker = subprocess.Popen(
         [
             "docker", "run", "-t", "--rm", "--init",
-            "--mount", f'type=bind,source={os.getcwd()}/tmp/animation,target={os.environ["PROJECT_PATH"]}/{destination_directory}',
+            "--mount", f'type=bind,source={os.getcwd()}/tmp/animation,target=/usr/local/webots-project/{destination_directory}',
             "-p", "3005:1234",
             "--env", "CI=true",
             "recorder-webots"
@@ -101,8 +100,7 @@ def record_animations(world_config, destination_directory, controller_name):
             timeout = True
             break
     if webots_docker.returncode:
-        print(f"ERROR: Webots container exited with code {webots_docker.returncode}")
-        raise Exception("Error while running the Webots simulation")
+        raise Exception(f"ERROR: Webots container exited with code {webots_docker.returncode}")
 
     print("Closing the containers...")
     webots_container_id = _get_container_id("recorder-webots")
@@ -160,6 +158,7 @@ def _get_container_id(container_name):
     container_id = subprocess.check_output(['docker', 'ps', '-f', f'ancestor={container_name}', '-q']).decode('utf-8').strip()
     return container_id
 
+# function to get the stdout of a Popen process in realtime
 def _get_realtime_stdout(process, error_message):
     while process.poll() is None:
         realtime_output = process.stdout.readline()

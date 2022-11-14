@@ -45,9 +45,7 @@ def _get_competitor():
         id = input_competitor.split(":")[0],
         controller_repository = input_competitor.split(":")[1].strip()
     )
-    
     print("done parsing competitor")
-
     return competitor
 
 
@@ -65,7 +63,6 @@ def _clone_competitor_controller(competitor):
     )
 
     git.clone(repo, competitor.controller_path)
-
     print("done fetching repo")
 
 def _run_competitor_controller(world_config, competitor):
@@ -115,7 +112,7 @@ def _update_animation_files(competitor):
 
     # remove old animation
     _remove_directory(new_destination_directory)
-    # replace by new animation
+
     _copy_directory(TMP_DESTINATION_DIRECTORY, new_destination_directory)
     _remove_directory(TMP_DESTINATION_DIRECTORY)
     

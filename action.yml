@@ -7,6 +7,9 @@ branding:
 runs:
   using: 'composite'
   steps:
+    - name: Get default controller name
+      run: bash ${{ github.action_path }}/default_controller_name_regex.sh
+
     - name: Run the python meta script
       run: |
         cp -r ${{ github.action_path }}/metascript .

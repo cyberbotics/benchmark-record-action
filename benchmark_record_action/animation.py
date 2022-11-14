@@ -40,7 +40,7 @@ def record_animations(world_config, destination_directory, controller_name):
     # Temporary file changes*:
     with open(world_config['file'], 'r') as f:
         world_content = f.read()
-    updated_file = world_content.replace(f'controller "{os.environ["INPUT_DEFAULT_CONTROLLER"]}"', 'controller "<extern>"')
+    updated_file = world_content.replace(f'controller "{os.environ["DEFAULT_CONTROLLER"]}"', 'controller "<extern>"')
 
     animation_recorder_vrml = _generate_animation_recorder_vrml(
         duration = world_config['max-duration'],
@@ -55,7 +55,7 @@ def record_animations(world_config, destination_directory, controller_name):
     recorder_build = subprocess.Popen(
         [
             "docker", "build",
-            "--build-arg", f'PROJECT_PATH={os.environ["INPUT_PROJECT_PATH"]}',
+            "--build-arg", f'PROJECT_PATH={os.environ["PROJECT_PATH"]}',
             "-t", "recorder-webots",
             "-f", "Dockerfile",
             "."
@@ -83,7 +83,7 @@ def record_animations(world_config, destination_directory, controller_name):
     webots_docker = subprocess.Popen(
         [
             "docker", "run", "-t", "--rm", "--init",
-            "--mount", f'type=bind,source={os.getcwd()}/tmp/animation,target={os.environ["INPUT_PROJECT_PATH"]}/{destination_directory}',
+            "--mount", f'type=bind,source={os.getcwd()}/tmp/animation,target={os.environ["PROJECT_PATH"]}/{destination_directory}',
             "-p", "3005:1234",
             "--env", "CI=true",
             "recorder-webots"

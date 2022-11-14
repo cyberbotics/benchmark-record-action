@@ -40,8 +40,6 @@ def record_animations(world_config, destination_directory, controller_name):
         f.write(updated_file + animation_recorder_vrml)
     
     # Building the Docker containers
-    # TODO: remove this line
-    subprocess.run(['docker',  'builder', 'prune', '-af'])
     recorder_build = subprocess.Popen(
         [
             "docker", "build",
@@ -54,7 +52,8 @@ def record_animations(world_config, destination_directory, controller_name):
         encoding='utf-8'
     )
     _get_realtime_stdout(recorder_build, "Error while building the recorder container")
-    
+    # TODO: remove this line
+    subprocess.run(['docker',  'builder', 'prune', '-af'])
     controller_build = subprocess.Popen(
         [
             "docker", "build",

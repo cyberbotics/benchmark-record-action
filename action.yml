@@ -10,5 +10,5 @@ runs:
     - name: Run the python meta script
       run: |
         export PYTHONPATH="${{ github.action_path }}:$PYTHONPATH"
-        python3 -u metascript -m
+        python3 -u -m metascript
       shell: bash

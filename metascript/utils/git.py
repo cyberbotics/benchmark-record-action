@@ -3,8 +3,6 @@
 import subprocess
 import os
 import requests
-from benchmark_record_action.utils.utils import is_debug
-
 
 def init():
     username = os.environ['GITHUB_ACTOR']
@@ -36,14 +34,11 @@ def push(message='Updated benchmark recordings', force=True):
         # If there are changes:
         subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT)
         
-        if not is_debug():
-            params = ['git', 'push']
-            if force:
-                params += ['-f']
-            params += [github_repository]
-            subprocess.check_output(params)
-        else:
-            print(f'@ git push {github_repository}')
+        params = ['git', 'push']
+        if force:
+            params += ['-f']
+        params += [github_repository]
+        subprocess.check_output(params)
 
 def clone(repo, path):
     subprocess.check_output(['git', 'clone', repo, path])

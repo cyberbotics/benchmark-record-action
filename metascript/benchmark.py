@@ -84,7 +84,7 @@ def _clone_competitor_controller(competitor):
 
 def _run_competitor_controller(world_config, competitor):
     print("\nRunning competitor's controller...")
-
+    # TODO: change to correct file location -----------v
     animator_controller_source = os.path.join('benchmark_record_action', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
     _copy_directory(animator_controller_source, animator_controller_destination)

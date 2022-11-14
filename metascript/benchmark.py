@@ -22,18 +22,18 @@ def benchmark(config):
     # get world configuration
     world_config = config['world']
 
-    # Initialise Git
     git.init()
 
     # Parse input competitor
     competitor = _get_competitor()
 
-    # Clone and run Docker containers
     _clone_competitor_controller(competitor)
-    _run_competitor_controller(world_config, competitor)
-    _remove_competitor_controller()
+    performance = _run_competitor_controller(world_config, competitor)
 
-    # Commit and Push updates
+    _update_repo_files(performance, competitor)
+
+    _remove_tmp_files(competitor)
+
     git.push(message="record and update benchmark animations")
 
 
@@ -81,15 +81,13 @@ def _run_competitor_controller(world_config, competitor):
         competitor.controller_name
     )
 
-    _update_animation_files(competitor)
-    _update_performance_line(performance, competitor)
-
-    # Remove tmp files
-    _remove_directory('tmp')
     _remove_directory(animator_controller_destination)
-    _remove_directory('metascript')
-
     print('done running controller and recording animations')
+    return performance
+
+def _update_repo_files(performance, competitor):
+    _update_performance_line(performance, competitor)
+    _update_animation_files(competitor)
 
 def _update_performance_line(performance, competitor):
 
@@ -135,11 +133,10 @@ def _cleanup_storage_files(directory):
             elif path.endswith('.x3d'):
                 os.rename(path, directory + '/scene.x3d')
 
-def _remove_competitor_controller():
-    for path in Path('controllers').glob('*'):
-        controller = str(path).split('/')[1]
-        if controller.startswith('competitor'):
-            shutil.rmtree(path)
+def _remove_tmp_files(competitor):
+    _remove_directory('tmp')
+    _remove_directory('metascript')
+    _remove_directory(competitor.controller_path)
 
 def _remove_directory(directory):
     if Path(directory).exists():

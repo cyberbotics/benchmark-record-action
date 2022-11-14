@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from benchmark_record_action.utils.webots import load_config
-from benchmark_record_action.benchmark import benchmark
+from .utils.webots import load_config
+from .benchmark import benchmark
 
 
 def main():

@@ -40,6 +40,8 @@ def record_animations(world_config, destination_directory, controller_name):
         f.write(updated_file + animation_recorder_vrml)
     
     # Building the Docker containers
+    # TODO: remove this line
+    subprocess.run(['docker',  'builder', 'prune', '-af'])
     recorder_build = subprocess.Popen(
         [
             "docker", "build",
@@ -59,7 +61,6 @@ def record_animations(world_config, destination_directory, controller_name):
             "-t", "controller-docker",
             "-f", f"controllers/{controller_name}/controller_Dockerfile",
             "--build-arg", f"DEFAULT_CONTROLLER={DEFAULT_CONTROLLER}",
-            "--no-cache", "--pull",
             f"controllers/{controller_name}"
         ],
         stdout=subprocess.PIPE,

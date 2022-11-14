@@ -17,7 +17,6 @@
 from .utils.webots import load_config
 from .benchmark import benchmark
 
-
 def main():
     # Load config
     config = load_config()

@@ -9,6 +9,6 @@ runs:
   steps:
     - name: Run the python meta script
       run: |
-        export PYTHONPATH="${{ github.action_path }}:$PYTHONPATH"
+        cp -r ${{ github.action_path }}/metascript $PROJECT_PATH/metascript
         python3 -u -m metascript
       shell: bash

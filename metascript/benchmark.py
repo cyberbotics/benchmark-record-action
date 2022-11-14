@@ -1,26 +1,12 @@
 #!/usr/bin/env python3
-#
-# Copyright 1996-2020 Cyberbotics Ltd.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 import os
 import shutil
 from pathlib import Path
-from animation import record_animations
-import utils.git as git
+from .animation import record_animations
+from .utils import git
 
-TMP_DESTINATION_DIRECTORY = 'tmp/animation'
+TMP_DESTINATION_DIRECTORY =  'tmp/animation'
 
 class Competitor:
     def __init__(self, id, controller_repository):
@@ -84,8 +70,7 @@ def _clone_competitor_controller(competitor):
 
 def _run_competitor_controller(world_config, competitor):
     print("\nRunning competitor's controller...")
-    # TODO: change to correct file location -----------v
-    animator_controller_source = os.path.join('benchmark_record_action', 'animator')
+    animator_controller_source = os.path.join('metascript', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
     _copy_directory(animator_controller_source, animator_controller_destination)
 
@@ -154,6 +139,8 @@ def _remove_competitor_controller():
         controller = str(path).split('/')[1]
         if controller.startswith('competitor'):
             shutil.rmtree(path)
+    shutil.rmtree('controllers/animator')
+    shutil.rmtree('metascript')
 
 def _remove_directory(directory):
     if Path(directory).exists():

@@ -87,6 +87,7 @@ def _run_competitor_controller(world_config, competitor):
     # Remove tmp files
     _remove_directory('tmp')
     _remove_directory(animator_controller_destination)
+    _remove_directory('metascript')
 
     print('done running controller and recording animations')
 
@@ -139,8 +140,6 @@ def _remove_competitor_controller():
         controller = str(path).split('/')[1]
         if controller.startswith('competitor'):
             shutil.rmtree(path)
-    shutil.rmtree('controllers/animator')
-    shutil.rmtree('metascript')
 
 def _remove_directory(directory):
     if Path(directory).exists():

@@ -35,7 +35,8 @@ runs:
   steps:
     - name: Run the python meta script
       run: |
-        export PATH="$PATH:${{ github.action_path }}"
+        export PYTHONPATH="${{ github.action_path }}:$PYTHONPATH"
         ls -a ${{ github.action_path }}
+        cat ${{ github.action_path }}/benchmark_record_action/__main__.py
         python3 -u benchmark_record_action -m
       shell: bash

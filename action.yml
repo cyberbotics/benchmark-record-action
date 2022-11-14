@@ -10,5 +10,6 @@ runs:
     - name: Run the python meta script
       run: |
         cp -r ${{ github.action_path }}/metascript .
+        ls
         python3 -u -m metascript
       shell: bash

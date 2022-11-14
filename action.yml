@@ -8,7 +8,8 @@ runs:
   using: 'composite'
   steps:
     - name: Get default controller name
-      run: bash ${{ github.action_path }}/default_controller_name_regex.sh
+      run: ${{ github.action_path }}/default_controller_name_regex.sh
+      shell: bash
 
     - name: Run the python meta script
       run: |

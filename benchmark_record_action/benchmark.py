@@ -17,7 +17,7 @@
 import os
 import shutil
 from pathlib import Path
-from benchmark_record_action.animation import record_animations
+from .animation import record_animations
 import benchmark_record_action.utils.git as git
 
 TMP_DESTINATION_DIRECTORY = 'tmp/animation'

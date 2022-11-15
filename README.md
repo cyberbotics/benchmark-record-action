@@ -22,17 +22,17 @@ We parse the `INPUT_INDIVIDUAL_EVALUATION` environment variable to get the **id*
 
 ### 2. Clone the competitor repositories
 
-We clone the competitor's **repository** into the Benchmark's `controller/` directory and rename them as: `competitor_{id}_{username}/` .
+We clone the competitor's **repository** into the Benchmark's `controllers/` directory and rename them as: `competitor_{id}_{username}/` .
 > the `{username}` variable is obtained from the **controller repository**
 
 ### 3. Run Webots and record Benchmarks
 
-We create a temporary storage directory `/tmp/animation` and modify the world file to add `Supervisor` running the `animator.py` controller and set the robot's controller to \<extern\>. We then build Webots and the competitor's controller inside Docker containers. We first launch the Webots container and when it is waiting for the external controller we launch the controller container.
+We create a temporary storage directory `/tmp/animation` and modify the world file to add `Supervisor` running the `animator.py` controller and set the robot's controller to \<extern\>. We then build Webots and the competitor's controller inside Docker containers. We first launch Webots and when it is waiting for the external controller we launch the controller container.
 
 The animator records and saves the animation files and the benchmark performance into the temporary storage.
 
-The animation files are renamed as `animation.json` and `scene.x3d` files and are moved to their own directory `storage/wb_animation_{id}`.
-The `competitors.txt` file is also updated with the new recorded performances.
+The animation files are renamed as `animation.json` and `scene.x3d` files and are moved to their own directory `storage/wb_animation_{id}`. If there is an old animation, it gets overwritten.
+The `competitors.txt` file is also updated with the new recorded performance.
 
 ### 4. Remove temporary files
 

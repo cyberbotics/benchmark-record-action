@@ -87,9 +87,7 @@ def record_animations(world_config, destination_directory, controller_name):
     timeout = False
     
     while webots_docker.poll() is None:
-        realtime_output = webots_docker.stdout.readline()
-        if realtime_output:
-            print(realtime_output.strip())
+        realtime_output = _print_stdout(webots_docker)
         if not already_launched_controller and "waiting for connection" in realtime_output:
                 print("META SCRIPT: Webots ready for controller, launching controller container...")
                 subprocess.Popen(
@@ -165,8 +163,12 @@ def _get_container_id(container_name):
 # function to get the stdout of a Popen process in realtime
 def _get_realtime_stdout(process, error_message):
     while process.poll() is None:
-        realtime_output = process.stdout.readline()
-        if realtime_output:
-            print(realtime_output.strip())
+        _print_stdout(process)
     if process.returncode != 0:
         raise Exception(error_message)
+
+def _print_stdout(process):
+    realtime_output = process.stdout.readline()
+    if realtime_output:
+        print(realtime_output.strip())
+    return realtime_output

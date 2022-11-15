@@ -45,6 +45,7 @@ def record_animations(world_config, destination_directory, controller_name):
             "docker", "build",
             "-t", "recorder-webots",
             "-f", "Dockerfile",
+            "--build-arg", f"WORLD_PATH={world_config['file']}",
             "."
         ],
         stdout=subprocess.PIPE,

@@ -9,7 +9,6 @@ For more information on Webots Benchmarks please refer to the template benchmark
 This composite action works with environment variables. It expects several input environment variables:
 
 - INPUT_INDIVIDUAL_EVALUATION: the competitor's line from `competitors.txt`. Each line in `competitors.txt` file has the following format: `id*:controller_repository_path*:performance:performance string:date` where * fields are mandatory
-- DEFAULT_CONTROLLER: name of the default controller used by the benchmark
 - INPUT_FETCH_TOKEN: token used to fetch the competitor repository, typically REPO_TOKEN
 - INPUT_PUSH_TOKEN: token used to push results to current repository, typically GITHUB_TOKEN
 
@@ -54,7 +53,6 @@ Here is a GitHub workflow snippet which uses the composite action:
   uses: cyberbotics/benchmark-record-action@dockerContainers
   env:
     INPUT_INDIVIDUAL_EVALUATION: "12:username/repoName"
-    DEFAULT_CONTROLLER: edit_me
     INPUT_FETCH_TOKEN: ${{ secrets.REPO_TOKEN }}
     INPUT_PUSH_TOKEN: ${{ github.token }}
 ```

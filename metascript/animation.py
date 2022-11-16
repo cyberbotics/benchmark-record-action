@@ -21,7 +21,7 @@ def _generate_animation_recorder_vrml(duration, output, controller_name):
 
 def record_animations(config, destination_directory, controller_name):
     world_config = config['world']
-    default_controller_name = world_config['dockerCompose'].split('/')[2]
+    default_controller_name = config['dockerCompose'].split('/')[2]
 
     # Create temporary directory
     subprocess.check_output(['mkdir', '-p', destination_directory])

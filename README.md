@@ -9,10 +9,12 @@ For more information on Webots Benchmarks please refer to the template benchmark
 This composite action works with environment variables as inputs:
 
 - INPUT_INDIVIDUAL_EVALUATION: the competitor's line from `competitors.txt`. Each line in `competitors.txt` file has the following format: `id*:controller_repository_path*:performance:performance string:date` where * fields are mandatory
-- INPUT_FETCH_TOKEN: token used to fetch the competitor repository, typically REPO_TOKEN
-- INPUT_PUSH_TOKEN: token used to push results to current repository, typically GITHUB_TOKEN
+- INPUT_PUSH_TOKEN: token used to push results to current repository, typically the default GITHUB_TOKEN
+- INPUT_FETCH_TOKEN: token used to fetch the competitor repository, typically REPO_TOKEN. A more privileged token than GITHUB_TOKEN is needed to fetch controllers from private repositories.
 
 ## Python code pipeline
+
+First, the `webots.yml` file is parsed to get several benchmark parameters. Then the script performs the following steps:
 
 ### 1. Get competitors
 
@@ -35,6 +37,8 @@ The animation files are renamed as `animation.json` and `scene.x3d` files and ar
 The `competitors.txt` file is also updated with the new recorded performance.
 
 ### 4. Remove temporary files
+
+We remove the various temporary files so that only the updated files of interest are left.
 
 ### 5. Commit and push updates
 

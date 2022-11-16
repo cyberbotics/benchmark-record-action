@@ -19,16 +19,13 @@ class Competitor:
 
 
 def benchmark(config):
-    # get world configuration
-    world_config = config['world']
-
     git.init()
 
     # Parse input competitor
     competitor = _get_competitor()
 
     _clone_competitor_controller(competitor)
-    performance = _run_competitor_controller(world_config, competitor)
+    performance = _run_competitor_controller(config, competitor)
 
     _update_repo_files(performance, competitor)
 
@@ -65,7 +62,7 @@ def _clone_competitor_controller(competitor):
     git.clone(repo, competitor.controller_path)
     print("done fetching repo")
 
-def _run_competitor_controller(world_config, competitor):
+def _run_competitor_controller(config, competitor):
     print("\nRunning competitor's controller...")
     animator_controller_source = os.path.join('metascript', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
@@ -73,7 +70,7 @@ def _run_competitor_controller(world_config, competitor):
 
     # Record animation and return performance
     performance = record_animations(
-        world_config,
+        config,
         TMP_DESTINATION_DIRECTORY,
         competitor.controller_name
     )

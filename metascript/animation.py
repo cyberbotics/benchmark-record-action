@@ -5,8 +5,6 @@ import os
 from datetime import datetime
 from math import floor
 
-DEFAULT_CONTROLLER = os.environ['DEFAULT_CONTROLLER']
-
 def _generate_animation_recorder_vrml(duration, output, controller_name):
     return (
         f'DEF ANIMATION_RECORDER_SUPERVISOR Robot {{\n'
@@ -21,14 +19,17 @@ def _generate_animation_recorder_vrml(duration, output, controller_name):
         f'}}\n'
     )
 
-def record_animations(world_config, destination_directory, controller_name):
+def record_animations(config, destination_directory, controller_name):
+    world_config = config['world']
+    default_controller_name = world_config['dockerCompose'].split('/')[2]
+
     # Create temporary directory
     subprocess.check_output(['mkdir', '-p', destination_directory])
 
     # Temporary file changes*:
     with open(world_config['file'], 'r') as f:
         world_content = f.read()
-    updated_file = world_content.replace(f'controller "{DEFAULT_CONTROLLER}"', 'controller "<extern>"')
+    updated_file = world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"')
 
     animation_recorder_vrml = _generate_animation_recorder_vrml(
         duration = world_config['max-duration'],
@@ -59,7 +60,7 @@ def record_animations(world_config, destination_directory, controller_name):
             "docker", "build",
             "-t", "controller-docker",
             "-f", f"controllers/{controller_name}/controller_Dockerfile",
-            "--build-arg", f"DEFAULT_CONTROLLER={DEFAULT_CONTROLLER}",
+            "--build-arg", f"DEFAULT_CONTROLLER={default_controller_name}",
             f"controllers/{controller_name}"
         ],
         stdout=subprocess.PIPE,

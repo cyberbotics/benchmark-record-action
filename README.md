@@ -1,20 +1,18 @@
 # Benchmark Record Action
 
-This action is to be used with Webots Benchmarks.
-It records animations and saves the performance of each competitor in the benchmark.
-For more information on Webots Benchmarks please refer to the template benchmark [here](https://github.com/cyberbotics/robot-programming-benchmark/blob/main/README.md).
+This composite action is to be used with Webots Benchmarks.
+It records an animation and the performance of a competitor in a benchmark and push the changes to GitHub.
+For more information on Webots Benchmarks please refer to the template benchmark [here](https://github.com/cyberbotics/benchmark-template/blob/main/README.md).
 
 ## Inputs
 
-This composite action works with environment variables. It expects several input environment variables:
+This composite action works with environment variables as inputs:
 
 - INPUT_INDIVIDUAL_EVALUATION: the competitor's line from `competitors.txt`. Each line in `competitors.txt` file has the following format: `id*:controller_repository_path*:performance:performance string:date` where * fields are mandatory
 - INPUT_FETCH_TOKEN: token used to fetch the competitor repository, typically REPO_TOKEN
 - INPUT_PUSH_TOKEN: token used to push results to current repository, typically GITHUB_TOKEN
 
-## Pipeline
-
-After checking out the repository to get access of the Benchmark's files, the action performs the following steps:
+## Python code pipeline
 
 ### 1. Get competitors
 
@@ -27,7 +25,9 @@ We clone the competitor's **repository** into the Benchmark's `controllers/` dir
 
 ### 3. Run Webots and record Benchmarks
 
-We create a temporary storage directory `/tmp/animation` and modify the world file to add `Supervisor` running the `animator.py` controller and set the robot's controller to \<extern\>. We then build Webots and the competitor's controller inside Docker containers. We first launch Webots and when it is waiting for the external controller we launch the controller container.
+We create a temporary storage directory `/tmp/animation` and modify the world file to add a `Supervisor` running the `animator.py` controller and we set the robot's controller to \<extern\>.
+
+We then build Webots and the competitor's controller inside Docker containers. We first launch Webots and when it is waiting for a connection of an external controller, we launch the controller container.
 
 The animator records and saves the animation files and the benchmark performance into the temporary storage.
 

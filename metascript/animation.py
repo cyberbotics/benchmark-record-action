@@ -82,28 +82,33 @@ def record_animations(world_config, destination_directory, controller_name):
         encoding='utf-8'
     )
 
-    already_launched_controller = False
+    launched_controller = False
     performance = 0
     timeout = False
     
     while webots_docker.poll() is None:
         realtime_output = _print_stdout(webots_docker)
-        if not already_launched_controller and "waiting for connection" in realtime_output:
+        if not launched_controller and "waiting for connection" in realtime_output:
                 print("META SCRIPT: Webots ready for controller, launching controller container...")
                 subprocess.Popen(
                     ["docker", "run", "--rm", "controller-docker"],
                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
                 )
-                already_launched_controller = True
-        if already_launched_controller and "performance_line:" in realtime_output:
+                launched_controller = True
+        if "performance_line:" in realtime_output:
             performance = float(realtime_output.strip().replace("performance_line:", ""))
             break
-        elif already_launched_controller and "Controller timeout" in realtime_output:
+        elif "Controller timeout" in realtime_output:
             timeout = True
             break
     if webots_docker.returncode:
         raise Exception(f"ERROR: Webots container exited with code {webots_docker.returncode}")
-
+    if not launched_controller:
+        raise Exception(
+            "ERROR: Benchmark finished before launching the competitor controller. "
+            "Verify that the controller used in the world file is the same as the one defined in webots.yml."
+        )
+    
     print("Closing the containers...")
     webots_container_id = _get_container_id("recorder-webots")
     if webots_container_id != '':

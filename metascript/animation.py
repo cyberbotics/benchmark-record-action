@@ -86,6 +86,7 @@ def record_animations(config, destination_directory, controller_name):
     )
 
     launched_controller = False
+    controller_connected = False
     performance = 0
     timeout = False
     
@@ -98,6 +99,9 @@ def record_animations(config, destination_directory, controller_name):
                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
                 )
                 launched_controller = True
+        if launched_controller and "extern controller: connected" in realtime_output:
+            print("META SCRIPT: Controller connected to Webots")
+            controller_connected = True
         if PERFORMANCE_KEYWORD in realtime_output:
             performance = float(realtime_output.strip().replace(PERFORMANCE_KEYWORD, ""))
             break
@@ -125,25 +129,25 @@ def record_animations(config, destination_directory, controller_name):
     with open(world_config['file'], 'w') as f:
         f.write(world_content)
 
-    return _get_performance_line(timeout, performance, world_config)
+    return _get_performance_line(timeout, controller_connected, performance, world_config)
 
-def _get_performance_line(timeout, performance, world_config):
+def _get_performance_line(timeout, controller_connected, performance, world_config):
     metric = world_config['metric']
     if not timeout:
         # Benchmark completed normally
         performance_line = _performance_format(performance, metric)
     elif metric != 'time-duration':
         # Benchmark failed: time limit reached
-        performance_line = _performance_format(0, metric)
+        performance_line = _performance_format(0, metric, controller_connected)
     else:
         # Time-duration benchmark completed with maximum time
         performance_line = _performance_format(world_config['max-duration'], metric)
 
     return performance_line
 
-def _performance_format(performance, metric):
-    if performance == 0:
-        performance_string = "failure"
+def _performance_format(performance, metric, controller_connected=True):
+    if not controller_connected:
+        performance_string = "Problem connecting with controller"
     elif metric == "time-duration" or metric == "time-speed":
         performance_string = _time_convert(performance)
     elif metric ==  "percent":

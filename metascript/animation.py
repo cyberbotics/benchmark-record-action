@@ -5,6 +5,8 @@ import os
 from datetime import datetime
 from math import floor
 
+PERFORMANCE_KEYWORD = "performance:"
+
 def _generate_animation_recorder_vrml(duration, output, controller_name):
     return (
         f'DEF ANIMATION_RECORDER_SUPERVISOR Robot {{\n'
@@ -96,8 +98,8 @@ def record_animations(config, destination_directory, controller_name):
                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
                 )
                 launched_controller = True
-        if "performance_line:" in realtime_output:
-            performance = float(realtime_output.strip().replace("performance_line:", ""))
+        if PERFORMANCE_KEYWORD in realtime_output:
+            performance = float(realtime_output.strip().replace(PERFORMANCE_KEYWORD, ""))
             break
         elif "Controller timeout" in realtime_output:
             timeout = True

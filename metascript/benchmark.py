@@ -23,6 +23,7 @@ from .utils import git
 TMP_DESTINATION_DIRECTORY = 'tmp/animation'
 PREVENT_PUSH = os.getenv('INPUT_PREVENT_PUSH', False)
 
+
 class Competitor:
     def __init__(self, id, controller_repository):
         self.id = id
@@ -46,7 +47,8 @@ def benchmark(config):
 
     _remove_tmp_files(competitor)
 
-    if not PREVENT_PUSH: git.push(message="record and update benchmark animations")
+    if not PREVENT_PUSH:
+        git.push(message="record and update benchmark animations")
 
 
 def _get_competitor():

@@ -6,7 +6,7 @@ For more information on Webots Benchmarks please refer to the template benchmark
 
 ## Inputs
 
-This composite action works with environment variables as inputs:
+This composite action works with environment variables as input:
 
 - INPUT_INDIVIDUAL_EVALUATION: the competitor's line from `competitors.txt`. Each line in `competitors.txt` file has the following format: `id*:controller_repository_path*:performance:performance string:date` where * fields are mandatory
 - INPUT_PUSH_TOKEN: token used to push results to current repository, typically the default GITHUB_TOKEN
@@ -29,9 +29,9 @@ We clone the competitor's **repository** into the Benchmark's `controllers/` dir
 
 We create a temporary storage directory `/tmp/animation` and modify the world file to add a `Supervisor` running the `animator.py` controller and we set the robot's controller to \<extern\>.
 
-We then build Webots and the competitor's controller inside Docker containers. We first launch Webots and when it is waiting for a connection of an external controller, we launch the controller container.
+We then run Webots and the competitor's controller inside Docker containers. We first launch Webots and when it is waiting for a connection of an external controller, we launch the controller container.
 
-The animator records and saves the animation files and the benchmark performance into the temporary storage.
+The animator records and saves the animation files and the benchmark performance in the temporary storage.
 
 The animation files are renamed as `animation.json` and `scene.x3d` files and are moved to their own directory `storage/wb_animation_{id}`. If there is an old animation, it gets overwritten.
 The `competitors.txt` file is also updated with the new recorded performance.

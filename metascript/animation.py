@@ -23,18 +23,18 @@ PERFORMANCE_KEYWORD = "performance:"
 
 
 def _generate_animation_recorder_vrml(duration, output, controller_name):
-    return (
-        f'DEF ANIMATION_RECORDER_SUPERVISOR Robot {{\n'
-        f'  name "animation_recorder_supervisor"\n'
-        f'  controller "animator"\n'
-        f'  controllerArgs [\n'
-        f'    "--duration={duration}"\n'
-        f'    "--output={output}"\n'
-        f'    "--controller={controller_name}"\n'
-        f'  ]\n'
-        f'  supervisor TRUE\n'
-        f'}}\n'
-    )
+    return f'''
+    DEF ANIMATION_RECORDER_SUPERVISOR Robot {{
+    name "animation_recorder_supervisor"
+    controller "animator"
+    controllerArgs [
+        "--duration={duration}"
+        "--output={output}"
+        "--controller={controller_name}"
+    ]
+    supervisor TRUE
+    }}
+    '''
 
 
 def record_animations(config, destination_directory, controller_name):

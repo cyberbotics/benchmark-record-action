@@ -21,7 +21,7 @@ from .animation import record_animations
 from .utils import git
 
 TMP_DESTINATION_DIRECTORY = 'tmp/animation'
-PREVENT_PUSH = os.getenv('INPUT_PREVENT_PUSH', False)
+ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
 
 
 class Competitor:
@@ -47,7 +47,7 @@ def benchmark(config):
 
     _remove_tmp_files(competitor)
 
-    if not PREVENT_PUSH:
+    if ALLOW_PUSH:
         git.push(message="record and update benchmark animations")
 
 
@@ -73,7 +73,7 @@ def _clone_competitor_controller(competitor):
 
     repo = 'https://{}:{}@github.com/{}/{}'.format(
         "Benchmark_Evaluator",
-        os.environ['INPUT_FETCH_TOKEN'],
+        os.environ['INPUT_REPO_TOKEN'],
         competitor.username,
         competitor.repository_name
     )

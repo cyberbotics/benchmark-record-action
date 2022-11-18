@@ -1,16 +1,21 @@
 # Benchmark Record Action
 
 This composite action is to be used with Webots Benchmarks.
-It records an animation and the performance of a competitor in a benchmark and push the changes to GitHub.
+It records an animation and the performance of a competitor in a benchmark. An optional setting can be set to push the changes to GitHub at the end of the evaluation.
 For more information on Webots Benchmarks please refer to the template benchmark [here](https://github.com/cyberbotics/benchmark-template/blob/main/README.md).
 
 ## Inputs
 
-This composite action works with environment variables as input:
+This composite action works with environment variables as input, two mandatory and one optional:
+
+### Mandatory inputs
 
 - INPUT_INDIVIDUAL_EVALUATION: the competitor's line from `competitors.txt`. Each line in `competitors.txt` file has the following format: `id*:controller_repository_path*:performance:performance string:date` where * fields are mandatory
-- INPUT_PUSH_TOKEN: token used to push results to current repository, typically the default GITHUB_TOKEN
-- INPUT_FETCH_TOKEN: token used to fetch the competitor repository, typically REPO_TOKEN. A more privileged token than GITHUB_TOKEN is needed to fetch controllers from private repositories.
+- INPUT_REPO_TOKEN: token used to fetch the competitor repository, typically REPO_TOKEN. A more privileged token than GITHUB_TOKEN is needed to fetch controllers from private repositories.
+
+### Optional input
+
+- INPUT_ALLOW_PUSH: allows the action to push the modified files after the evaluation using the INPUT_REPO_TOKEN.
 
 ## Python code pipeline
 
@@ -40,7 +45,7 @@ The `competitors.txt` file is also updated with the new recorded performance.
 
 We remove the various temporary files so that only the updated files of interest are left.
 
-### 5. Commit and push updates
+### 5. Commit and push updates (if INPUT_ALLOW_PUSH is set)
 
 All of the updates are committed and pushed to the Benchmark's repository.
 The modified directories and files are therefore:
@@ -57,6 +62,6 @@ Here is a GitHub workflow snippet which uses the composite action:
   uses: cyberbotics/benchmark-record-action@dockerContainers
   env:
     INPUT_INDIVIDUAL_EVALUATION: "12:username/repoName"
-    INPUT_FETCH_TOKEN: ${{ secrets.REPO_TOKEN }}
-    INPUT_PUSH_TOKEN: ${{ github.token }}
+    INPUT_REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+    INPUT_ALLOW_PUSH: True
 ```

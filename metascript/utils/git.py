@@ -43,7 +43,7 @@ def push(message='Updated benchmark recordings', force=True):
 
     github_repository = 'https://{}:{}@github.com/{}'.format(
         os.environ['GITHUB_ACTOR'],
-        os.environ['INPUT_PUSH_TOKEN'],
+        os.environ['INPUT_REPO_TOKEN'],
         os.environ['GITHUB_REPOSITORY']
     )
 

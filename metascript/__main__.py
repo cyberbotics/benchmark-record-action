@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 1996-2020 Cyberbotics Ltd.
+# Copyright 1996-2022 Cyberbotics Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,3 +13,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from .utils.webots import load_config
+from .benchmark import benchmark
+
+
+def main():
+    # Load config
+    config = load_config()
+
+    # Continue parsing
+    if 'type' not in config or config['type'] != 'benchmark':
+        print('You have to specify `type` parameter in `webots.yaml` and set it to `benchmark`')
+        return
+
+    # Run benchmark
+    benchmark(config)
+
+
+if __name__ == "__main__":
+    main()

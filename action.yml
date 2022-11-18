@@ -3,6 +3,12 @@ description: 'Build and publish Webots animation and save Benchmark score every 
 branding:
   icon: 'play'
   color: 'red'
+
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: 'composite'
+  steps:
+    - name: Run the python meta script
+      run: |
+        cp -r ${{ github.action_path }}/metascript .
+        python3 -u -m metascript
+      shell: bash

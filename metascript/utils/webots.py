@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 1996-2020 Cyberbotics Ltd.
+# Copyright 1996-2022 Cyberbotics Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,22 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from benchmark_record_action.utils.webots import load_config
-from benchmark_record_action.benchmark import benchmark
+import os
+import sys
+import yaml
 
 
-def main():
-    # Load config
-    config = load_config()
+def load_config(files=['webots.yaml', 'webots.yml']):
+    """Load config from webots.yaml located in the repository root."""
 
-    # Continue parsing
-    if 'type' not in config or config['type'] != 'benchmark':
-        print('You have to specify `type` parameter in `webots.yaml` and set it to `benchmark`')
-        return
-
-    # Run benchmark
-    benchmark(config)
-
-
-if __name__ == "__main__":
-    main()
+    config = None
+    for file in files:
+        if os.path.isfile(file):
+            with open(file, 'r') as f:
+                config = yaml.load(f.read(), Loader=yaml.FullLoader) or {}
+            break
+    if config is None:
+        print('Cannot load `webots.yaml`')
+        sys.exit(1)
+    return config

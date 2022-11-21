@@ -37,7 +37,7 @@ def main():
     # Wait for the controller to connect and start the animation
     supervisor.simulationSetMode(supervisor.SIMULATION_MODE_PAUSE)
     time.sleep(CONTROLLER_WAITING_TIME)
-    supervisor.simulationSetMode(supervisor.SIMULATION_MODE_FAST)
+    supervisor.simulationSetMode(supervisor.SIMULATION_MODE_REAL_TIME)
     supervisor.animationStartRecording(
         f"../../{args.output}/{args.controller}.html")
 

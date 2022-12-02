@@ -211,7 +211,7 @@ def _get_realtime_stdout(process, error_message):
     while process.poll() is None:
         _print_stdout(process)
     if process.returncode != 0:
-        raise Exception(error_message)
+        raise Exception(f"::error ::{error_message}")
 
 
 def _print_stdout(process):

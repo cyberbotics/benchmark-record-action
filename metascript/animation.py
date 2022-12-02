@@ -73,7 +73,10 @@ def record_animations(config, destination_directory, controller_name):
         encoding='utf-8'
     )
     _get_realtime_stdout(
-        recorder_build, "Error while building the recorder container")
+        recorder_build,
+        "Error while building the recorder container",
+        "Missing or misconfigured Dockerfile"
+    )
 
     controller_build = subprocess.Popen(
         [
@@ -88,7 +91,10 @@ def record_animations(config, destination_directory, controller_name):
         encoding='utf-8'
     )
     _get_realtime_stdout(
-        controller_build, "Error while building the controller container")
+        controller_build,
+        "Error while building the controller container",
+        "Missing or misconfigured Dockerfile"
+    )
 
     # Run Webots container with Popen to read the stdout
     webots_docker = subprocess.Popen(
@@ -130,17 +136,19 @@ def record_animations(config, destination_directory, controller_name):
             timeout = True
             break
     if webots_docker.returncode:
-        raise Exception(
-            f"::error ::Webots container exited with code {webots_docker.returncode}")
+        _print_error(
+            f"Webots container exited with code {webots_docker.returncode}",
+            "Error while running the Webots container"
+        )
     if not launched_controller:
-        raise Exception(
-            "::error ::Benchmark finished before launching the competitor controller.\n"
-            "Verify that the controller used in the world file is the same as the one defined in webots.yml."
+        _print_error(
+            "Benchmark finished before launching the competitor controller",
+            "Verify that the controller used in the world file is the same as the one defined in webots.yml"
         )
     if not controller_connected:
-        raise Exception(
-            "::error ::Benchmark finished before the competitor controller connected to Webots.\n"
-            "Your controller crashed. Please test your controller locally before submitting it."
+        _print_error(
+            "Benchmark finished before the competitor controller connected to Webots",
+            "Your controller crashed. Please debug your controller locally before submitting it."
         )
 
     print("Closing the containers...")
@@ -207,12 +215,11 @@ def _get_container_id(container_name):
     return container_id
 
 
-def _get_realtime_stdout(process, error_message):
+def _get_realtime_stdout(process, error_title, error_message):
     while process.poll() is None:
         _print_stdout(process)
     if process.returncode != 0:
-        print(f"::error ::{error_message}")
-        raise Exception(error_message)
+        _print_error(error_title, error_message)
 
 
 def _print_stdout(process):
@@ -220,3 +227,7 @@ def _print_stdout(process):
     if realtime_output:
         print(realtime_output.strip())
     return realtime_output
+
+def _print_error(title, message):
+    print(f"::error title={title}::{message}")
+    raise Exception(f"{title}\n{message}")

@@ -73,7 +73,10 @@ def record_animations(config, destination_directory, controller_name):
         encoding='utf-8'
     )
     _get_realtime_stdout(
-        recorder_build, "Error while building the recorder container")
+        recorder_build,
+        "Error while building the recorder container",
+        "Missing or misconfigured Dockerfile"
+    )
 
     controller_build = subprocess.Popen(
         [
@@ -88,7 +91,10 @@ def record_animations(config, destination_directory, controller_name):
         encoding='utf-8'
     )
     _get_realtime_stdout(
-        controller_build, "Error while building the controller container")
+        controller_build,
+        "Error while building the controller container",
+        "Missing or misconfigured Dockerfile"
+    )
 
     # Run Webots container with Popen to read the stdout
     webots_docker = subprocess.Popen(
@@ -130,12 +136,19 @@ def record_animations(config, destination_directory, controller_name):
             timeout = True
             break
     if webots_docker.returncode:
-        raise Exception(
-            f"ERROR: Webots container exited with code {webots_docker.returncode}")
+        _print_error(
+            f"Webots container exited with code {webots_docker.returncode}",
+            "Error while running the Webots container"
+        )
     if not launched_controller:
-        raise Exception(
-            "ERROR: Benchmark finished before launching the competitor controller. "
-            "Verify that the controller used in the world file is the same as the one defined in webots.yml."
+        _print_error(
+            "Benchmark finished before launching the competitor controller",
+            "Verify that the controller used in the world file is the same as the one defined in webots.yml"
+        )
+    if not controller_connected:
+        _print_error(
+            "Benchmark finished before the competitor controller connected to Webots",
+            "Your controller crashed. Please debug your controller locally before submitting it."
         )
 
     print("Closing the containers...")
@@ -153,17 +166,19 @@ def record_animations(config, destination_directory, controller_name):
     with open(world_config['file'], 'w') as f:
         f.write(world_content)
 
-    return _get_performance_line(timeout, controller_connected, performance, world_config)
+    return _get_performance_line(timeout, performance, world_config)
 
 
-def _get_performance_line(timeout, controller_connected, performance, world_config):
+def _get_performance_line(timeout, performance, world_config):
     metric = world_config['metric']
     if not timeout:
         # Benchmark completed normally
         performance_line = _performance_format(performance, metric)
     elif metric != 'time-duration':
         # Benchmark failed: time limit reached
-        performance_line = _performance_format(0, metric, controller_connected)
+        raise Exception(
+            f"::error ::Your controller took more than {world_config['max-duration']} seconds to complete the benchmark."
+        )
     else:
         # Time-duration benchmark completed with maximum time
         performance_line = _performance_format(
@@ -172,10 +187,8 @@ def _get_performance_line(timeout, controller_connected, performance, world_conf
     return performance_line
 
 
-def _performance_format(performance, metric, controller_connected=True):
-    if not controller_connected:
-        performance_string = "Problem connecting with controller"
-    elif metric == "time-duration" or metric == "time-speed":
+def _performance_format(performance, metric):
+    if metric == "time-duration" or metric == "time-speed":
         performance_string = _time_convert(performance)
     elif metric == "percent":
         performance_string = str(round(performance * 100, 2)) + '%'
@@ -202,11 +215,11 @@ def _get_container_id(container_name):
     return container_id
 
 
-def _get_realtime_stdout(process, error_message):
+def _get_realtime_stdout(process, error_title, error_message):
     while process.poll() is None:
         _print_stdout(process)
     if process.returncode != 0:
-        raise Exception(error_message)
+        _print_error(error_title, error_message)
 
 
 def _print_stdout(process):
@@ -214,3 +227,7 @@ def _print_stdout(process):
     if realtime_output:
         print(realtime_output.strip())
     return realtime_output
+
+def _print_error(title, message):
+    print(f"::error title={title}::{message}")
+    raise Exception(f"{title}\n{message}")

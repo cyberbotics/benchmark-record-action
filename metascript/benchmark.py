@@ -48,42 +48,42 @@ def benchmark(config):
     _remove_tmp_files(competitor)
 
     if ALLOW_PUSH:
-        git.push(message="record and update benchmark animations")
+        git.push(message='record and update benchmark animations')
 
 
 def _get_competitor():
-    print("\nParsing competitor...")
+    print('\nParsing competitor...')
 
     input_competitor = os.environ['INPUT_INDIVIDUAL_EVALUATION']
     competitor = Competitor(
-        id=input_competitor.split(":")[0],
-        controller_repository=input_competitor.split(":")[1].strip()
+        id=input_competitor.split(':')[0],
+        controller_repository=input_competitor.split(':')[1].strip()
     )
-    print("done parsing competitor")
+    print('done parsing competitor')
     return competitor
 
 
 def _clone_competitor_controller(competitor):
-    print("\nCloning competitor repo...")
+    print('\nCloning competitor repo...')
 
-    competitor.controller_name = "competitor_" + \
-        competitor.id + "_" + competitor.username
+    competitor.controller_name = 'competitor_' + \
+        competitor.id + '_' + competitor.username
     competitor.controller_path = os.path.join(
         'controllers', competitor.controller_name)
 
     repo = 'https://{}:{}@github.com/{}/{}'.format(
-        "Benchmark_Evaluator",
+        'Benchmark_Evaluator',
         os.environ['INPUT_REPO_TOKEN'],
         competitor.username,
         competitor.repository_name
     )
 
     git.clone(repo, competitor.controller_path)
-    print("done fetching repo")
+    print('done fetching repo')
 
 
 def _run_competitor_controller(config, competitor):
-    print("\nRunning competitor's controller...")
+    print('\nRunning competitor\'s controller...')
     animator_controller_source = os.path.join('metascript', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
     _copy_directory(animator_controller_source,
@@ -109,8 +109,8 @@ def _update_repo_files(performance, competitor):
 def _update_performance_line(performance, competitor):
 
     # Only change the requested competitor's performance
-    updated_competitor_line = f"{competitor.id}:{competitor.controller_repository}:{performance}"
-    tmp_competitors = ""
+    updated_competitor_line = f'{competitor.id}:{competitor.controller_repository}:{performance}'
+    tmp_competitors = ''
     with open('competitors.txt', 'r') as f:
         for line in f:
             # stripping line break
@@ -122,7 +122,7 @@ def _update_performance_line(performance, competitor):
             else:
                 new_line = line
             # concatenate the new string and add an end-line break
-            tmp_competitors = tmp_competitors + new_line + "\n"
+            tmp_competitors = tmp_competitors + new_line + '\n'
 
     with open('competitors.txt', 'w') as f:
         f.write(tmp_competitors)

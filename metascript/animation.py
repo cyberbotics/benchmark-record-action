@@ -117,7 +117,7 @@ def record_animations(config, destination_directory, controller_name):
 
     while webots_docker.poll() is None:
         realtime_output = _print_stdout(webots_docker)
-        if not launched_controller and "waiting for connection" in realtime_output:
+        if not launched_controller and 'waiting for connection' in realtime_output:
             print(
                 'META SCRIPT: Webots ready for controller, launching controller container...')
             subprocess.Popen(
@@ -130,7 +130,7 @@ def record_animations(config, destination_directory, controller_name):
             controller_connected = True
         if PERFORMANCE_KEYWORD in realtime_output:
             performance = float(
-                realtime_output.strip().replace(PERFORMANCE_KEYWORD, ""))
+                realtime_output.strip().replace(PERFORMANCE_KEYWORD, ''))
             break
         elif 'Controller timeout' in realtime_output:
             timeout = True
@@ -147,17 +147,17 @@ def record_animations(config, destination_directory, controller_name):
         )
     if not controller_connected:
         _print_error(
-            "Benchmark finished before the competitor controller connected to Webots",
-            "Your controller crashed. Please debug your controller locally before submitting it."
+            'Benchmark finished before the competitor controller connected to Webots',
+            'Your controller crashed. Please debug your controller locally before submitting it.'
         )
 
-    print("Closing the containers...")
-    webots_container_id = _get_container_id("recorder-webots")
+    print('Closing the containers...')
+    webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':
         # Closing Webots with SIGINT to trigger animation export
         subprocess.run(
             ['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
-    controller_container_id = _get_container_id("controller-docker")
+    controller_container_id = _get_container_id('controller-docker')
     if controller_container_id != '':
         subprocess.run(
             ['/bin/bash', '-c', f'docker kill {controller_container_id}'])

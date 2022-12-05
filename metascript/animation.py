@@ -171,7 +171,7 @@ def record_animations(config, destination_directory, controller_name):
 
 def _get_performance_line(timeout, performance, world_config):
     metric = world_config['metric']
-    higher_is_better = world_config['higher_is_better'] == 'True'
+    higher_is_better = world_config['higher-is-better'] == 'True'
     if not timeout:
         # Benchmark completed normally
         performance_line = _performance_format(performance, metric)

@@ -19,7 +19,7 @@ import os
 from datetime import datetime
 from math import floor
 
-PERFORMANCE_KEYWORD = "performance:"
+PERFORMANCE_KEYWORD = 'performance:'
 
 
 def _generate_animation_recorder_vrml(duration, output, controller_name):
@@ -62,11 +62,11 @@ def record_animations(config, destination_directory, controller_name):
     # Building the Docker containers
     recorder_build = subprocess.Popen(
         [
-            "docker", "build",
-            "-t", "recorder-webots",
-            "-f", "Dockerfile",
-            "--build-arg", f"WORLD_PATH={world_config['file']}",
-            "."
+            'docker', 'build',
+            '-t', 'recorder-webots',
+            '-f', 'Dockerfile',
+            '--build-arg', f'WORLD_PATH={world_config["file"]}',
+            '.'
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -74,17 +74,17 @@ def record_animations(config, destination_directory, controller_name):
     )
     _get_realtime_stdout(
         recorder_build,
-        "Error while building the recorder container",
-        "Missing or misconfigured Dockerfile"
+        'Error while building the recorder container',
+        'Missing or misconfigured Dockerfile'
     )
 
     controller_build = subprocess.Popen(
         [
-            "docker", "build",
-            "-t", "controller-docker",
-            "-f", f"controllers/{controller_name}/controller_Dockerfile",
-            "--build-arg", f"DEFAULT_CONTROLLER={default_controller_name}",
-            f"controllers/{controller_name}"
+            'docker', 'build',
+            '-t', 'controller-docker',
+            '-f', f'controllers/{controller_name}/controller_Dockerfile',
+            '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
+            f'controllers/{controller_name}'
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -92,18 +92,18 @@ def record_animations(config, destination_directory, controller_name):
     )
     _get_realtime_stdout(
         controller_build,
-        "Error while building the controller container",
-        "Missing or misconfigured Dockerfile"
+        'Error while building the controller container',
+        'Missing or misconfigured Dockerfile'
     )
 
     # Run Webots container with Popen to read the stdout
     webots_docker = subprocess.Popen(
         [
-            "docker", "run", "-t", "--rm", "--init",
-            "--mount", f'type=bind,source={os.getcwd()}/tmp/animation,target=/usr/local/webots-project/{destination_directory}',
-            "-p", "3005:1234",
-            "--env", "CI=true",
-            "recorder-webots"
+            'docker', 'run', '-t', '--rm', '--init',
+            '--mount', f'type=bind,source={os.getcwd()}/tmp/animation,target=/usr/local/webots-project/{destination_directory}',
+            '-p', '3005:1234',
+            '--env', 'CI=true',
+            'recorder-webots'
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -119,31 +119,31 @@ def record_animations(config, destination_directory, controller_name):
         realtime_output = _print_stdout(webots_docker)
         if not launched_controller and "waiting for connection" in realtime_output:
             print(
-                "META SCRIPT: Webots ready for controller, launching controller container...")
+                'META SCRIPT: Webots ready for controller, launching controller container...')
             subprocess.Popen(
-                ["docker", "run", "--rm", "controller-docker"],
+                ['docker', 'run', '--rm', 'controller-docker'],
                 stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
             )
             launched_controller = True
-        if launched_controller and "extern controller: connected" in realtime_output:
-            print("META SCRIPT: Controller connected to Webots")
+        if launched_controller and 'extern controller: connected' in realtime_output:
+            print('META SCRIPT: Controller connected to Webots')
             controller_connected = True
         if PERFORMANCE_KEYWORD in realtime_output:
             performance = float(
                 realtime_output.strip().replace(PERFORMANCE_KEYWORD, ""))
             break
-        elif "Controller timeout" in realtime_output:
+        elif 'Controller timeout' in realtime_output:
             timeout = True
             break
     if webots_docker.returncode:
         _print_error(
-            f"Webots container exited with code {webots_docker.returncode}",
-            "Error while running the Webots container"
+            f'Webots container exited with code {webots_docker.returncode}',
+            'Error while running the Webots container'
         )
     if not launched_controller:
         _print_error(
-            "Benchmark finished before launching the competitor controller",
-            "Verify that the controller used in the world file is the same as the one defined in webots.yml"
+            'Benchmark finished before launching the competitor controller',
+            'Verify that the controller used in the world file is the same as the one defined in webots.yml'
         )
     if not controller_connected:
         _print_error(
@@ -171,30 +171,31 @@ def record_animations(config, destination_directory, controller_name):
 
 def _get_performance_line(timeout, performance, world_config):
     metric = world_config['metric']
+    higher_is_better = world_config['higher_is_better'] == 'True'
     if not timeout:
         # Benchmark completed normally
         performance_line = _performance_format(performance, metric)
-    elif metric != 'time-duration':
-        # Benchmark failed: time limit reached
-        raise Exception(
-            f"::error ::Your controller took more than {world_config['max-duration']} seconds to complete the benchmark."
-        )
-    else:
+    elif metric == 'time' and higher_is_better:
         # Time-duration benchmark completed with maximum time
         performance_line = _performance_format(
             world_config['max-duration'], metric)
+    else:
+        # Benchmark failed: time limit reached
+        raise Exception(
+            f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the benchmark.'
+        )
 
     return performance_line
 
 
 def _performance_format(performance, metric):
-    if metric == "time-duration" or metric == "time-speed":
+    if metric == 'time':
         performance_string = _time_convert(performance)
-    elif metric == "percent":
+    elif metric == 'percent':
         performance_string = str(round(performance * 100, 2)) + '%'
-    elif metric == "distance":
-        performance_string = "{:.3f} m.".format(performance)
-    return f"{performance}:{performance_string}:{datetime.today().strftime('%Y-%m-%d')}"
+    elif metric == 'distance':
+        performance_string = '{:.3f} m.'.format(performance)
+    return f'{performance}:{performance_string}:{datetime.today().strftime("%Y-%m-%d")}'
 
 
 def _time_convert(time):
@@ -206,7 +207,7 @@ def _time_convert(time):
     seconds_string = str(absolute_seconds).zfill(2)
     cs = floor((seconds - absolute_seconds) * 100)
     cs_string = str(cs).zfill(2)
-    return minutes_string + "." + seconds_string + "." + cs_string
+    return minutes_string + '.' + seconds_string + '.' + cs_string
 
 
 def _get_container_id(container_name):
@@ -229,5 +230,5 @@ def _print_stdout(process):
     return realtime_output
 
 def _print_error(title, message):
-    print(f"::error title={title}::{message}")
-    raise Exception(f"{title}\n{message}")
+    print(f'::error title={title}::{message}')
+    raise Exception(f'{title}\n{message}')

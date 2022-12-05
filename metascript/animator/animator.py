@@ -39,7 +39,7 @@ def main():
     time.sleep(CONTROLLER_WAITING_TIME)
     supervisor.simulationSetMode(supervisor.SIMULATION_MODE_REAL_TIME)
     supervisor.animationStartRecording(
-        f"../../{args.output}/{args.controller}.html")
+        f'../../{args.output}/{args.controller}.html')
 
     # Time out detection loop
     step_max = 1000 * args.duration / timestep
@@ -53,7 +53,7 @@ def main():
 
     # If the time is up, stop recording and signal script to close Webots
     supervisor.animationStopRecording()
-    print("Controller timeout")
+    print('Controller timeout')
 
 
 if __name__ == '__main__':

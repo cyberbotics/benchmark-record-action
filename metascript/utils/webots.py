@@ -20,7 +20,7 @@ import yaml
 
 
 def load_config(files=['webots.yaml', 'webots.yml']):
-    """Load config from webots.yaml located in the repository root."""
+    '''Load config from webots.yaml located in the repository root.'''
 
     config = None
     for file in files:

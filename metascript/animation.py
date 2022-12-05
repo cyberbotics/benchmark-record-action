@@ -157,7 +157,7 @@ def record_animations(config, destination_directory, controller_name):
         # Closing Webots with SIGINT to trigger animation export
         subprocess.run(
             ['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
-    controller_container_id = _get_container_id("controller-docker")
+    controller_container_id = _get_container_id('controller-docker')
     if controller_container_id != '':
         subprocess.run(
             ['/bin/bash', '-c', f'docker kill {controller_container_id}'])
@@ -177,7 +177,7 @@ def _get_performance_line(timeout, performance, world_config):
     elif metric != 'time-duration':
         # Benchmark failed: time limit reached
         raise Exception(
-            f'::error ::Your controller took more than {world_config['max-duration']} seconds to complete the benchmark.'
+            f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the benchmark.'
         )
     else:
         # Time-duration benchmark completed with maximum time

@@ -48,6 +48,7 @@ def benchmark(config):
     _remove_tmp_files(competitor)
 
     if ALLOW_PUSH:
+        print('Attempting to push')
         git.push(message='record and update benchmark animations')
 
 

@@ -71,12 +71,17 @@ def _clone_competitor_controller(competitor):
     competitor.controller_path = os.path.join(
         'controllers', competitor.controller_name)
 
-    repo = 'https://{}:{}@github.com/{}/{}'.format(
-        'Benchmark_Evaluator',
-        os.environ['INPUT_REPO_TOKEN'],
+#    repo = 'https://{}:{}@github.com/{}/{}'.format(
+#        'Benchmark_Evaluator',
+#        os.environ['INPUT_REPO_TOKEN'],
+#        competitor.username,
+#        competitor.repository_name
+#    )
+    repo = 'https://github.com/{}/{}'.format(
         competitor.username,
         competitor.repository_name
     )
+
 
     git.clone(repo, competitor.controller_path)
     print('done fetching repo')

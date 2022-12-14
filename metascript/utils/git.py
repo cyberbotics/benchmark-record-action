@@ -46,22 +46,19 @@ def push(message='Updated benchmark recordings', force=True):
         os.environ['INPUT_REPO_TOKEN'],
         os.environ['GITHUB_REPOSITORY']
     )
-
+    print(f'GitHub repository: {github_repository}')
     # We push only if there are changes:
     try:
-        subprocess.check_output(['git', 'add', '-A'])
-        subprocess.check_output(
-            ['git', 'diff', '--exit-code', '--cached', './storage'])
+        print(subprocess.check_output(['git', 'add', '-A']))
+        print(subprocess.check_output(['git', 'diff', '--exit-code', '--cached', './storage']))
     except:
         # If there are changes:
-        subprocess.check_output(
-            ['git', 'commit', '-m', message], stderr=subprocess.STDOUT)
-
+        print(subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT))
         params = ['git', 'push']
         if force:
             params += ['-f']
         params += [github_repository]
-        subprocess.check_output(params)
+        print(subprocess.check_output(params))
 
 
 def clone(repo, path):

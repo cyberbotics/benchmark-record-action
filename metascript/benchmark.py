@@ -111,7 +111,9 @@ def _update_performance_line(performance, competitor):
     # Only change the requested competitor's performance
     updated_competitor_line = f'{competitor.id}:{competitor.controller_repository}:{performance}'
     tmp_competitors = ''
+    print('Updating competitors.txt\n')
     with open('competitors.txt', 'r') as f:
+        found = False
         for line in f:
             # stripping line break
             line = line.strip()
@@ -119,10 +121,13 @@ def _update_performance_line(performance, competitor):
 
             if test_id == competitor.id:
                 new_line = updated_competitor_line.strip()
+                found = True
             else:
                 new_line = line
             # concatenate the new string and add an end-line break
             tmp_competitors = tmp_competitors + new_line + '\n'
+        if not found:  # add at the end of the competitors.txt file
+            tmp_competitors = tmp_competitors + updated_competitor_line.strip()
 
     with open('competitors.txt', 'w') as f:
         f.write(tmp_competitors)

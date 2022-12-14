@@ -46,10 +46,10 @@ def push(message='Updated benchmark recordings', force=True):
         os.environ['INPUT_REPO_TOKEN'],
         os.environ['GITHUB_REPOSITORY']
     )
-    print(f'GitHub repository: {github_repository}')
+    print(f'GitHub repository: https://github.com/{os.environ["GITHUB_REPOSITORY"]}')
     # We push only if there are changes:
     try:
-        print(subprocess.check_output(['git', 'add', '-A']))
+        subprocess.check_output(['git', 'add', '-A'])
         print(subprocess.check_output(['git', 'diff', '--exit-code', '--cached', './storage']))
     except:
         # If there are changes:

@@ -3,21 +3,21 @@
 ## Local Development
 Build:
 ```bash
-docker build . -t benchmark-record-action
+docker build . -t competition-record-action
 ```
 
-### Benchmark
+### Competition
 
 Pull a sample project:
 ```bash
-git clone https://github.com/cyberbotics/robot-programming-benchmark.git $HOME/robot-programming-benchmark
+git clone https://github.com/cyberbotics/robot-programming-competition.git $HOME/robot-programming-competition
 ```
 
 Run:
 ```bash
 docker run \
-    -v $HOME/robot-programming-benchmark:/root/repo \
+    -v $HOME/robot-programming-competition:/root/repo \
     -w /root/repo \
     -e DEBUG=true \
-    -it benchmark-record-action
+    -it competition-record-action
 ```

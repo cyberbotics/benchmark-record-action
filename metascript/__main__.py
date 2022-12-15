@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from .utils.webots import load_config
-from .benchmark import benchmark
+from .competition import competition
 
 
 def main():
@@ -23,12 +23,12 @@ def main():
     config = load_config()
 
     # Continue parsing
-    if 'type' not in config or config['type'] != 'benchmark':
-        print('You have to specify `type` parameter in `webots.yaml` and set it to `benchmark`')
+    if 'type' not in config or config['type'] != 'competition':
+        print('You have to specify `type` parameter in `webots.yaml` and set it to `competition`')
         return
 
-    # Run benchmark
-    benchmark(config)
+    # Run competition
+    competition(config)
 
 
 if __name__ == '__main__':

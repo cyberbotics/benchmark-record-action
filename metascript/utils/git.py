@@ -39,7 +39,7 @@ def init():
             ['git', 'config', '--global', 'user.email', email])
 
 
-def push(message='Updated benchmark recordings', force=True):
+def push(message='Updated competition recordings', force=True):
 
     github_repository = 'https://{}:{}@github.com/{}'.format(
         os.environ['GITHUB_ACTOR'],
@@ -49,7 +49,7 @@ def push(message='Updated benchmark recordings', force=True):
     print(f'GitHub repository: https://github.com/{os.environ["GITHUB_REPOSITORY"]}')
     # We push only if there are changes:
     try:
-        print(subprocess.check_output(['git', 'diff', './competitors.txt']))
+        print(subprocess.check_output(['git', 'diff', './participants.txt']))
         subprocess.check_output(['git', 'add', '-A'])
         print(subprocess.check_output(['git', 'diff', '--exit-code', '--cached', './storage']))
     except:

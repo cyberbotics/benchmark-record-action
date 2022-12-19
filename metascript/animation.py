@@ -47,8 +47,7 @@ def record_animations(config, destination_directory, controller_name):
     # Temporary file changes*:
     with open(world_config['file'], 'r') as f:
         world_content = f.read()
-    updated_file = world_content.replace(
-        f'controller "{default_controller_name}"', 'controller "<extern>"')
+    updated_file = world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"')
 
     animation_recorder_vrml = _generate_animation_recorder_vrml(
         duration=world_config['max-duration'],
@@ -129,8 +128,7 @@ def record_animations(config, destination_directory, controller_name):
             print('META SCRIPT: Controller connected to Webots')
             controller_connected = True
         if PERFORMANCE_KEYWORD in realtime_output:
-            performance = float(
-                realtime_output.strip().replace(PERFORMANCE_KEYWORD, ''))
+            performance = float(realtime_output.strip().replace(PERFORMANCE_KEYWORD, ''))
             break
         elif 'Controller timeout' in realtime_output:
             timeout = True
@@ -155,12 +153,10 @@ def record_animations(config, destination_directory, controller_name):
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':
         # Closing Webots with SIGINT to trigger animation export
-        subprocess.run(
-            ['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
+        subprocess.run(['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
     controller_container_id = _get_container_id('controller-docker')
     if controller_container_id != '':
-        subprocess.run(
-            ['/bin/bash', '-c', f'docker kill {controller_container_id}'])
+        subprocess.run(['/bin/bash', '-c', f'docker kill {controller_container_id}'])
 
     # *Restoring temporary file changes
     with open(world_config['file'], 'w') as f:
@@ -177,8 +173,7 @@ def _get_performance_line(timeout, performance, world_config):
         performance_line = _performance_format(performance, metric)
     elif metric == 'time' and higher_is_better:
         # Time-duration benchmark completed with maximum time
-        performance_line = _performance_format(
-            world_config['max-duration'], metric)
+        performance_line = _performance_format(world_config['max-duration'], metric)
     else:
         # Benchmark failed: time limit reached
         raise Exception(
@@ -211,8 +206,7 @@ def _time_convert(time):
 
 
 def _get_container_id(container_name):
-    container_id = subprocess.check_output(
-        ['docker', 'ps', '-f', f'ancestor={container_name}', '-q']).decode('utf-8').strip()
+    container_id = subprocess.check_output(['docker', 'ps', '-f', f'ancestor={container_name}', '-q']).decode('utf-8').strip()
     return container_id
 
 

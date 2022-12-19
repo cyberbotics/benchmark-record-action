@@ -140,12 +140,12 @@ def record_animations(config, destination_directory, controller_name):
         )
     if not launched_controller:
         _print_error(
-            'Benchmark finished before launching the competitor controller',
+            'Competition finished before launching the participant controller',
             'Verify that the controller used in the world file is the same as the one defined in webots.yml'
         )
     if not controller_connected:
         _print_error(
-            'Benchmark finished before the competitor controller connected to Webots',
+            'Competition finished before the participant controller connected to Webots',
             'Your controller crashed. Please debug your controller locally before submitting it.'
         )
 
@@ -168,16 +168,13 @@ def record_animations(config, destination_directory, controller_name):
 def _get_performance_line(timeout, performance, world_config):
     metric = world_config['metric']
     higher_is_better = world_config['higher-is-better'] == 'true'
-    if not timeout:
-        # Benchmark completed normally
+    if not timeout:  # Competition completed normally
         performance_line = _performance_format(performance, metric)
-    elif metric == 'time' and higher_is_better:
-        # Time-duration benchmark completed with maximum time
+    elif metric == 'time' and higher_is_better:  # Time-duration competition completed with maximum time
         performance_line = _performance_format(world_config['max-duration'], metric)
-    else:
-        # Benchmark failed: time limit reached
+    else:  # Competition failed: time limit reached
         raise Exception(
-            f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the benchmark.'
+            f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition.'
         )
 
     return performance_line

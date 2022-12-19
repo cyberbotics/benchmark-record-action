@@ -24,7 +24,7 @@ TMP_DESTINATION_DIRECTORY = 'tmp/animation'
 ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
 
 
-class Competitor:
+class Participant:
     def __init__(self, id, controller_repository):
         self.id = id
         self.username = controller_repository.split('/')[0]
@@ -34,56 +34,56 @@ class Competitor:
         self.controller_name = None
 
 
-def benchmark(config):
+def competition(config):
     git.init()
 
-    # Parse input competitor
-    competitor = _get_competitor()
+    # Parse input participant
+    participant = _get_participant()
 
-    _clone_competitor_controller(competitor)
-    performance = _run_competitor_controller(config, competitor)
+    _clone_participant_controller(participant)
+    performance = _run_participant_controller(config, participant)
 
-    _update_repo_files(performance, competitor)
+    _update_repo_files(performance, participant)
 
-    _remove_tmp_files(competitor)
+    _remove_tmp_files(participant)
 
     if ALLOW_PUSH:
-        git.push(message='record and update benchmark animations')
+        git.push(message='record and update competition animations')
 
 
-def _get_competitor():
-    print('\nParsing competitor...')
+def _get_participant():
+    print('\nParsing participant...')
 
-    input_competitor = os.environ['INPUT_INDIVIDUAL_EVALUATION']
-    competitor = Competitor(
-        id=input_competitor.split(':')[0],
-        controller_repository=input_competitor.split(':')[1].strip()
+    input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
+    participant = Participant(
+        id=input_participant.split(':')[0],
+        controller_repository=input_participant.split(':')[1].strip()
     )
-    print('done parsing competitor')
-    return competitor
+    print('done parsing participant')
+    return participant
 
 
-def _clone_competitor_controller(competitor):
-    print('\nCloning competitor repo...')
+def _clone_participant_controller(participant):
+    print('\nCloning participant repo...')
 
-    competitor.controller_name = 'competitor_' + \
-        competitor.id + '_' + competitor.username
-    competitor.controller_path = os.path.join(
-        'controllers', competitor.controller_name)
+    participant.controller_name = 'participant_' + \
+        participant.id + '_' + participant.username
+    participant.controller_path = os.path.join(
+        'controllers', participant.controller_name)
 
     repo = 'https://{}:{}@github.com/{}/{}'.format(
-        'Benchmark_Evaluator',
+        'Competition_Evaluator',
         os.environ['INPUT_REPO_TOKEN'],
-        competitor.username,
-        competitor.repository_name
+        participant.username,
+        participant.repository_name
     )
 
-    git.clone(repo, competitor.controller_path)
+    git.clone(repo, participant.controller_path)
     print('done fetching repo')
 
 
-def _run_competitor_controller(config, competitor):
-    print('\nRunning competitor\'s controller...')
+def _run_participant_controller(config, participant):
+    print('\nRunning participant\'s controller...')
     animator_controller_source = os.path.join('metascript', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
     _copy_directory(animator_controller_source,
@@ -93,7 +93,7 @@ def _run_competitor_controller(config, competitor):
     performance = record_animations(
         config,
         TMP_DESTINATION_DIRECTORY,
-        competitor.controller_name
+        participant.controller_name
     )
 
     _remove_directory(animator_controller_destination)
@@ -101,36 +101,41 @@ def _run_competitor_controller(config, competitor):
     return performance
 
 
-def _update_repo_files(performance, competitor):
-    _update_performance_line(performance, competitor)
-    _update_animation_files(competitor)
+def _update_repo_files(performance, participant):
+    _update_performance_line(performance, participant)
+    _update_animation_files(participant)
 
 
-def _update_performance_line(performance, competitor):
+def _update_performance_line(performance, participant):
 
-    # Only change the requested competitor's performance
-    updated_competitor_line = f'{competitor.id}:{competitor.controller_repository}:{performance}'
-    tmp_competitors = ''
-    with open('competitors.txt', 'r') as f:
+    # Only change the requested participant's performance
+    updated_participant_line = f'{participant.id}:{participant.controller_repository}:{performance}'
+    tmp_participants = ''
+    print('Updating participants.txt\n')
+    with open('participants.txt', 'r') as f:
+        found = False
         for line in f:
             # stripping line break
             line = line.strip()
             test_id = line.split(':')[0]
 
-            if test_id == competitor.id:
-                new_line = updated_competitor_line.strip()
+            if test_id == participant.id:
+                new_line = updated_participant_line.strip()
+                found = True
             else:
                 new_line = line
             # concatenate the new string and add an end-line break
-            tmp_competitors = tmp_competitors + new_line + '\n'
+            tmp_participants = tmp_participants + new_line + '\n'
+        if not found:  # add at the end of the participants.txt file
+            tmp_participants = tmp_participants + updated_participant_line.strip()
 
-    with open('competitors.txt', 'w') as f:
-        f.write(tmp_competitors)
+    with open('participants.txt', 'w') as f:
+        f.write(tmp_participants)
 
 
-def _update_animation_files(competitor):
+def _update_animation_files(participant):
     new_destination_directory = os.path.join(
-        'storage', 'wb_animation_' + competitor.id)
+        'storage', 'wb_animation_' + participant.id)
 
     # remove old animation
     _remove_directory(new_destination_directory)
@@ -154,10 +159,10 @@ def _cleanup_storage_files(directory):
                 os.rename(path, directory + '/scene.x3d')
 
 
-def _remove_tmp_files(competitor):
+def _remove_tmp_files(participant):
     _remove_directory('tmp')
     _remove_directory('metascript')
-    _remove_directory(competitor.controller_path)
+    _remove_directory(participant.controller_path)
 
 
 def _remove_directory(directory):

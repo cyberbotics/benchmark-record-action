@@ -1,8 +1,8 @@
-# Benchmark Record Action
+# Competition Record Action
 
-This composite action is to be used with Webots Benchmarks.
-It records an animation and the performance of a competitor in a benchmark. An optional setting can be set to push the changes to GitHub at the end of the evaluation.
-For more information on Webots Benchmarks please refer to the template benchmark [here](https://github.com/cyberbotics/benchmark-template/blob/main/README.md).
+This composite action is to be used with Webots competitions.
+It records an animation and the performance of a participant in a competition. An optional setting can be set to push the changes to GitHub at the end of the evaluation.
+For more information on Webots competitions please refer to the competition template [here](https://github.com/cyberbotics/competition-template/blob/main/README.md).
 
 ## Inputs
 
@@ -19,7 +19,7 @@ This composite action works with environment variables as input, two mandatory a
 
 ## Python code pipeline
 
-First, the `webots.yml` file is parsed to get several benchmark parameters. Then the script performs the following steps:
+First, the `webots.yml` file is parsed to get several competition parameters. Then the script performs the following steps:
 
 ### 1. Get competitors
 
@@ -27,16 +27,16 @@ We parse the `INPUT_INDIVIDUAL_EVALUATION` environment variable to get the **id*
 
 ### 2. Clone the competitor repositories
 
-We clone the competitor's **repository** into the Benchmark's `controllers/` directory and rename them as: `competitor_{id}_{username}/` .
+We clone the paticipant **repository** into the competition `controllers/` directory and rename them as: `competitor_{id}_{username}/` .
 > the `{username}` variable is obtained from the **controller repository**
 
-### 3. Run Webots and record Benchmarks
+### 3. Run Webots and Record Animations
 
 We create a temporary storage directory `/tmp/animation` and modify the world file to add a `Supervisor` running the `animator.py` controller and we set the robot's controller to \<extern\>.
 
 We then run Webots and the competitor's controller inside Docker containers. We first launch Webots and when it is waiting for a connection of an external controller, we launch the controller container.
 
-The animator records and saves the animation files and the benchmark performance in the temporary storage.
+The animator records and saves the animation files and the competition performance in the temporary storage.
 
 The animation files are renamed as `animation.json` and `scene.x3d` files and are moved to their own directory `storage/wb_animation_{id}`. If there is an old animation, it gets overwritten.
 The `competitors.txt` file is also updated with the new recorded performance.
@@ -47,7 +47,7 @@ We remove the various temporary files so that only the updated files of interest
 
 ### 5. Commit and push updates (if INPUT_ALLOW_PUSH is set)
 
-All of the updates are committed and pushed to the Benchmark's repository.
+All of the updates are committed and pushed to the repository of the competition organizer.
 The modified directories and files are therefore:
 
 - `competitors.txt`
@@ -58,8 +58,8 @@ The modified directories and files are therefore:
 Here is a GitHub workflow snippet which uses the composite action:
 
 ```yaml
-- name: Record and update Benchmark animations
-  uses: cyberbotics/benchmark-record-action@dockerContainers
+- name: Record and update animations
+  uses: cyberbotics/competition-record-action@dockerContainers
   env:
     INPUT_INDIVIDUAL_EVALUATION: "12:username/repoName"
     INPUT_REPO_TOKEN: ${{ secrets.REPO_TOKEN }}

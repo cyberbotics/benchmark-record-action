@@ -1,5 +1,5 @@
-name: 'Benchmark Record'
-description: 'Build and publish Webots animation and save Benchmark score every 12 hours'
+name: 'Competition Record'
+description: 'Build and publish Webots animation and save competition score'
 branding:
   icon: 'play'
   color: 'red'

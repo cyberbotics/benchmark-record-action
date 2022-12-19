@@ -22,6 +22,9 @@ import requests
 def init():
     username = os.environ['GITHUB_ACTOR']
     user_info = requests.get(f'https://api.github.com/users/{username}').json()
+    
+    if 'id' not in user_info:
+        print(user_info)
 
     subprocess.check_output(
         ['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])

@@ -27,8 +27,7 @@ ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
 class Participant:
     def __init__(self, id, controller_repository):
         self.id = id
-        self.username = controller_repository.split('/')[0]
-        self.repository_name = controller_repository.split('/')[1]
+        (self.username, self.repository_name) = controller_repository.split('/')
         self.controller_repository = controller_repository
         self.controller_path = None
         self.controller_name = None

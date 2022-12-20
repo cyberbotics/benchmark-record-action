@@ -4,42 +4,41 @@ This composite action is to be used with Webots competitions.
 It records an animation and the performance of a participant in a competition. An optional setting can be set to push the changes to GitHub at the end of the evaluation.
 For more information on Webots competitions please refer to the competition template [here](https://github.com/cyberbotics/competition-template/blob/main/README.md).
 
-## Inputs
+## Input
 
 This composite action works with environment variables as input, two mandatory and one optional:
 
-### Mandatory inputs
+### Mandatory Input
 
-- INPUT_INDIVIDUAL_EVALUATION: the competitor's line from `competitors.txt`. Each line in `competitors.txt` file has the following format: `id*:repository*:performance:performance string:date` where * fields are mandatory
-- INPUT_REPO_TOKEN: token used to fetch the competitor repository, typically REPO_TOKEN. A more privileged token than GITHUB_TOKEN is needed to fetch controllers from private repositories.
+- INPUT_INDIVIDUAL_EVALUATION: the participant's line from `participants.txt`. Each line in `participants.txt` file has the following format: `id*:repository*:performance:performance string:date` where * fields are mandatory
+- INPUT_REPO_TOKEN: token used to fetch the participant repository, typically REPO_TOKEN. A more privileged token than GITHUB_TOKEN is needed to fetch controllers from private repositories.
 
-### Optional input
+### Optional Input
 
 - INPUT_ALLOW_PUSH: allows the action to push the modified files after the evaluation using the INPUT_REPO_TOKEN.
 
-## Python code pipeline
+## Python Code Pipeline
 
 First, the `webots.yml` file is parsed to get several competition parameters. Then the script performs the following steps:
 
-### 1. Get competitors
+### 1. Get the Participants
 
 We parse the `INPUT_INDIVIDUAL_EVALUATION` environment variable to get the **id** and the **controller repository** needed for the rest of the code.
 
-### 2. Clone the competitor repositories
+### 2. Clone the Participant Repositories
 
-We clone the paticipant **repository** into the competition `controllers/` directory and rename them as: `competitor_{id}_{username}/` .
-> the `{username}` variable is obtained from the **controller repository**
+We clone the participant **repository** into the competition `controllers/` directory and rename it using the GitHub repository: `{id}`.
 
 ### 3. Run Webots and Record Animations
 
 We create a temporary storage directory `/tmp/animation` and modify the world file to add a `Supervisor` running the `animator.py` controller and we set the robot's controller to \<extern\>.
 
-We then run Webots and the competitor's controller inside Docker containers. We first launch Webots and when it is waiting for a connection of an external controller, we launch the controller container.
+We then run Webots and the controller of the participant inside Docker containers. We first launch Webots and when it is waiting for a connection of an external controller, we launch the controller container.
 
 The animator records and saves the animation files and the competition performance in the temporary storage.
 
 The animation files are renamed as `animation.json` and `scene.x3d` files and are moved to their own directory `storage/wb_animation_{id}`. If there is an old animation, it gets overwritten.
-The `competitors.txt` file is also updated with the new recorded performance.
+The `participants.txt` file is also updated with the new recorded performance.
 
 ### 4. Remove temporary files
 
@@ -50,7 +49,7 @@ We remove the various temporary files so that only the updated files of interest
 All of the updates are committed and pushed to the repository of the competition organizer.
 The modified directories and files are therefore:
 
-- `competitors.txt`
+- `participants.txt`
 - `storage/wb_animation_{id}`
 
 ## Workflow
@@ -59,9 +58,9 @@ Here is a GitHub workflow snippet which uses the composite action:
 
 ```yaml
 - name: Record and update animations
-  uses: cyberbotics/competition-record-action@dockerContainers
+  uses: cyberbotics/competition-record-action@main
   env:
-    INPUT_INDIVIDUAL_EVALUATION: "12:username/repoName"
+    INPUT_INDIVIDUAL_EVALUATION: "1876568742:username/repository_name"
     INPUT_REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
     INPUT_ALLOW_PUSH: True
 ```

@@ -27,8 +27,6 @@ def main():
                         help='Duration of the animation in seconds')
     parser.add_argument('--output', default='storage',
                         help='Path at which the animation will be saved')
-    parser.add_argument('--controller', default="animation_0",
-                        help='Name of the default controller')
     args = parser.parse_args()
 
     supervisor = Supervisor()
@@ -38,8 +36,7 @@ def main():
     supervisor.simulationSetMode(supervisor.SIMULATION_MODE_PAUSE)
     time.sleep(CONTROLLER_WAITING_TIME)
     supervisor.simulationSetMode(supervisor.SIMULATION_MODE_REAL_TIME)
-    supervisor.animationStartRecording(
-        f'../../{args.output}/{args.controller}.html')
+    supervisor.animationStartRecording(f'../../{args.output}/animation.html')
 
     # Time out detection loop
     step_max = 1000 * args.duration / timestep

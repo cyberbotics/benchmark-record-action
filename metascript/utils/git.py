@@ -14,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import subprocess
 import os
 import requests
+import subprocess
 
 
 def init():
@@ -25,24 +25,16 @@ def init():
 
     user_info = requests.get(f'https://api.github.com/users/{username}', headers=headers).json()
 
-    subprocess.check_output(
-        ['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
-    subprocess.check_output(
-        ['git', 'config', '--global', '--add', 'safe.directory', '/root/repo'])
-
-    result = subprocess.run(
-        'git config --list | grep user.name', shell=True, check=False)
+    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
+    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/root/repo'])
+    result = subprocess.run('git config --list | grep user.name', shell=True, check=False)
     if result.returncode != 0:
-        email = '{}+{}@users.noreply.github.com'.format(
-            user_info['id'], username)
-        subprocess.check_output(
-            ['git', 'config', '--global', 'user.name', user_info['name'] or username])
-        subprocess.check_output(
-            ['git', 'config', '--global', 'user.email', email])
+        email = '{}+{}@users.noreply.github.com'.format(user_info['id'], username)
+        subprocess.check_output(['git', 'config', '--global', 'user.name', user_info['name'] or username])
+        subprocess.check_output(['git', 'config', '--global', 'user.email', email])
 
 
 def push(message='Updated competition recordings', force=True):
-
     github_repository = 'https://{}:{}@github.com/{}'.format(
         os.environ['GITHUB_ACTOR'],
         os.environ['INPUT_REPO_TOKEN'],

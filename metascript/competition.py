@@ -17,10 +17,9 @@
 import os
 import shutil
 from pathlib import Path
-from .animation import record_animations
+from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git
 
-TMP_DESTINATION_DIRECTORY = 'tmp/animation'
 ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
 
 
@@ -30,7 +29,6 @@ class Participant:
         (self.username, self.repository_name) = controller_repository.split('/')
         self.controller_repository = controller_repository
         self.controller_path = None
-        self.controller_name = None
 
 
 def competition(config):
@@ -38,12 +36,9 @@ def competition(config):
 
     # Parse input participant
     participant = _get_participant()
-
     _clone_participant_controller(participant)
-    performance = _run_participant_controller(config, participant)
-
+    performance = _run_participant_controller(config, participant.controller_path)
     _update_repo_files(performance, participant)
-
     _remove_tmp_files(participant)
 
     if ALLOW_PUSH:
@@ -63,12 +58,9 @@ def _get_participant():
 
 
 def _clone_participant_controller(participant):
-    print('\nCloning participant repo...')
+    print('\nCloning participant repository...')
 
-    participant.controller_name = 'participant_' + \
-        participant.id + '_' + participant.username
-    participant.controller_path = os.path.join(
-        'controllers', participant.controller_name)
+    participant.controller_path = os.path.join('controllers', participant.id)
 
     repo = 'https://{}:{}@github.com/{}/{}'.format(
         'Competition_Evaluator',
@@ -81,19 +73,14 @@ def _clone_participant_controller(participant):
     print('done fetching repo')
 
 
-def _run_participant_controller(config, participant):
+def _run_participant_controller(config, controller_path):
     print('\nRunning participant\'s controller...')
     animator_controller_source = os.path.join('metascript', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
-    _copy_directory(animator_controller_source,
-                    animator_controller_destination)
+    _copy_directory(animator_controller_source, animator_controller_destination)
 
     # Record animation and return performance
-    performance = record_animations(
-        config,
-        TMP_DESTINATION_DIRECTORY,
-        participant.controller_name
-    )
+    performance = record_animations(config, controller_path)
 
     _remove_directory(animator_controller_destination)
     print('done running controller and recording animations')
@@ -133,15 +120,10 @@ def _update_performance_line(performance, participant):
 
 
 def _update_animation_files(participant):
-    new_destination_directory = os.path.join(
-        'storage', 'wb_animation_' + participant.id)
-
-    # remove old animation
-    _remove_directory(new_destination_directory)
-
-    _copy_directory(TMP_DESTINATION_DIRECTORY, new_destination_directory)
-    _remove_directory(TMP_DESTINATION_DIRECTORY)
-
+    new_destination_directory = os.path.join('storage', 'wb_animation_' + participant.id)
+    _remove_directory(new_destination_directory)  # remove old animation
+    _copy_directory(TMP_ANIMATION_DIRECTORY, new_destination_directory)
+    _remove_directory(TMP_ANIMATION_DIRECTORY)
     _cleanup_storage_files(new_destination_directory)
     return
 

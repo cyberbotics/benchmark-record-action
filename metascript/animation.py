@@ -59,8 +59,11 @@ def record_animations(config, destination_directory, controller_path):
     # Building the Docker containers
     recorder_build = subprocess.Popen(
         [
-            'docker', 'build', '-t', 'recorder-webots', '-f', 'Dockerfile',
-            '--build-arg', f'WORLD_PATH={world_config["file"]}', '.'
+            'docker', 'build',
+            '-t', 'recorder-webots',
+            '-f', 'Dockerfile',
+            '--build-arg', f'WORLD_PATH={world_config["file"]}',
+            '.'
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -74,8 +77,11 @@ def record_animations(config, destination_directory, controller_path):
 
     controller_build = subprocess.Popen(
         [
-            'docker', 'build', '-t', 'controller-docker', '-f', f'{controller_path}/controller_Dockerfile',
-            '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}', f'{controller_path}'
+            'docker', 'build',
+            '-t', 'controller-docker',
+            '-f', f'{controller_path}/controller_Dockerfile',
+            '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
+            f'{controller_path}'
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,

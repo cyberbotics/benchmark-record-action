@@ -108,12 +108,9 @@ def record_animations(config, destination_directory, controller_path):
     while webots_docker.poll() is None:
         realtime_output = _print_stdout(webots_docker)
         if not launched_controller and 'waiting for connection' in realtime_output:
-            print(
-                'META SCRIPT: Webots ready for controller, launching controller container...')
-            subprocess.Popen(
-                ['docker', 'run', '--rm', 'controller-docker'],
-                stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
-            )
+            print('META SCRIPT: Webots ready for controller, launching controller container...')
+            subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             launched_controller = True
         if launched_controller and 'extern controller: connected' in realtime_output:
             print('META SCRIPT: Controller connected to Webots')
@@ -125,25 +122,18 @@ def record_animations(config, destination_directory, controller_path):
             timeout = True
             break
     if webots_docker.returncode:
-        _print_error(
-            f'Webots container exited with code {webots_docker.returncode}',
-            'Error while running the Webots container'
-        )
+        _print_error(f'Webots container exited with code {webots_docker.returncode}',
+                     'Error while running the Webots container.')
     if not launched_controller:
-        _print_error(
-            'Competition finished before launching the participant controller',
-            'Verify that the controller used in the world file is the same as the one defined in webots.yml'
-        )
+        _print_error('Competition finished before launching the participant controller',
+                     'Check that the controller in the world file is the same as the one in webots.yml.')
     if not controller_connected:
-        _print_error(
-            'Competition finished before the participant controller connected to Webots',
-            'Your controller crashed. Please debug your controller locally before submitting it.'
-        )
+        _print_error('Competition finished before the participant controller connected to Webots',
+                     'Your controller crashed. Please debug your controller locally before submitting it.')
 
     print('Closing the containers...')
     webots_container_id = _get_container_id('recorder-webots')
-    if webots_container_id != '':
-        # Closing Webots with SIGINT to trigger animation export
+    if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
     controller_container_id = _get_container_id('controller-docker')
     if controller_container_id != '':

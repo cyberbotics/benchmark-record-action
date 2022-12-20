@@ -65,10 +65,8 @@ def _get_participant():
 def _clone_participant_controller(participant):
     print('\nCloning participant repo...')
 
-    participant.controller_name = 'participant_' + \
-        participant.id + '_' + participant.username
-    participant.controller_path = os.path.join(
-        'controllers', participant.controller_name)
+    participant.controller_name = 'participant_' + participant.id + '_' + participant.username
+    participant.controller_path = os.path.join('controllers', participant.controller_name)
 
     repo = 'https://{}:{}@github.com/{}/{}'.format(
         'Competition_Evaluator',
@@ -89,11 +87,7 @@ def _run_participant_controller(config, participant):
                     animator_controller_destination)
 
     # Record animation and return performance
-    performance = record_animations(
-        config,
-        TMP_DESTINATION_DIRECTORY,
-        participant.controller_name
-    )
+    performance = record_animations(config, TMP_DESTINATION_DIRECTORY, participant.controller_name)
 
     _remove_directory(animator_controller_destination)
     print('done running controller and recording animations')

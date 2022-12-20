@@ -8,10 +8,7 @@ runs:
   using: 'composite'
   steps:
     - name: Run the python meta script
-      # env:
-      #  PYTHONPATH: ${{ github.action_path }}
       run: |
         cp -r ${{ github.action_path }}/metascript .
         python3 -u -m metascript
-        # python3 -u -m metascript
       shell: bash

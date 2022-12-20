@@ -22,7 +22,7 @@ from math import floor
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-def _generate_animation_recorder_vrml(duration, output, controller_name):
+def _generate_animation_recorder_vrml(duration, output):
     return f'''
     DEF ANIMATION_RECORDER_SUPERVISOR Robot {{
     name "animation_recorder_supervisor"
@@ -30,14 +30,13 @@ def _generate_animation_recorder_vrml(duration, output, controller_name):
     controllerArgs [
         "--duration={duration}"
         "--output={output}"
-        "--controller={controller_name}"
     ]
     supervisor TRUE
     }}
     '''
 
 
-def record_animations(config, destination_directory, controller_name):
+def record_animations(config, destination_directory, controller_path):
     world_config = config['world']
     default_controller_name = config['dockerCompose'].split('/')[2]
 
@@ -49,23 +48,19 @@ def record_animations(config, destination_directory, controller_name):
         world_content = f.read()
     updated_file = world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"')
 
-    animation_recorder_vrml = _generate_animation_recorder_vrml(
+    updated_file += _generate_animation_recorder_vrml(
         duration=world_config['max-duration'],
-        output=destination_directory,
-        controller_name=controller_name
+        output=destination_directory
     )
 
     with open(world_config['file'], 'w') as f:
-        f.write(updated_file + animation_recorder_vrml)
+        f.write(updated_file)
 
     # Building the Docker containers
     recorder_build = subprocess.Popen(
         [
-            'docker', 'build',
-            '-t', 'recorder-webots',
-            '-f', 'Dockerfile',
-            '--build-arg', f'WORLD_PATH={world_config["file"]}',
-            '.'
+            'docker', 'build', '-t', 'recorder-webots', '-f', 'Dockerfile',
+            '--build-arg', f'WORLD_PATH={world_config["file"]}', '.'
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -79,11 +74,8 @@ def record_animations(config, destination_directory, controller_name):
 
     controller_build = subprocess.Popen(
         [
-            'docker', 'build',
-            '-t', 'controller-docker',
-            '-f', f'controllers/{controller_name}/controller_Dockerfile',
-            '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
-            f'controllers/{controller_name}'
+            'docker', 'build', '-t', 'controller-docker', '-f', f'{controller_path}/controller_Dockerfile',
+            '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}', f'{controller_path}'
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,

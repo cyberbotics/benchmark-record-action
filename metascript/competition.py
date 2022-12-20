@@ -30,7 +30,6 @@ class Participant:
         (self.username, self.repository_name) = controller_repository.split('/')
         self.controller_repository = controller_repository
         self.controller_path = None
-        self.controller_name = None
 
 
 def competition(config):
@@ -40,7 +39,7 @@ def competition(config):
     participant = _get_participant()
 
     _clone_participant_controller(participant)
-    performance = _run_participant_controller(config, participant)
+    performance = _run_participant_controller(config, participant.controller_path)
 
     _update_repo_files(performance, participant)
 
@@ -65,8 +64,7 @@ def _get_participant():
 def _clone_participant_controller(participant):
     print('\nCloning participant repo...')
 
-    participant.controller_name = 'participant_' + participant.id + '_' + participant.username
-    participant.controller_path = os.path.join('controllers', participant.controller_name)
+    participant.controller_path = os.path.join('controllers', participant.id)
 
     repo = 'https://{}:{}@github.com/{}/{}'.format(
         'Competition_Evaluator',
@@ -79,7 +77,7 @@ def _clone_participant_controller(participant):
     print('done fetching repo')
 
 
-def _run_participant_controller(config, participant):
+def _run_participant_controller(config, controller_path):
     print('\nRunning participant\'s controller...')
     animator_controller_source = os.path.join('metascript', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
@@ -87,7 +85,7 @@ def _run_participant_controller(config, participant):
                     animator_controller_destination)
 
     # Record animation and return performance
-    performance = record_animations(config, TMP_DESTINATION_DIRECTORY, participant.controller_name)
+    performance = record_animations(config, TMP_DESTINATION_DIRECTORY, controller_path)
 
     _remove_directory(animator_controller_destination)
     print('done running controller and recording animations')

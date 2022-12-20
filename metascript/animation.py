@@ -74,6 +74,7 @@ def record_animations(config, controller_path):
             '-t', 'controller-docker',
             '-f', f'{controller_path}/controllers/{default_controller_name}/Dockerfile.extern',
             '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
+            '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/participant',
             f'{controller_path}/controllers/{default_controller_name}'
         ],
         stdout=subprocess.PIPE,

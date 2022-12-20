@@ -74,7 +74,7 @@ def record_animations(config, controller_path):
             '-t', 'controller-docker',
             '-f', f'{controller_path}/controllers/{default_controller_name}/Dockerfile.extern',
             '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
-            f'{controller_path}'
+            f'{controller_path}/controllers/{default_controller_name}'
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,

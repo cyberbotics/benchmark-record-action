@@ -24,11 +24,10 @@ ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
 
 
 class Participant:
-    def __init__(self, id, controller_repository):
+    def __init__(self, id, repository):
         self.id = id
-        (self.username, self.repository_name) = controller_repository.split('/')
-        self.controller_repository = controller_repository
-        self.controller_path = None
+        self.repository = repository
+        self.controller_path = os.path.join('controllers', id)
 
 
 def competition(config):
@@ -51,7 +50,7 @@ def _get_participant():
     input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
     participant = Participant(
         id=input_participant.split(':')[0],
-        controller_repository=input_participant.split(':')[1].strip()
+        repository=input_participant.split(':')[1].strip()
     )
     print('done parsing participant')
     return participant
@@ -60,13 +59,10 @@ def _get_participant():
 def _clone_participant_controller(participant):
     print('\nCloning participant repository...')
 
-    participant.controller_path = os.path.join('controllers', participant.id)
-
-    repo = 'https://{}:{}@github.com/{}/{}'.format(
+    repo = 'https://{}:{}@github.com/{}'.format(
         'Competition_Evaluator',
         os.environ['INPUT_REPO_TOKEN'],
-        participant.username,
-        participant.repository_name
+        participant.repository
     )
 
     git.clone(repo, participant.controller_path)
@@ -95,7 +91,7 @@ def _update_repo_files(performance, participant):
 def _update_performance_line(performance, participant):
 
     # Only change the requested participant's performance
-    updated_participant_line = f'{participant.id}:{participant.controller_repository}:{performance}'
+    updated_participant_line = f'{participant.id}:{participant.repository}:{performance}'
     tmp_participants = ''
     print('Updating participants.txt\n')
     with open('participants.txt', 'r') as f:

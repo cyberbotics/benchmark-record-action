@@ -10,7 +10,7 @@ This composite action works with environment variables as input, two mandatory a
 
 ### Mandatory inputs
 
-- INPUT_INDIVIDUAL_EVALUATION: the competitor's line from `competitors.txt`. Each line in `competitors.txt` file has the following format: `id*:controller_repository_path*:performance:performance string:date` where * fields are mandatory
+- INPUT_INDIVIDUAL_EVALUATION: the competitor's line from `competitors.txt`. Each line in `competitors.txt` file has the following format: `id*:repository*:performance:performance string:date` where * fields are mandatory
 - INPUT_REPO_TOKEN: token used to fetch the competitor repository, typically REPO_TOKEN. A more privileged token than GITHUB_TOKEN is needed to fetch controllers from private repositories.
 
 ### Optional input

@@ -17,7 +17,7 @@
 import os
 import shutil
 from pathlib import Path
-from .animation import record_animations, TMP_DESTINATION_DIRECTORY
+from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git
 
 ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
@@ -84,7 +84,7 @@ def _run_participant_controller(config, controller_path):
                     animator_controller_destination)
 
     # Record animation and return performance
-    performance = record_animations(config, TMP_DESTINATION_DIRECTORY, controller_path)
+    performance = record_animations(config, TMP_ANIMATION_DIRECTORY, controller_path)
 
     _remove_directory(animator_controller_destination)
     print('done running controller and recording animations')
@@ -130,8 +130,8 @@ def _update_animation_files(participant):
     # remove old animation
     _remove_directory(new_destination_directory)
 
-    _copy_directory(TMP_DESTINATION_DIRECTORY, new_destination_directory)
-    _remove_directory(TMP_DESTINATION_DIRECTORY)
+    _copy_directory(TMP_ANIMATION_DIRECTORY, new_destination_directory)
+    _remove_directory(TMP_ANIMATION_DIRECTORY)
 
     _cleanup_storage_files(new_destination_directory)
     return

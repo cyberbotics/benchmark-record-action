@@ -19,7 +19,7 @@ import os
 from datetime import datetime
 from math import floor
 
-TMP_DESTINATION_DIRECTORY = 'tmp/animation'
+TMP_ANIMATION_DIRECTORY = 'tmp/animation'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
@@ -98,7 +98,7 @@ def record_animations(config, destination_directory, controller_path):
     webots_docker = subprocess.Popen(
         [
             'docker', 'run', '-t', '--rm', '--init',
-            '--mount', f'type=bind,source={os.getcwd()}/{TMP_DESTINATION_DIRECTORY},target=/usr/local/webots-project/{destination_directory}',
+            '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{destination_directory}',
             '-p', '3005:1234',
             '--env', 'CI=true',
             'recorder-webots'

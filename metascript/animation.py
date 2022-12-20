@@ -23,7 +23,7 @@ TMP_ANIMATION_DIRECTORY = 'tmp/animation'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-def record_animations(config, controller_path):
+def record_animations(config, controller_path, opponent_controller_path):
     world_config = config['world']
     default_controller_name = config['dockerCompose'].split('/')[2]
 
@@ -33,8 +33,10 @@ def record_animations(config, controller_path):
     # Temporary file changes*:
     with open(world_config['file'], 'r') as f:
         world_content = f.read()
-    updated_file = world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"') + \
-    f'''
+    world_content = world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"')
+    if opponent_controller_path:
+        world_content = world_content.replace(f'controller "opponent"', 'controller "<extern>"')
+    world_content += f'''
     DEF ANIMATION_RECORDER_SUPERVISOR Robot {{
     name "animation_recorder_supervisor"
     controller "animator"
@@ -47,7 +49,7 @@ def record_animations(config, controller_path):
     '''
 
     with open(world_config['file'], 'w') as f:
-        f.write(updated_file)
+        f.write(world_content)
 
     # Building the Docker containers
     recorder_build = subprocess.Popen(
@@ -74,6 +76,7 @@ def record_animations(config, controller_path):
             '-t', 'controller-docker',
             '-f', f'{controller_path}/controllers/{default_controller_name}/Dockerfile.extern',
             '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
+            '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/participant',
             f'{controller_path}/controllers/{default_controller_name}'
         ],
         stdout=subprocess.PIPE,
@@ -82,9 +85,29 @@ def record_animations(config, controller_path):
     )
     _get_realtime_stdout(
         controller_build,
-        'Error while building the controller container',
+        'Error while building the participant controller container',
         'Missing or misconfigured Dockerfile'
     )
+
+    if opponent_controller_path:
+        opponent_controller_build = subprocess.Popen(
+            [
+                'docker', 'build',
+                '-t', 'opponent-controller-docker',
+                '-f', f'{opponent_controller_path}/controllers/{default_controller_name}/Dockerfile.extern',
+                '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
+                '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/opponent',
+                f'{opponent_controller_path}/controllers/{default_controller_name}'
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='utf-8'
+        )
+        _get_realtime_stdout(
+            opponent_controller_build,
+            'Error while building the opponent controller container',
+            'Missing or misconfigured Dockerfile'
+        )
 
     # Run Webots container with Popen to read the stdout
     webots_docker = subprocess.Popen(
@@ -111,6 +134,9 @@ def record_animations(config, controller_path):
             print('META SCRIPT: Webots ready for controller, launching controller container...')
             subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
                              stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            if opponent_controller_path:
+                subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             launched_controller = True
         if launched_controller and 'extern controller: connected' in realtime_output:
             print('META SCRIPT: Controller connected to Webots')
@@ -138,6 +164,10 @@ def record_animations(config, controller_path):
     controller_container_id = _get_container_id('controller-docker')
     if controller_container_id != '':
         subprocess.run(['/bin/bash', '-c', f'docker kill {controller_container_id}'])
+    if opponent_controller_path:
+        opponent_controller_container_id = _get_container_id('opponent-controller-docker')
+        if opponent_controller_container_id != '':
+            subprocess.run(['/bin/bash', '-c', f'docker kill {opponent_controller_container_id}'])
 
     # Restoring temporary file changes
     with open(world_config['file'], 'w') as f:
@@ -164,6 +194,8 @@ def _performance_format(performance, metric):
         performance_string = str(round(performance * 100, 2)) + '%'
     elif metric == 'distance':
         performance_string = '{:.3f} m.'.format(performance)
+    else:
+        performance_string = performance
     return f'{performance}:{performance_string}:{datetime.today().strftime("%Y-%m-%d")}'
 
 def _time_convert(time):

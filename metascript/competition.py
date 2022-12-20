@@ -36,23 +36,42 @@ def competition(config):
     # Parse input participant
     participant = _get_participant()
     _clone_participant_controller(participant)
-    performance = _run_participant_controller(config, participant.controller_path)
-    _update_repo_files(performance, participant)
-    _remove_tmp_files(participant)
+    if config['metric'] == 'ranking':  # run a bubble sort ranking
+        opponent = _get_opponent(participant.repository)
+        if opponent == None:
+            return
+        _clone_participant_controller(opponent)
+        performance = _run_participant_controller(config, participant.controller_path, opponent.controller_path)
+
+    else:
+        performance = _run_participant_controller(config, participant.controller_path)
+        _update_repo_files(performance, participant)
+        _remove_tmp_files(participant)
 
     if ALLOW_PUSH:
         git.push(message='record and update competition animations')
 
 
-def _get_participant():
-    print('\nParsing participant...')
+def _get_opponent(participant_repository):
+    with open('participants.txt') as f:
+        upper_line = ''
+        for line in f:
+            line = line.strip()  # strip the line break
+            if line == participant_repository:
+                if upper_line == '':  # participant is number one, no opponent available
+                    print(f'{participant_repository} is number 1 in the ranking.')
+                    return None
+                split = upper_line.split(':')
+                return Participant(split[0], split[1])
+            upper_line = line
+    print(f'Error: cannot find {participant_repository} in participants.txt')
+    return None
 
+
+def _get_participant():
     input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
-    participant = Participant(
-        id=input_participant.split(':')[0],
-        repository=input_participant.split(':')[1].strip()
-    )
-    print('done parsing participant')
+    split = input_participant.split(':')
+    participant = Participant(split[0], split[1])
     return participant
 
 
@@ -69,14 +88,14 @@ def _clone_participant_controller(participant):
     print('done fetching repo')
 
 
-def _run_participant_controller(config, controller_path):
+def _run_participant_controller(config, controller_path, opponent_controller_path=None):
     print('\nRunning participant\'s controller...')
     animator_controller_source = os.path.join('metascript', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
     _copy_directory(animator_controller_source, animator_controller_destination)
 
     # Record animation and return performance
-    performance = record_animations(config, controller_path)
+    performance = record_animations(config, controller_path, opponent_controller_path)
 
     _remove_directory(animator_controller_destination)
     print('done running controller and recording animations')
@@ -97,22 +116,21 @@ def _update_performance_line(performance, participant):
     with open('participants.txt', 'r') as f:
         found = False
         for line in f:
-            # stripping line break
-            line = line.strip()
+            line = line.strip()  # strip the line break
             test_id = line.split(':')[0]
 
             if test_id == participant.id:
-                new_line = updated_participant_line.strip()
+                new_line = updated_participant_line
                 found = True
             else:
                 new_line = line
             # concatenate the new string and add an end-line break
-            tmp_participants = tmp_participants + new_line + '\n'
+            tmp_participants += new_line + '\n'
         if not found:  # add at the end of the participants.txt file
-            tmp_participants = tmp_participants + updated_participant_line.strip()
+            tmp_participants += updated_participant_line + '\n'
 
     with open('participants.txt', 'w') as f:
-        f.write(tmp_participants)
+        f.write(tmp_participants.strip())
 
 
 def _update_animation_files(participant):

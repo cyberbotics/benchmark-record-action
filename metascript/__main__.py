@@ -19,16 +19,13 @@ from .competition import competition
 
 
 def main():
-    # Load config
     config = load_config()
 
-    # Continue parsing
     if 'type' not in config or config['type'] != 'competition':
-        print('You have to specify `type` parameter in `webots.yaml` and set it to `competition`')
+        print('You have to specify the `type` parameter in `webots.yaml` and set it to `competition`')
         return
 
-    # Run competition
-    competition(config)
+    competition(config)  # run the competition
 
 
 if __name__ == '__main__':

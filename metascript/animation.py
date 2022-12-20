@@ -23,20 +23,6 @@ TMP_ANIMATION_DIRECTORY = 'tmp/animation'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-def _generate_animation_recorder_vrml(duration, output):
-    return f'''
-    DEF ANIMATION_RECORDER_SUPERVISOR Robot {{
-    name "animation_recorder_supervisor"
-    controller "animator"
-    controllerArgs [
-        "--duration={duration}"
-        "--output={output}"
-    ]
-    supervisor TRUE
-    }}
-    '''
-
-
 def record_animations(config, destination_directory, controller_path):
     world_config = config['world']
     default_controller_name = config['dockerCompose'].split('/')[2]
@@ -47,12 +33,18 @@ def record_animations(config, destination_directory, controller_path):
     # Temporary file changes*:
     with open(world_config['file'], 'r') as f:
         world_content = f.read()
-    updated_file = world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"')
-
-    updated_file += _generate_animation_recorder_vrml(
-        duration=world_config['max-duration'],
-        output=destination_directory
-    )
+    updated_file = world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"') + \
+    f'''
+    DEF ANIMATION_RECORDER_SUPERVISOR Robot {{
+    name "animation_recorder_supervisor"
+    controller "animator"
+    controllerArgs [
+        "--duration={world_config['max-duration']}"
+        "--output={destination_directory}"
+    ]
+    supervisor TRUE
+    }}
+    '''
 
     with open(world_config['file'], 'w') as f:
         f.write(updated_file)
@@ -157,14 +149,11 @@ def record_animations(config, destination_directory, controller_path):
     if controller_container_id != '':
         subprocess.run(['/bin/bash', '-c', f'docker kill {controller_container_id}'])
 
-    # *Restoring temporary file changes
+    # Restoring temporary file changes
     with open(world_config['file'], 'w') as f:
         f.write(world_content)
 
-    return _get_performance_line(timeout, performance, world_config)
-
-
-def _get_performance_line(timeout, performance, world_config):
+    # compute performance line
     metric = world_config['metric']
     higher_is_better = world_config['higher-is-better'] == 'true'
     if not timeout:  # Competition completed normally
@@ -178,7 +167,6 @@ def _get_performance_line(timeout, performance, world_config):
 
     return performance_line
 
-
 def _performance_format(performance, metric):
     if metric == 'time':
         performance_string = _time_convert(performance)
@@ -187,7 +175,6 @@ def _performance_format(performance, metric):
     elif metric == 'distance':
         performance_string = '{:.3f} m.'.format(performance)
     return f'{performance}:{performance_string}:{datetime.today().strftime("%Y-%m-%d")}'
-
 
 def _time_convert(time):
     minutes = time / 60
@@ -200,18 +187,15 @@ def _time_convert(time):
     cs_string = str(cs).zfill(2)
     return minutes_string + '.' + seconds_string + '.' + cs_string
 
-
 def _get_container_id(container_name):
     container_id = subprocess.check_output(['docker', 'ps', '-f', f'ancestor={container_name}', '-q']).decode('utf-8').strip()
     return container_id
-
 
 def _get_realtime_stdout(process, error_title, error_message):
     while process.poll() is None:
         _print_stdout(process)
     if process.returncode != 0:
         _print_error(error_title, error_message)
-
 
 def _print_stdout(process):
     realtime_output = process.stdout.readline()

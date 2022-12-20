@@ -80,7 +80,7 @@ def _run_participant_controller(config, controller_path):
     _copy_directory(animator_controller_source, animator_controller_destination)
 
     # Record animation and return performance
-    performance = record_animations(config, TMP_ANIMATION_DIRECTORY, controller_path)
+    performance = record_animations(config, controller_path)
 
     _remove_directory(animator_controller_destination)
     print('done running controller and recording animations')

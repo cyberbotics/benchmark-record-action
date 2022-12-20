@@ -23,12 +23,12 @@ TMP_ANIMATION_DIRECTORY = 'tmp/animation'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-def record_animations(config, destination_directory, controller_path):
+def record_animations(config, controller_path):
     world_config = config['world']
     default_controller_name = config['dockerCompose'].split('/')[2]
 
     # Create temporary directory
-    subprocess.check_output(['mkdir', '-p', destination_directory])
+    subprocess.check_output(['mkdir', '-p', TMP_ANIMATION_DIRECTORY])
 
     # Temporary file changes*:
     with open(world_config['file'], 'r') as f:
@@ -40,7 +40,7 @@ def record_animations(config, destination_directory, controller_path):
     controller "animator"
     controllerArgs [
         "--duration={world_config['max-duration']}"
-        "--output={destination_directory}"
+        "--output={TMP_ANIMATION_DIRECTORY}"
     ]
     supervisor TRUE
     }}
@@ -90,7 +90,7 @@ def record_animations(config, destination_directory, controller_path):
     webots_docker = subprocess.Popen(
         [
             'docker', 'run', '-t', '--rm', '--init',
-            '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{destination_directory}',
+            '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
             '-p', '3005:1234',
             '--env', 'CI=true',
             'recorder-webots'

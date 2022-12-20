@@ -17,10 +17,9 @@
 import os
 import shutil
 from pathlib import Path
-from .animation import record_animations
+from .animation import record_animations, TMP_DESTINATION_DIRECTORY
 from .utils import git
 
-TMP_DESTINATION_DIRECTORY = 'tmp/animation'
 ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
 
 

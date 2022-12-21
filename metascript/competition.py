@@ -36,23 +36,48 @@ def competition(config):
     # Parse input participant
     participant = _get_participant()
     _clone_participant_controller(participant)
-    performance = _run_participant_controller(config, participant.controller_path)
-    _update_repo_files(performance, participant)
-    _remove_tmp_files(participant)
+    if config['metric'] == 'ranking':  # run a bubble sort ranking
+        while True:
+            opponent = _get_opponent(participant.repository)
+            if opponent == None:  # we reached the top of the ranking
+                break
+            _clone_participant_controller(opponent)
+            performance = _run_participant_controller(config, participant.controller_path, opponent.controller_path)
+            _update_ranking(performance, participant, opponent)
+            _update_animation_files(opponent if performance == 1 else participant)
+            _remove_tmp_files(participant, opponent)
+            if performance == 0:  # draw or loose, stopping duals
+                break
+    else:  # run a simple performance evaluation
+        performance = _run_participant_controller(config, participant.controller_path)
+        _update_performance_line(performance, participant)
+        _update_animation_files(participant)
+        _remove_tmp_files(participant)
 
     if ALLOW_PUSH:
         git.push(message='record and update competition animations')
 
 
-def _get_participant():
-    print('\nParsing participant...')
+def _get_opponent(participant_repository):
+    with open('participants.txt') as f:
+        upper_line = ''
+        for line in f:
+            line = line.strip()  # strip the line break
+            if line == participant_repository:
+                if upper_line == '':  # participant is number one, no opponent available
+                    print(f'{participant_repository} is number 1 in the ranking.')
+                    return None
+                split = upper_line.split(':')
+                return Participant(split[0], split[1])
+            upper_line = line
+    print(f'Error: cannot find {participant_repository} in participants.txt')
+    return None
 
+
+def _get_participant():
     input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
-    participant = Participant(
-        id=input_participant.split(':')[0],
-        repository=input_participant.split(':')[1].strip()
-    )
-    print('done parsing participant')
+    split = input_participant.split(':')
+    participant = Participant(split[0], split[1])
     return participant
 
 
@@ -69,50 +94,86 @@ def _clone_participant_controller(participant):
     print('done fetching repo')
 
 
-def _run_participant_controller(config, controller_path):
+def _run_participant_controller(config, controller_path, opponent_controller_path=None):
     print('\nRunning participant\'s controller...')
     animator_controller_source = os.path.join('metascript', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
     _copy_directory(animator_controller_source, animator_controller_destination)
 
     # Record animation and return performance
-    performance = record_animations(config, controller_path)
+    performance = record_animations(config, controller_path, opponent_controller_path)
 
     _remove_directory(animator_controller_destination)
     print('done running controller and recording animations')
     return performance
 
 
-def _update_repo_files(performance, participant):
-    _update_performance_line(performance, participant)
-    _update_animation_files(participant)
-
-
-def _update_performance_line(performance, participant):
-
-    # Only change the requested participant's performance
+def _update_performance_line(performance, participant):  # only change the requested participant's performance
     updated_participant_line = f'{participant.id}:{participant.repository}:{performance}'
     tmp_participants = ''
     print('Updating participants.txt\n')
     with open('participants.txt', 'r') as f:
         found = False
         for line in f:
-            # stripping line break
-            line = line.strip()
-            test_id = line.split(':')[0]
+            line = line.strip()  # remove the line break
 
-            if test_id == participant.id:
-                new_line = updated_participant_line.strip()
+            if line.split(':')[0] == participant.id:
+                new_line = updated_participant_line
                 found = True
             else:
                 new_line = line
             # concatenate the new string and add an end-line break
-            tmp_participants = tmp_participants + new_line + '\n'
+            tmp_participants += new_line + '\n'
         if not found:  # add at the end of the participants.txt file
-            tmp_participants = tmp_participants + updated_participant_line.strip()
+            tmp_participants += updated_participant_line + '\n'
 
     with open('participants.txt', 'w') as f:
-        f.write(tmp_participants)
+        f.write(tmp_participants.strip())
+
+
+def _update_ranking(performance, participant, opponent):
+    lines = []
+    with open('participants.txt', 'r') as f:
+        found_participant = -1
+        found_opponent = -1
+        counter = 0
+        for line in f:
+            line = line.strip()  # remove the line break
+            split = line.split(':')
+            id = split[0]
+            ranking = split[2]
+            if ranking != counter + 1:
+                print('Error: Unordered ranking.')
+                return
+            if found_opponent >= 0:
+                if id != participant.id:
+                    print('Error: wrong ranking.')
+                    return
+                found_participant = counter
+            elif id == opponent.id:
+                found_opponent = counter
+            lines.append(line)
+            counter += 1
+        if found_opponent == -1:
+            print('Error: opponent not found in ranking.')
+            return
+        if found_participant == -1:
+            if found_opponent != counter - 1:
+                print('Error: opponent should be the last one in the ranking.')
+                return
+            if performance != 1:  # participant lost
+                lines.append(f'{participant.id}:{participant.repository}:{counter + 1}')
+            else:  # participant won: swap with opponent in the ranking
+                lines[counter - 1] = f'{participant.id}:{participant.repository}:{counter}'
+                lines.append(f'{opponent.id}:{opponent.repository}:{counter + 1}')
+        elif performance == 1:  # swap participant and opponent in leaderboard
+            lines[found_opponent] = f'{participant.id}:{participant.repository}:{found_opponent + 1}'
+            lines[found_participant] = f'{opponent.id}:{opponent.repository}:{found_participant + 1}'
+        else:  # nothing to change in the ranking
+            return
+    # write the updated ranking
+    with open('participants.txt', 'w') as f:
+        f.write('\n'.join(lines))
 
 
 def _update_animation_files(participant):
@@ -136,10 +197,12 @@ def _cleanup_storage_files(directory):
                 os.rename(path, directory + '/scene.x3d')
 
 
-def _remove_tmp_files(participant):
+def _remove_tmp_files(participant, opponent=None):
     _remove_directory('tmp')
     _remove_directory('metascript')
     _remove_directory(participant.controller_path)
+    if opponent:
+        _remove_directory(opponent.controller_path)
 
 
 def _remove_directory(directory):

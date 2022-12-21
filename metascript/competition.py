@@ -93,13 +93,11 @@ def _get_participant():
 
 def _clone_participant_controller(participant):
     print('\nCloning participant repository...')
-
     repo = 'https://{}:{}@github.com/{}'.format(
         'Competition_Evaluator',
         os.environ['INPUT_REPO_TOKEN'],
         participant.repository
     )
-
     git.clone(repo, participant.controller_path)
     print('done fetching repo')
 
@@ -126,7 +124,6 @@ def _update_performance_line(performance, participant):  # only change the reque
         found = False
         for line in f:
             line = line.strip()  # remove the line break
-
             if line.split(':')[0] == participant.id:
                 new_line = updated_participant_line
                 found = True

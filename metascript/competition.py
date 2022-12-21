@@ -36,7 +36,7 @@ def competition(config):
     # Parse input participant
     participant = _get_participant()
     _clone_participant_controller(participant)
-    if config['metric'] == 'ranking':  # run a bubble sort ranking
+    if config['world']['metric'] == 'ranking':  # run a bubble sort ranking
         while True:
             opponent = _get_opponent(participant.repository)
             if opponent == None:  # we reached the top of the ranking

@@ -148,7 +148,7 @@ def _update_ranking(performance, participant, opponent):
             line = line.strip()  # remove the line break
             split = line.split(':')
             id = split[0]
-            ranking = intval(split[2])
+            ranking = int(split[2])
             if ranking != counter + 1:
                 print('Error: Unordered ranking.')
                 return

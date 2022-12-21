@@ -42,8 +42,12 @@ def push(message='Updated competition recordings'):
     )
     print(f'GitHub repository: https://github.com/{os.environ["GITHUB_REPOSITORY"]}')
     print(subprocess.check_output(['git', 'add', '-A', 'storage', 'participants.txt']))
-    print(subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT))
-    print(subprocess.check_output(['git', 'push', '-f', github_repository]))
+    try:
+        print(subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT))
+        print(subprocess.check_output(['git', 'push', '-f', github_repository]))
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+        print(e)
 
 
 def clone(repo, path):

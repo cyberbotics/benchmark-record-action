@@ -70,7 +70,13 @@ def _get_opponent(participant_repository):
                 split = upper_line.split(':')
                 return Participant(split[0], split[1])
             upper_line = line
-    print(f'Error: cannot find {participant_repository} in participants.txt')
+    if upper_line == '':  # the first participant is stepping in
+        print(f'Welcome {participant_repository}, you are the first participant there!')
+        return None
+    else:  # participant is a new comer, but there are other participants there, run against the last one
+        print(f'Welcome {participant_repository}, and good luck for the competition!')
+        split = upper_line.split(':')
+        return Participant(split[0], split[1])
     return None
 
 

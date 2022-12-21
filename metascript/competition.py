@@ -43,15 +43,16 @@ def competition(config):
             if opponent == None:  # we reached the top of the ranking
                 break
             _clone_participant_controller(opponent)
-            performance = _run_participant_controller(config, participant.controller_path, opponent.controller_path)
-            _update_ranking(performance, participant, opponent)
+            performance_line = _run_participant_controller(config, participant.controller_path, opponent.controller_path)
+            performance = int(performance_line[0])
+            _update_ranking(performance_line, participant, opponent)
             _update_animation_files(opponent if performance == 1 else participant)
             _remove_tmp_files(participant, opponent)
-            if performance == 0:  # draw or loose, stopping duals
+            if performance != 1:  # draw or loose, stopping duals
                 break
     else:  # run a simple performance evaluation
-        performance = _run_participant_controller(config, participant.controller_path)
-        _update_performance_line(performance, participant)
+        performance_line = _run_participant_controller(config, participant.controller_path)
+        _update_performance_line(performance_line, participant)
         _update_animation_files(participant)
         _remove_tmp_files(participant)
 
@@ -138,7 +139,9 @@ def _update_performance_line(performance, participant):  # only change the reque
         f.write(tmp_participants.strip())
 
 
-def _update_ranking(performance, participant, opponent):
+def _update_ranking(performance_line, participant, opponent):
+    performance = int(performance_line[0])
+    date_string = datetime.today().strftime("%Y-%m-%d")
     lines = []
     with open('participants.txt', 'r') as f:
         found_participant = -1
@@ -171,11 +174,11 @@ def _update_ranking(performance, participant, opponent):
             if performance != 1:  # participant lost
                 lines.append(f'{participant.id}:{participant.repository}:{counter + 1}')
             else:  # participant won: swap with opponent in the ranking
-                lines[counter - 1] = f'{participant.id}:{participant.repository}:{counter}'
-                lines.append(f'{opponent.id}:{opponent.repository}:{counter + 1}')
+                lines[counter - 1] = f'{participant.id}:{participant.repository}:{counter}:-:{date_string}'
+                lines.append(f'{opponent.id}:{opponent.repository}:{counter + 1}:-:{date_string}')
         elif performance == 1:  # swap participant and opponent in leaderboard
-            lines[found_opponent] = f'{participant.id}:{participant.repository}:{found_opponent + 1}'
-            lines[found_participant] = f'{opponent.id}:{opponent.repository}:{found_participant + 1}'
+            lines[found_opponent] = f'{participant.id}:{participant.repository}:{found_opponent + 1}:-:{date_string}'
+            lines[found_participant] = f'{opponent.id}:{opponent.repository}:{found_participant + 1}:-:{date_string}'
         else:  # nothing to change in the ranking
             return
     # write the updated ranking

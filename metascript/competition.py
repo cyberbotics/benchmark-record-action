@@ -63,7 +63,8 @@ def _get_opponent(participant):
         upper_line = ''
         for line in f:
             line = line.strip()  # strip the line break
-            if line == participant.repository:
+            split = line.split()
+            if split[0] == participant.id:
                 if upper_line == '':  # participant is number one, no opponent available
                     print(f'{participant.repository} is number 1 in the ranking.')
                     return None

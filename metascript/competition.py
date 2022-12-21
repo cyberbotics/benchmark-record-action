@@ -38,7 +38,7 @@ def competition(config):
     _clone_participant_controller(participant)
     if config['world']['metric'] == 'ranking':  # run a bubble sort ranking
         while True:
-            opponent = _get_opponent(participant.repository)
+            opponent = _get_opponent(participant)
             if opponent == None:  # we reached the top of the ranking
                 break
             _clone_participant_controller(opponent)
@@ -58,23 +58,25 @@ def competition(config):
         git.push(message='record and update competition animations')
 
 
-def _get_opponent(participant_repository):
+def _get_opponent(participant):
     with open('participants.txt') as f:
         upper_line = ''
         for line in f:
             line = line.strip()  # strip the line break
-            if line == participant_repository:
+            if line == participant.repository:
                 if upper_line == '':  # participant is number one, no opponent available
-                    print(f'{participant_repository} is number 1 in the ranking.')
+                    print(f'{participant.repository} is number 1 in the ranking.')
                     return None
                 split = upper_line.split(':')
                 return Participant(split[0], split[1])
             upper_line = line
     if upper_line == '':  # the first participant is stepping in
-        print(f'Welcome {participant_repository}, you are the first participant there!')
+        with open('participants.txt', 'w') as f:
+            f.write(f'{participant.id}:{participant.repository}:1')
+        print(f'Welcome {participant.repository}, you are the first participant there!')
         return None
     else:  # participant is a new comer, but there are other participants there, run against the last one
-        print(f'Welcome {participant_repository}, and good luck for the competition!')
+        print(f'Welcome {participant.repository}, and good luck for the competition!')
         split = upper_line.split(':')
         return Participant(split[0], split[1])
     return None

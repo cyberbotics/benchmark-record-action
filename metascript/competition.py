@@ -64,6 +64,7 @@ def _get_opponent(participant):
         for line in f:
             line = line.strip()  # strip the line break
             split = line.split()
+            print(f'split[0]={split[0]} participant.id={participant.id}')
             if split[0] == participant.id:
                 if upper_line == '':  # participant is number one, no opponent available
                     print(f'{participant.repository} is number 1 in the ranking.')
@@ -73,11 +74,11 @@ def _get_opponent(participant):
             upper_line = line
     if upper_line == '':  # the first participant is stepping in
         with open('participants.txt', 'w') as f:
-            f.write(f'{participant.id}:{participant.repository}:1')
+            f.write(f'{participant.id}:{participant.repository}:1\n')
         print(f'Welcome {participant.repository}, you are the first participant there!')
         return None
     else:  # participant is a new comer, but there are other participants there, run against the last one
-        print(f'Welcome {participant.repository}, and good luck for the competition!')
+        print(f'Welcome {participant.repository} and good luck for the competition!')
         split = upper_line.split(':')
         return Participant(split[0], split[1])
     return None

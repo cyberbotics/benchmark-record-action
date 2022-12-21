@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime
 import os
 import shutil
 from pathlib import Path
@@ -73,7 +74,7 @@ def _get_opponent(participant):
             upper_line = line
     if upper_line == '':  # the first participant is stepping in
         with open('participants.txt', 'w') as f:
-            f.write(f'{participant.id}:{participant.repository}:1')
+            f.write(f'{participant.id}:{participant.repository}:1:-:{datetime.today().strftime("%Y-%m-%d")}')
         print(f'Welcome {participant.repository}, you are the first participant there!')
         return None
     else:  # participant is a new comer, but there are other participants there, run against the last one

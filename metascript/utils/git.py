@@ -46,8 +46,7 @@ def push(message='Updated competition recordings'):
         print(subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT))
         print(subprocess.check_output(['git', 'push', '-f', github_repository]))
     except subprocess.CalledProcessError as e:
-        print(e.output)
-        print(e)
+        print("Nothing to commit and push.")
 
 
 def clone(repo, path):

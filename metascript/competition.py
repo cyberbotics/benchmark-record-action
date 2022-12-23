@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import os
 import shutil
@@ -120,7 +120,7 @@ def _update_participant(p, participant, performance):
     p['description'] = participant.data['description']
     p['country'] = participant.data['country']
     p['performance'] = performance
-    p['date'] = datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    p['date'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _update_performance(performance, participant, higher_is_better):

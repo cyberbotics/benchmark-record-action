@@ -89,7 +89,7 @@ def _get_opponent(participant):
         print(f'Welcome {participant.repository} and good luck for the competition.')
     else:
         print(f'Welcome back {participant.repository} and good luck for this round.')
-    opponent = participants['participant'][i - 1]
+    opponent = participants['participants'][i - 1]
     return Participant(opponent['id'], opponent['repository'])
 
 

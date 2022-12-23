@@ -34,7 +34,7 @@ class Participant:
         repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['INPUT_REPO_TOKEN'], self.repository)
         git.clone(repo, self.controller_path)
         self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
-        print('\Done cloning repository')
+        print('Cloning complete.')
 
 
 def competition(config):
@@ -66,6 +66,15 @@ def competition(config):
 
 def _get_opponent(participant):
     participants = _load_participants()
+    if participants is None:
+        participants['participants'] = []
+        p = {}
+        _update_participant(p, participant, 1)
+        participants['participants'].append(p)
+        _save_participants(participants)
+        print(f'Welcome {participant.repository}, you are the first participant there.')
+        return None
+
     i = 0
     found = False
     for p in participants['participants']:
@@ -73,11 +82,8 @@ def _get_opponent(participant):
             found = True
             break
         i += 1
-    if i == 0:
-        if found:
-            print(f'{participant.repository} is number 1 in the ranking.')
-        else:
-            print(f'Welcome {participant.repository}, you are the first participant there.')
+    if i == 0 and found:
+        print(f'{participant.repository} is number 1 in the ranking.')
         return None
     if not found:
         print(f'Welcome {participant.repository} and good luck for the competition.')

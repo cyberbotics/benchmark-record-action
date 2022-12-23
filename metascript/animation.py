@@ -169,34 +169,22 @@ def record_animations(config, controller_path, opponent_controller_path):
         if opponent_controller_container_id != '':
             subprocess.run(['/bin/bash', '-c', f'docker kill {opponent_controller_container_id}'])
 
-    # Restoring temporary file changes
+    # restore temporary file changes
     with open(world_config['file'], 'w') as f:
         f.write(world_content)
 
     # compute performance line
     metric = world_config['metric']
     higher_is_better = world_config['higher-is-better'] == 'true'
-    if not timeout:  # Competition completed normally
-        performance_line = _performance_format(performance, metric)
-    elif metric == 'time' and higher_is_better:  # Time-duration competition completed with maximum time
-        performance_line = _performance_format(world_config['max-duration'], metric)
-    else:  # Competition failed: time limit reached
-        raise Exception(
-            f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition.'
-        )
+    if timeout:
+        if metric == 'time' and higher_is_better:  # time-duration competition completed with maximum time
+            performance = float(world_config['max-duration'])
+        else:  # competition failed: time limit reached
+            raise Exception(
+                f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition.'
+            )
 
-    return performance_line
-
-def _performance_format(performance, metric):
-    if metric == 'time':
-        performance_string = _time_convert(performance)
-    elif metric == 'percent':
-        performance_string = str(round(performance * 100, 2)) + '%'
-    elif metric == 'distance':
-        performance_string = '{:.3f} m.'.format(performance)
-    else:
-        performance_string = performance
-    return f'{performance}:{performance_string}:{datetime.today().strftime("%Y-%m-%d")}'
+    return performance
 
 def _time_convert(time):
     minutes = time / 60

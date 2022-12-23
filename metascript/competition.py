@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from datetime import datetime
+import json
 import os
 import shutil
 from pathlib import Path
@@ -29,6 +30,11 @@ class Participant:
         self.id = id
         self.repository = repository
         self.controller_path = os.path.join('controllers', id)
+        print(f'\nCloning {repository} repository...')
+        repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['INPUT_REPO_TOKEN'], self.repository)
+        git.clone(repo, self.controller_path)
+        self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
+        print('\Done cloning repository')
 
 
 def competition(config):
@@ -36,23 +42,21 @@ def competition(config):
 
     # Parse input participant
     participant = _get_participant()
-    _clone_participant_controller(participant)
     if config['world']['metric'] == 'ranking':  # run a bubble sort ranking
         while True:
             opponent = _get_opponent(participant)
             if opponent == None:  # we reached the top of the ranking
                 break
-            _clone_participant_controller(opponent)
-            performance_line = _run_participant_controller(config, participant.controller_path, opponent.controller_path)
-            performance = int(performance_line[0])
-            _update_ranking(performance_line, participant, opponent)
+            performance = int(_run_participant_controller(config, participant.controller_path, opponent.controller_path))
+            _update_ranking(performance, participant, opponent)
             _update_animation_files(opponent if performance == 1 else participant)
             _remove_tmp_files(participant, opponent)
             if performance != 1:  # draw or loose, stopping duals
                 break
     else:  # run a simple performance evaluation
-        performance_line = _run_participant_controller(config, participant.controller_path)
-        _update_performance_line(performance_line, participant)
+        performance = _run_participant_controller(config, participant.controller_path)
+        higher_is_better = config['world']['higher_is_better'].lower() == 'true'
+        _update_performance(performance, participant, higher_is_better)
         _update_animation_files(participant)
         _remove_tmp_files(participant)
 
@@ -61,28 +65,26 @@ def competition(config):
 
 
 def _get_opponent(participant):
-    with open('participants.txt') as f:
-        upper_line = ''
-        for line in f:
-            line = line.strip()  # strip the line break
-            split = line.split(':')
-            if split[0] == participant.id:
-                if upper_line == '':  # participant is number one, no opponent available
-                    print(f'{participant.repository} is number 1 in the ranking.')
-                    return None
-                split = upper_line.split(':')
-                return Participant(split[0], split[1])
-            upper_line = line
-    if upper_line == '':  # the first participant is stepping in
-        with open('participants.txt', 'w') as f:
-            f.write(f'{participant.id}:{participant.repository}:1:-:{datetime.today().strftime("%Y-%m-%d")}')
-        print(f'Welcome {participant.repository}, you are the first participant there!')
+    participants = _load_participants()
+    i = 0
+    found = False
+    for p in participants['participants']:
+        if p['id'] == participant.id:
+            found = True
+            break
+        i += 1
+    if i == 0:
+        if found:
+            print(f'{participant.repository} is number 1 in the ranking.')
+        else:
+            print(f'Welcome {participant.repository}, you are the first participant there.')
         return None
-    else:  # participant is a new comer, but there are other participants there, run against the last one
-        print(f'Welcome {participant.repository} and good luck for the competition!')
-        split = upper_line.split(':')
-        return Participant(split[0], split[1])
-    return None
+    if not found:
+        print(f'Welcome {participant.repository} and good luck for the competition.')
+    else:
+        print(f'Welcome back {participant.repository} and good luck for this round.')
+    opponent = participants['participant'][i - 1]
+    return Participant(opponent['id'], opponent['repository'])
 
 
 def _get_participant():
@@ -90,17 +92,6 @@ def _get_participant():
     split = input_participant.split(':')
     participant = Participant(split[0], split[1])
     return participant
-
-
-def _clone_participant_controller(participant):
-    print('\nCloning participant repository...')
-    repo = 'https://{}:{}@github.com/{}'.format(
-        'Competition_Evaluator',
-        os.environ['INPUT_REPO_TOKEN'],
-        participant.repository
-    )
-    git.clone(repo, participant.controller_path)
-    print('done fetching repo')
 
 
 def _run_participant_controller(config, controller_path, opponent_controller_path=None):
@@ -117,73 +108,100 @@ def _run_participant_controller(config, controller_path, opponent_controller_pat
     return performance
 
 
-def _update_performance_line(performance, participant):  # only change the requested participant's performance
-    updated_participant_line = f'{participant.id}:{participant.repository}:{performance}'
-    tmp_participants = ''
-    print('Updating participants.txt\n')
-    with open('participants.txt', 'r') as f:
-        found = False
-        for line in f:
-            line = line.strip()  # remove the line break
-            if line.split(':')[0] == participant.id:
-                new_line = updated_participant_line
-                found = True
-            else:
-                new_line = line
-            # concatenate the new string and add an end-line break
-            tmp_participants += new_line + '\n'
-        if not found:  # add at the end of the participants.txt file
-            tmp_participants += updated_participant_line + '\n'
-
-    with open('participants.txt', 'w') as f:
-        f.write(tmp_participants.strip())
+def _update_participant(p, participant, performance):
+    p['id'] = participant.id
+    p['repository'] = participant.repository
+    p['name'] = participant.data['name']
+    p['description'] = participant.data['description']
+    p['country'] = participant.data['country']
+    p['performance'] = performance
+    p['date'] = datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def _update_ranking(performance_line, participant, opponent):
-    performance = int(performance_line[0])
-    date_string = datetime.today().strftime("%Y-%m-%d")
-    lines = []
-    with open('participants.txt', 'r') as f:
-        found_participant = -1
-        found_opponent = -1
-        counter = 0
-        for line in f:
-            line = line.strip()  # remove the line break
-            split = line.split(':')
-            id = split[0]
-            ranking = int(split[2])
-            if ranking != counter + 1:
-                print('Error: Unordered ranking.')
-                return
-            if found_opponent >= 0:
-                if id != participant.id:
-                    print('Error: wrong ranking.')
-                    return
-                found_participant = counter
-            elif id == opponent.id:
-                found_opponent = counter
-            lines.append(line)
-            counter += 1
-        if found_opponent == -1:
-            print('Error: opponent not found in ranking.')
+def _update_performance(performance, participant, higher_is_better):
+    # change the requested participant's performance and update list order
+    participants = _load_participants()
+    i = 0
+    found = False
+    for p in participants['participants']:
+        if p['id'] == participant.id:
+            found = True
+            break
+        i += 1
+    np = participants['participants'].pop(i) if found else {}
+    _update_participant(np, participant, performance)
+    i = 0
+    for p in participants['participants']:
+        if higher_is_better and performance > p['performance']:
+            break
+        elif not higher_is_better and performance < p['performance']:
+            break
+        i += 1
+    participants['participants'].insert(i, np)
+    _save_participants(participants)
+
+
+def _update_ranking(performance, participant, opponent):
+    # insert participant if new, and swap winning participant with opponent
+    participants = _load_participants()
+    found_participant = False
+    found_opponent = False
+    for p in participants['participants']:
+        if p['id'] == opponent.id:
+            found_opponent = p
+            if found_participant:
+                break
+        elif p['id'] == participant.id:
+            found_participant = p
+            if found_opponent:
+                break
+    if not found_opponent:
+        print('Error: missing opponent in participants.json.')
+        return
+    count = len(participants['participants']) + 1
+    if performance != 1:  # participant lost
+        if found_participant:  # nothing to change
             return
-        if found_participant == -1:
-            if found_opponent != counter - 1:
-                print('Error: opponent should be the last one in the ranking.')
-                return
-            if performance != 1:  # participant lost
-                lines.append(f'{participant.id}:{participant.repository}:{counter + 1}')
-            else:  # participant won: swap with opponent in the ranking
-                lines[counter - 1] = f'{participant.id}:{participant.repository}:{counter}:-:{date_string}'
-                lines.append(f'{opponent.id}:{opponent.repository}:{counter + 1}:-:{date_string}')
-        elif performance == 1:  # swap participant and opponent in leaderboard
-            lines[found_opponent] = f'{participant.id}:{participant.repository}:{found_opponent + 1}:-:{date_string}'
-            lines[found_participant] = f'{opponent.id}:{opponent.repository}:{found_participant + 1}:-:{date_string}'
-        else:  # nothing to change in the ranking
-            return
-    # write the updated ranking
-    with open('participants.txt', 'w') as f:
-        f.write('\n'.join(lines))
+        # we need to add the partipant at the bottom of the list
+        p = {}
+        _update_participant(p, participant, count)
+        participants['participants'].append(p)
+    else:
+        if found_participant:  # swap
+            rank = found_opponent['performance']
+            _update_participant(found_opponent, participant, rank)
+            _update_participant(found_participant, opponent, rank + 1)
+        else:  # insert participant at last but one position, move opponent to last position
+            if found_opponent['performance'] != count - 1:
+                print('Error: opponent should be ranked last in participants.json')
+            _update_participant(found_opponent, participant, count - 1)
+            p = {}
+            _update_participant(p, opponent, count)
+            participants['participants'].append(p)
+    _save_participants(participants)
+
+
+def _load_participants():
+    participants = _load_json('participants.json')
+    if participants is None:
+        participants = {'participants': []}
+    return participants
+
+
+def _save_participants(participants):
+    _save_json('participants.json', participants)
+
+
+def _load_json(filename):
+    if not os.path.exists(filename):
+        return None
+    with open(filename, encoding='utf-8') as f:
+        return json.load(f)
+
+
+def _save_json(filename, object):
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(object, f, ensure_ascii=False)
 
 
 def _update_animation_files(participant):

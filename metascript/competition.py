@@ -66,8 +66,7 @@ def competition(config):
 
 def _get_opponent(participant):
     participants = _load_participants()
-    if participants is None:
-        participants['participants'] = []
+    if len(participants['participants']) == 0:
         p = {}
         _update_participant(p, participant, 1)
         participants['participants'].append(p)

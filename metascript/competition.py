@@ -114,14 +114,15 @@ def _run_participant_controller(config, controller_path, opponent_controller_pat
     return performance
 
 
-def _update_participant(p, participant, performance):
+def _update_participant(p, participant, performance=None):
     p['id'] = participant.id
     p['repository'] = participant.repository
     p['private'] = participant.private
     p['name'] = participant.data['name']
     p['description'] = participant.data['description']
     p['country'] = participant.data['country']
-    p['performance'] = performance
+    if performance is not None:
+        p['performance'] = performance
     p['date'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
@@ -167,7 +168,9 @@ def _update_ranking(performance, participant, opponent):
         return
     count = len(participants['participants']) + 1
     if performance != 1:  # participant lost
-        if found_participant:  # nothing to change
+        if found_participant:  # nothing to change, however, the participant.json data may have changed
+            _update_participant(found_participant, participant)
+            _save_participants(participants)
             return
         # we need to add the partipant at the bottom of the list
         p = {}

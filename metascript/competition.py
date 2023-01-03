@@ -26,9 +26,10 @@ ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
 
 
 class Participant:
-    def __init__(self, id, repository):
+    def __init__(self, id, repository, private):
         self.id = id
         self.repository = repository
+        self.private = private
         self.controller_path = os.path.join('controllers', id)
         print(f'\nCloning {repository} repository...')
         repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['INPUT_REPO_TOKEN'], self.repository)
@@ -89,13 +90,13 @@ def _get_opponent(participant):
     else:
         print(f'Welcome back {participant.repository} and good luck for this round.')
     opponent = participants['participants'][i - 1]
-    return Participant(opponent['id'], opponent['repository'])
+    return Participant(opponent['id'], opponent['repository'], opponent['private'])
 
 
 def _get_participant():
     input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
     split = input_participant.split(':')
-    participant = Participant(split[0], split[1])
+    participant = Participant(split[0], split[1], split[2])
     return participant
 
 
@@ -116,6 +117,7 @@ def _run_participant_controller(config, controller_path, opponent_controller_pat
 def _update_participant(p, participant, performance):
     p['id'] = participant.id
     p['repository'] = participant.repository
+    p['private'] = participant.private
     p['name'] = participant.data['name']
     p['description'] = participant.data['description']
     p['country'] = participant.data['country']

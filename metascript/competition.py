@@ -47,6 +47,7 @@ def competition(config):
         while True:
             opponent = _get_opponent(participant)
             if opponent == None:  # we reached the top of the ranking
+                # FIXME: we need to update the information from the participant.json file if that wasn't done
                 break
             performance = int(_run_participant_controller(config, participant.controller_path, opponent.controller_path))
             _update_ranking(performance, participant, opponent)

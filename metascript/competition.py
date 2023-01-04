@@ -43,11 +43,23 @@ def competition(config):
 
     # Parse input participant
     participant = _get_participant()
+    performance = None
     if config['world']['metric'] == 'ranking':  # run a bubble sort ranking
         while True:
             opponent = _get_opponent(participant)
-            if opponent == None:  # we reached the top of the ranking
-                # FIXME: we need to update the information from the participant.json file if that wasn't done
+            if opponent is None:  # we reached the top of the ranking
+                if performance is None:  # number 1 was modified, so no performance evaluation was run
+                    # we still need to update the participant data in case they were modified
+                    participants = _load_participants()
+                    if len(participants) == 0:  # number 1 is the first one to be submitted
+                        p = {}
+                        _update_participant(p, participant, 1)
+                        participants['participants'].append(p)
+                    else:  # number 1 was updated
+                        for p in participants['participants']:
+                            if p['id'] = participant.id:
+                                _update_participant(p, participant, 1)
+                    _save_participants(participants)                        
                 break
             performance = int(_run_participant_controller(config, participant.controller_path, opponent.controller_path))
             _update_ranking(performance, participant, opponent)

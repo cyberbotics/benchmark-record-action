@@ -10,7 +10,7 @@ This composite action works with environment variables as input, two mandatory a
 
 ### Mandatory Input
 
-- INPUT_INDIVIDUAL_EVALUATION: the participant's line from `participants.txt`. Each line in `participants.txt` file has the following format: `id*:repository*:performance:performance string:date` where * fields are mandatory
+- INPUT_INDIVIDUAL_EVALUATION: information about the repository of the participant with the following format: `id:repository:private`, e.g., `348767863:omichel/my-competitor:true`.
 - INPUT_REPO_TOKEN: token used to fetch the participant repository, typically REPO_TOKEN. A more privileged token than GITHUB_TOKEN is needed to fetch controllers from private repositories.
 
 ### Optional Input
@@ -23,7 +23,7 @@ First, the `webots.yml` file is parsed to get several competition parameters. Th
 
 ### 1. Get the Participants
 
-We parse the `INPUT_INDIVIDUAL_EVALUATION` environment variable to get the **id** and the **controller repository** needed for the rest of the code.
+We parse the `INPUT_INDIVIDUAL_EVALUATION` environment variable to get the **id**, the **controller repository** and the **private** status needed in the rest of the code.
 
 ### 2. Clone the Participant Repositories
 
@@ -38,7 +38,7 @@ We then run Webots and the controller of the participant inside Docker container
 The animator records and saves the animation files and the competition performance in the temporary storage.
 
 The animation files are renamed as `animation.json` and `scene.x3d` files and are moved to their own directory `storage/wb_animation_{id}`. If there is an old animation, it gets overwritten.
-The `participants.txt` file is also updated with the new recorded performance.
+The `participants.json` file is also updated with the new recorded performance.
 
 ### 4. Remove temporary files
 
@@ -49,7 +49,7 @@ We remove the various temporary files so that only the updated files of interest
 All of the updates are committed and pushed to the repository of the competition organizer.
 The modified directories and files are therefore:
 
-- `participants.txt`
+- `participants.json`
 - `storage/wb_animation_{id}`
 
 ## Workflow
@@ -60,7 +60,7 @@ Here is a GitHub workflow snippet which uses the composite action:
 - name: Record and update animations
   uses: cyberbotics/competition-record-action@main
   env:
-    INPUT_INDIVIDUAL_EVALUATION: "1876568742:username/repository_name"
+    INPUT_INDIVIDUAL_EVALUATION: "1876568742:username/repository_name:true"
     INPUT_REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
     INPUT_ALLOW_PUSH: True
 ```

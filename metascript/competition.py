@@ -57,7 +57,7 @@ def competition(config):
                         participants['participants'].append(p)
                     else:  # number 1 was updated
                         for p in participants['participants']:
-                            if p['id'] = participant.id:
+                            if p['id'] == participant.id:
                                 _update_participant(p, participant, 1)
                     _save_participants(participants)                        
                 break

@@ -124,23 +124,26 @@ def record_animations(config, controller_path, opponent_controller_path):
     )
 
     launched_controller = False
-    controller_connected = False
+    participant_controller_connected = False
+    opponent_controller_connected = False
     performance = 0
     timeout = False
 
     while webots_docker.poll() is None:
         realtime_output = _print_stdout(webots_docker)
         if not launched_controller and 'waiting for connection' in realtime_output:
-            print('META SCRIPT: Webots ready for controller, launching controller container...')
             subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
                              stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             if opponent_controller_path:
                 subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
                                  stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             launched_controller = True
-        if launched_controller and 'extern controller: connected' in realtime_output:
-            print('META SCRIPT: Controller connected to Webots')
-            controller_connected = True
+        if launched_controller:
+            if ' extern controller: connected' in realtime_output:
+                if "'participant' " in realtime_output:
+                    participant_controller_connected = True
+                elif "'opponent' " in realtime_output:
+                    opponent_controller_connected = True
         if PERFORMANCE_KEYWORD in realtime_output:
             performance = float(realtime_output.strip().replace(PERFORMANCE_KEYWORD, ''))
             break
@@ -153,9 +156,14 @@ def record_animations(config, controller_path, opponent_controller_path):
     if not launched_controller:
         _print_error('Competition finished before launching the participant controller',
                      'Check that the controller in the world file is the same as the one in webots.yml.')
-    if not controller_connected:
+    if not participant_controller_connected:
         _print_error('Competition finished before the participant controller connected to Webots',
                      'Your controller crashed. Please debug your controller locally before submitting it.')
+        performance = 0
+    if not opponent_controller_connected:
+        _print_error('Competition finished before the opponent controller connected to Webots',
+                     'Therefore, you won.')
+        performance = 1
 
     print('Closing the containers...')
     webots_container_id = _get_container_id('recorder-webots')

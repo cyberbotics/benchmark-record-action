@@ -258,7 +258,6 @@ def _remove_tmp_files(participant, opponent=None):
 
 def _remove_directory(directory):
     if Path(directory).exists():
-        os.system(f'ls -l {directory}/*')
         shutil.rmtree(directory, ignore_errors=True)
 
 

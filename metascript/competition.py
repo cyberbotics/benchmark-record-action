@@ -127,7 +127,7 @@ def _run_participant_controller(config, controller_path, opponent_controller_pat
     return performance
 
 
-def _update_participant(p, participant, performance=None):
+def _update_participant(p, participant, performance=None, date=True):
     p['id'] = participant.id
     p['repository'] = participant.repository
     p['private'] = participant.private
@@ -136,7 +136,8 @@ def _update_participant(p, participant, performance=None):
     p['country'] = participant.data['country']
     if performance is not None:
         p['performance'] = performance
-    p['date'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    if date:
+        p['date'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _update_performance(performance, participant, higher_is_better):
@@ -193,13 +194,13 @@ def _update_ranking(performance, participant, opponent):
         if found_participant:  # swap
             rank = found_opponent['performance']
             _update_participant(found_opponent, participant, rank)
-            _update_participant(found_participant, opponent, rank + 1)
+            _update_participant(found_participant, opponent, rank + 1, False)
         else:  # insert participant at last but one position, move opponent to last position
             if found_opponent['performance'] != count - 1:
                 print('Error: opponent should be ranked last in participants.json')
             _update_participant(found_opponent, participant, count - 1)
             p = {}
-            _update_participant(p, opponent, count)
+            _update_participant(p, opponent, count, False)
             participants['participants'].append(p)
     _save_participants(participants)
 

@@ -78,7 +78,7 @@ def record_animations(config, controller_path, opponent_controller_path):
             '-f', f'{controller_path}/controllers/Dockerfile',
             '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
             '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/participant',
-            f'{controller_path}/controllers/{default_controller_name}'
+            f'{controller_path}/controllers'
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -98,7 +98,7 @@ def record_animations(config, controller_path, opponent_controller_path):
                 '-f', f'{opponent_controller_path}/controllers/Dockerfile',
                 '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
                 '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/opponent',
-                f'{opponent_controller_path}/controllers/{default_controller_name}'
+                f'{opponent_controller_path}/controllers'
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,

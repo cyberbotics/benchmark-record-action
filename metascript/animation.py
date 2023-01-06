@@ -133,12 +133,12 @@ def record_animations(config, controller_path, opponent_controller_path):
     while webots_docker.poll() is None:
         realtime_output = _print_stdout(webots_docker)
         if participant_docker:
-            _print_stdout(participant_docker)
+            #_print_stdout(participant_docker)
         elif "INFO: 'participant' extern controller: waiting for connection on ipc://" in realtime_output:
             participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
                                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
         if opponent_docker:
-            _print_stdout(opponent_docker)        
+            #_print_stdout(opponent_docker)        
         elif "INFO: 'opponent' extern controller: waiting for connection on ipc://" in realtime_output:
             opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
                                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
@@ -147,7 +147,7 @@ def record_animations(config, controller_path, opponent_controller_path):
                 participant_controller_connected = True
             elif "'opponent' " in realtime_output:
                 opponent_controller_connected = True
-        if PERFORMANCE_KEYWORD in realtime_output:
+        elif PERFORMANCE_KEYWORD in realtime_output:
             performance = float(realtime_output.strip().replace(PERFORMANCE_KEYWORD, ''))
             break
         elif 'Controller timeout' in realtime_output:

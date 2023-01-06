@@ -132,21 +132,21 @@ def record_animations(config, controller_path, opponent_controller_path):
 
     while webots_docker.poll() is None:
         realtime_output = _print_stdout(webots_docker)
-        if not participant_docker and 'waiting for connection' in realtime_output:
-            participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
-                                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
-            if opponent_controller_path:
-                opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
-                                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
         if participant_docker:
             _print_stdout(participant_docker)
-            if opponent_docker:
-                _print_stdout(opponent_docker)
-            if ' extern controller: connected' in realtime_output:
-                if "'participant' " in realtime_output:
-                    participant_controller_connected = True
-                elif "'opponent' " in realtime_output:
-                    opponent_controller_connected = True
+        elif "INFO: 'participant' extern controller: waiting for connection on ipc://" in realtime_output:
+            participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
+                                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+        if opponent_docker:
+            _print_stdout(opponent_docker)        
+        elif "INFO: 'opponent' extern controller: waiting for connection on ipc://" in realtime_output:
+            opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
+                                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+        if ' extern controller: connected' in realtime_output:
+            if "'participant' " in realtime_output:
+                participant_controller_connected = True
+            elif "'opponent' " in realtime_output:
+                opponent_controller_connected = True
         if PERFORMANCE_KEYWORD in realtime_output:
             performance = float(realtime_output.strip().replace(PERFORMANCE_KEYWORD, ''))
             break

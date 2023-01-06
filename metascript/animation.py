@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import subprocess
 import os
+import select
+import subprocess
 from datetime import datetime
 from math import floor
 
@@ -230,12 +231,6 @@ def _get_realtime_stdout(process, error_title, error_message):
             print(realtime_output.strip())
     if process.returncode != 0:
         _print_error(error_title, error_message)
-
-def _print_stdout(process):
-    realtime_output = process.stdout.readline()
-    if realtime_output:
-        print(realtime_output.strip())
-    return realtime_output
 
 def _print_error(title, message):
     print(f'::error title={title}::{message}')

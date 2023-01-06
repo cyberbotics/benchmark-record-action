@@ -137,7 +137,7 @@ def record_animations(config, controller_path, opponent_controller_path):
             fds.append(participant_docker.stdout)
         if opponent_docker:
             fds.append(opponent_docker.stdout)
-        fd = select(fds, [], [])[0]
+        fd = select.select(fds, [], [])[0]
         webots_line = webots_docker.stdout.readline().strip() if webots_docker.stdout in fd else None
         participant_line = participant_docker.stdout.readline().strip() if participant_docker and participant_docker.stdout in fd else None
         opponent_line = opponent_docker.stdout.readline().strip() if opponent_docker and opponent_docker.stdout in fd else None

@@ -131,28 +131,37 @@ def record_animations(config, controller_path, opponent_controller_path):
     timeout = False
 
     while webots_docker.poll() is None:
-        realtime_output = _print_stdout(webots_docker)
+        fds = [ webots_docker.stdout ]
         if participant_docker:
-            pass
-            #_print_stdout(participant_docker)
-        elif "INFO: 'participant' extern controller: waiting for connection on ipc://" in realtime_output:
-            participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
-                                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+            fds.append(participant_docker.stdout)
         if opponent_docker:
-            pass
-            #_print_stdout(opponent_docker)        
-        elif "INFO: 'opponent' extern controller: waiting for connection on ipc://" in realtime_output:
-            opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
-                                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
-        if ' extern controller: connected' in realtime_output:
-            if "'participant' " in realtime_output:
+            fds.append(opponent_docker.stdout)
+        fd = select(fds, [], [])[0]
+        webots_line = webots_docker.stdout.readline().strip() if webots_docker.stdout in fd else None
+        participant_line = participant_docker.stdout.readline().strip() if participant_docker and participant_docker.stdout in fd else None
+        opponent_line = opponent_docker.stdout.readline().strip() if opponent_docker and opponent_docker.stdout in fd else None
+        if webots_line:
+            print(webots_line)
+        if participant_line:
+            print(participant_line)
+        if opponent_line:
+            print(opponent_line)
+        if "' extern controller: waiting for connection on ipc://" in webots_line:
+            if participant_docker is None and "INFO: 'participant' " in webots_line:
+                participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
+                                                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+            elif opponent_docker is None and "INFO: 'opponent' " in webots_line:
+                opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
+                                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+        elif "' extern controller: connected" in webots_line:
+            if "INFO: 'participant' " in webots_line:
                 participant_controller_connected = True
-            elif "'opponent' " in realtime_output:
+            elif "INFO: 'opponent' " in webots_line:
                 opponent_controller_connected = True
-        elif PERFORMANCE_KEYWORD in realtime_output:
-            performance = float(realtime_output.strip().replace(PERFORMANCE_KEYWORD, ''))
+        elif PERFORMANCE_KEYWORD in webots_line:
+            performance = float(webots_line.strip().replace(PERFORMANCE_KEYWORD, ''))
             break
-        elif 'Controller timeout' in realtime_output:
+        elif 'Controller timeout' in webots_line:
             timeout = True
             break
     if webots_docker.returncode:
@@ -216,7 +225,9 @@ def _get_container_id(container_name):
 
 def _get_realtime_stdout(process, error_title, error_message):
     while process.poll() is None:
-        _print_stdout(process)
+        realtime_output = process.stdout.readline()
+        if realtime_output:
+            print(realtime_output.strip())
     if process.returncode != 0:
         _print_error(error_title, error_message)
 

@@ -123,7 +123,6 @@ def record_animations(config, controller_path, opponent_controller_path):
         encoding='utf-8'
     )
 
-    launched_controller = False
     participant_docker = None
     opponent_docker = None
     participant_controller_connected = False
@@ -133,18 +132,16 @@ def record_animations(config, controller_path, opponent_controller_path):
 
     while webots_docker.poll() is None:
         realtime_output = _print_stdout(webots_docker)
-        if not launched_controller and 'waiting for connection' in realtime_output:
+        if not participant_docker and 'waiting for connection' in realtime_output:
             participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
-                                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
             if opponent_controller_path:
                 opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
-                                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            launched_controller = True
-        if launched_controller:
-            if participant_docker is not None:
-                _print_stdout(participant_docker)
-                if opponent_docker is not None:
-                    _print_stdout(opponent_docker)
+                                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+        if participant_docker:
+            _print_stdout(participant_docker)
+            if opponent_docker:
+                _print_stdout(opponent_docker)
             if ' extern controller: connected' in realtime_output:
                 if "'participant' " in realtime_output:
                     participant_controller_connected = True
@@ -159,7 +156,7 @@ def record_animations(config, controller_path, opponent_controller_path):
     if webots_docker.returncode:
         _print_error(f'Webots container exited with code {webots_docker.returncode}',
                      'Error while running the Webots container.')
-    if not launched_controller:
+    if not participant_docker:
         _print_error('Competition finished before launching the participant controller',
                      'Check that the controller in the world file is the same as the one in webots.yml.')
     if not participant_controller_connected:

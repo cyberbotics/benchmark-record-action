@@ -135,10 +135,10 @@ def record_animations(config, controller_path, opponent_controller_path):
         realtime_output = _print_stdout(webots_docker)
         if not launched_controller and 'waiting for connection' in realtime_output:
             participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
-                                                  stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+                                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             if opponent_controller_path:
                 opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
-                                                   stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+                                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             launched_controller = True
         if launched_controller:
             if participant_docker is not None:

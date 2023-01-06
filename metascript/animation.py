@@ -142,9 +142,9 @@ def record_animations(config, controller_path, opponent_controller_path):
             launched_controller = True
         if launched_controller:
             if participant_docker:
-                _print_output(participant_docker)
+                _print_stdout(participant_docker)
                 if opponent_docker:
-                    _print_output(opponent_docker)
+                    _print_stdout(opponent_docker)
             if ' extern controller: connected' in realtime_output:
                 if "'participant' " in realtime_output:
                     participant_controller_connected = True

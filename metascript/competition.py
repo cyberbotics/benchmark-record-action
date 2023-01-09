@@ -111,7 +111,7 @@ def _get_opponent(participant):
 def _get_participant():
     input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
     split = input_participant.split(':')
-    participant = Participant(split[0], split[1], split[2])
+    participant = Participant(split[0], split[1], split[2] == 'true')
     return participant
 
 

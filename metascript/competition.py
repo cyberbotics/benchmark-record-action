@@ -64,7 +64,7 @@ def competition(config):
                 break
             performance = int(record_animations(config, participant.controller_path, opponent.controller_path))
             _update_ranking(performance, participant, opponent)
-            _update_animation_files(opponent if performance == 1 else participant)            
+            _update_animation_files(opponent if performance == 1 else participant)
             _remove_directory(opponent.controller_path)
             if performance != 1:  # draw or loose, stopping duals
                 break

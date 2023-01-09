@@ -44,6 +44,7 @@ def competition(config):
     # Parse input participant
     participant = _get_participant()
     performance = None
+    animator_controller_destination_path = _copy_animator_files()
     if config['world']['metric'] == 'ranking':  # run a bubble sort ranking
         while True:
             opponent = _get_opponent(participant)
@@ -61,18 +62,19 @@ def competition(config):
                                 _update_participant(p, participant, 1)
                     _save_participants(participants)                        
                 break
-            performance = int(_run_participant_controller(config, participant.controller_path, opponent.controller_path))
+            performance = int(record_animations(config, participant.controller_path, opponent.controller_path))
             _update_ranking(performance, participant, opponent)
-            _update_animation_files(opponent if performance == 1 else participant)
-            _remove_tmp_files(participant, opponent)
+            _update_animation_files(opponent if performance == 1 else participant)            
+            _remove_directory(opponent.controller_path)
             if performance != 1:  # draw or loose, stopping duals
                 break
     else:  # run a simple performance evaluation
-        performance = _run_participant_controller(config, participant.controller_path)
+        performance = record_animations(config, participant.controller_path)
         higher_is_better = config['world']['higher_is_better'].lower() == 'true'
         _update_performance(performance, participant, higher_is_better)
         _update_animation_files(participant)
-        _remove_tmp_files(participant)
+    _remove_directory(participant.controller_path)
+    _remove_directory(animator_controller_destination_path)
 
     if ALLOW_PUSH:
         git.push(message='record and update competition animations')
@@ -113,18 +115,11 @@ def _get_participant():
     return participant
 
 
-def _run_participant_controller(config, controller_path, opponent_controller_path=None):
-    print('\nRunning participant\'s controller...')
+def _copy_animator_files():
     animator_controller_source = os.path.join('metascript', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
     _copy_directory(animator_controller_source, animator_controller_destination)
-
-    # Record animation and return performance
-    performance = record_animations(config, controller_path, opponent_controller_path)
-
-    _remove_directory(animator_controller_destination)
-    print('done running controller and recording animations')
-    return performance
+    return animator_controller_destination
 
 
 def _update_participant(p, participant, performance=None, date=True):
@@ -247,14 +242,6 @@ def _cleanup_storage_files(directory):
                 os.rename(path, directory + '/animation.json')
             elif path.endswith('.x3d'):
                 os.rename(path, directory + '/scene.x3d')
-
-
-def _remove_tmp_files(participant, opponent=None):
-    _remove_directory('tmp')
-    _remove_directory('metascript')
-    _remove_directory(participant.controller_path)
-    if opponent:
-        _remove_directory(opponent.controller_path)
 
 
 def _remove_directory(directory):

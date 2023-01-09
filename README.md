@@ -31,7 +31,7 @@ We clone the participant **repository** into the competition `controllers/` dire
 
 ### 3. Run Webots and Record Animations
 
-We create a temporary storage directory `/tmp/animation` and modify the world file to add a `Supervisor` running the `animator.py` controller and we set the robot's controller to \<extern\>.
+We create a temporary storage directory `/tmp` and modify the world file to add a `Supervisor` running the `animator.py` controller and we set the robot's controller to \<extern\>.
 
 We then run Webots and the controller of the participant inside Docker containers. We first launch Webots and when it is waiting for a connection of an external controller, we launch the controller container.
 

@@ -20,11 +20,11 @@ import subprocess
 from datetime import datetime
 from math import floor
 
-TMP_ANIMATION_DIRECTORY = 'tmp/animation'
+TMP_ANIMATION_DIRECTORY = 'tmp'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-def record_animations(config, controller_path, opponent_controller_path):
+def record_animations(config, controller_path, opponent_controller_path=None):
     world_config = config['world']
     default_controller_name = config['dockerCompose'].split('/')[2]
 
@@ -111,6 +111,7 @@ def record_animations(config, controller_path, opponent_controller_path):
         )
 
     # Run Webots container with Popen to read the stdout
+    print('\nRunning participant\'s controller...')
     webots_docker = subprocess.Popen(
         [
             'docker', 'run', '-t', '--rm', '--init',
@@ -207,7 +208,7 @@ def record_animations(config, controller_path, opponent_controller_path):
             raise Exception(
                 f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition.'
             )
-
+    print('done running controller and recording animations')
     return performance
 
 def _time_convert(time):

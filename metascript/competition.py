@@ -133,8 +133,6 @@ def _update_participant(p, participant, performance=None, date=True):
         p['performance'] = performance
     if date:
         p['date'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    else:
-        p['date'] = participant.data['date'] # keep the original date
 
 
 def _update_performance(performance, participant, higher_is_better):
@@ -195,10 +193,10 @@ def _update_ranking(performance, participant, opponent):
         else:  # insert participant at last but one position, move opponent to last position
             if found_opponent['performance'] != count - 1:
                 print('Error: opponent should be ranked last in participants.json')
-            _update_participant(found_opponent, participant, count - 1)
+            _update_participant(found_opponent, opponent, count, False)
             p = {}
-            _update_participant(p, opponent, count, False)
-            participants['participants'].append(p)
+            _update_participant(p, participant, count - 1)
+            participants['participants'].insert(count - 1, p)
     _save_participants(participants)
 
 

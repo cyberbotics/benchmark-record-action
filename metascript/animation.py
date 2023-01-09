@@ -31,10 +31,10 @@ def record_animations(config, controller_path, opponent_controller_path=None):
     # Create temporary directory
     subprocess.check_output(['mkdir', '-p', TMP_ANIMATION_DIRECTORY])
 
-    # Temporary file changes*:
+    # Temporary world file changes
     with open(world_config['file'], 'r') as f:
-        world_content = f.read()
-    world_content = world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"')
+        original_world_content = f.read()
+    world_content = original_world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"')
     if opponent_controller_path:
         world_content = world_content.replace(f'controller "opponent"', 'controller "<extern>"')
     world_content += f'''
@@ -196,7 +196,7 @@ def record_animations(config, controller_path, opponent_controller_path=None):
 
     # restore temporary file changes
     with open(world_config['file'], 'w') as f:
-        f.write(world_content)
+        f.write(original_world_content)
 
     # compute performance line
     metric = world_config['metric']

@@ -133,6 +133,8 @@ def _update_participant(p, participant, performance=None, date=True):
         p['performance'] = performance
     if date:
         p['date'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    else:
+        p['date'] = participant.data['date'] # keep the original date
 
 
 def _update_performance(performance, participant, higher_is_better):
@@ -181,7 +183,7 @@ def _update_ranking(performance, participant, opponent):
             _update_participant(found_participant, participant)
             _save_participants(participants)
             return
-        # we need to add the partipant at the bottom of the list
+        # we need to add the participant at the bottom of the list
         p = {}
         _update_participant(p, participant, count)
         participants['participants'].append(p)

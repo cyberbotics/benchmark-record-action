@@ -195,8 +195,8 @@ def _update_ranking(performance, participant, opponent):
                 print('Error: opponent should be ranked last in participants.json')
             _update_participant(found_opponent, opponent, count, False)
             p = {}
-            _update_participant(p, participant, count -1)
-            participants['participants'].insert(count -1, p)
+            _update_participant(p, participant, count - 1)
+            participants['participants'].insert(count - 1, p)
     _save_participants(participants)
 
 

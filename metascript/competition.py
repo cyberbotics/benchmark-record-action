@@ -62,14 +62,16 @@ def competition(config):
                                 _update_participant(p, participant, 1)
                     _save_participants(participants)                        
                 break
-            performance = int(record_animations(config, participant.controller_path, opponent.controller_path))
+            performance = int(record_animations(config, participant.controller_path, opponent.controller_path,
+                                                participant.data['name'], opponent.data['name']))
             _update_ranking(performance, participant, opponent)
             _update_animation_files(opponent if performance == 1 else participant)
             _remove_directory(opponent.controller_path)
             if performance != 1:  # draw or loose, stopping duals
                 break
     else:  # run a simple performance evaluation
-        performance = record_animations(config, participant.controller_path)
+        performance = record_animations(config, participant.controller_path, None,
+                                       participant.data['name'], None)
         higher_is_better = config['world']['higher_is_better'].lower() == 'true'
         _update_performance(performance, participant, higher_is_better)
         _update_animation_files(participant)

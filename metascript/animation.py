@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 1996-2022 Cyberbotics Ltd.
+# Copyright 1996-2023 Cyberbotics Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,11 +65,10 @@ def record_animations(config, controller_path, opponent_controller_path=None):
         stderr=subprocess.STDOUT,
         encoding='utf-8'
     )
-    _get_realtime_stdout(
-        recorder_build,
-        'Error while building the recorder container',
-        'Missing or misconfigured Dockerfile'
-    )
+    return_code = _get_realtime_stdout(recorder_build)
+    if return_code != 0:
+        _print_error('Error while building the recorder container',
+                     'Missing or misconfigured Dockerfile')
 
     controller_build = subprocess.Popen(
         [
@@ -84,11 +83,10 @@ def record_animations(config, controller_path, opponent_controller_path=None):
         stderr=subprocess.STDOUT,
         encoding='utf-8'
     )
-    _get_realtime_stdout(
-        controller_build,
-        'Error while building the participant controller container',
-        'Missing or misconfigured Dockerfile'
-    )
+    return_code = _get_realtime_stdout(controller_build)
+    if return_code != 0:
+        _print_error('Error while building the participant controller container',
+                     'Missing or misconfigured Dockerfile')
 
     if opponent_controller_path:
         opponent_controller_build = subprocess.Popen(
@@ -104,11 +102,12 @@ def record_animations(config, controller_path, opponent_controller_path=None):
             stderr=subprocess.STDOUT,
             encoding='utf-8'
         )
-        _get_realtime_stdout(
-            opponent_controller_build,
-            'Error while building the opponent controller container',
-            'Missing or misconfigured Dockerfile'
-        )
+        return_code = _get_realtime_stdout(opponent_controller_build)
+        if return_code != 0:
+            _print_error('Error while building the opponent controller container',
+                         'Missing or misconfigured Dockerfile',
+                         throw_exception=False)
+            performance = 1
 
     # Run Webots container with Popen to read the stdout
     print('\nRunning participant\'s controller...')
@@ -176,10 +175,10 @@ def record_animations(config, controller_path, opponent_controller_path=None):
     if not participant_controller_connected:
         _print_error('Competition finished before the participant controller connected to Webots',
                      'Your controller crashed. Please debug your controller locally before submitting it.')
-        performance = 0
     if not opponent_controller_connected:
         _print_error('Competition finished before the opponent controller connected to Webots',
-                     'Therefore, you won.')
+                     'Therefore, you won.',
+                     throw_exception=False)
         performance = 1
 
     print('Closing the containers...')
@@ -226,14 +225,16 @@ def _get_container_id(container_name):
     container_id = subprocess.check_output(['docker', 'ps', '-f', f'ancestor={container_name}', '-q']).decode('utf-8').strip()
     return container_id
 
-def _get_realtime_stdout(process, error_title, error_message):
+def _get_realtime_stdout(process):
     while process.poll() is None:
         realtime_output = process.stdout.readline()
         if realtime_output:
             print(realtime_output.strip())
-    if process.returncode != 0:
-        _print_error(error_title, error_message)
+    return process.returncode
 
-def _print_error(title, message):
-    print(f'::error title={title}::{message}')
-    raise Exception(f'{title}\n{message}')
+def _print_error(title, message, throw_exception=True):
+    if throw_exception:
+        print(f'::error title={title}::{message}')
+        raise Exception(f'{title}\n{message}')
+    else:
+        print(f'::notice title={title}::{message}')

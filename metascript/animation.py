@@ -24,7 +24,7 @@ TMP_ANIMATION_DIRECTORY = 'tmp'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-def record_animations(config, controller_path, opponent_controller_path=None):
+def record_animations(config, controller_path, participant_name, opponent_controller_path=None, opponent_name=''):
     world_config = config['world']
     default_controller_name = config['dockerCompose'].split('/')[2]
 
@@ -117,8 +117,8 @@ def record_animations(config, controller_path, opponent_controller_path=None):
             '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
             '-p', '3005:1234',
             '--env', 'CI=true',
-            '--env', f'PARTICIPANT_NAME={}',
-            '--env', f'OPPONENT_NAME={}',
+            '--env', f'PARTICIPANT_NAME={participant_name}',
+            '--env', f'OPPONENT_NAME={opponent_name}',
             'recorder-webots'
         ],
         stdout=subprocess.PIPE,

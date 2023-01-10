@@ -117,6 +117,8 @@ def record_animations(config, controller_path, opponent_controller_path=None):
             '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
             '-p', '3005:1234',
             '--env', 'CI=true',
+            '--env', f'PARTICIPANT_NAME={}',
+            '--env', f'OPPONENT_NAME={}',
             'recorder-webots'
         ],
         stdout=subprocess.PIPE,

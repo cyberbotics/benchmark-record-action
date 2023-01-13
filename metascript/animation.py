@@ -113,7 +113,7 @@ def record_animations(config, controller_path, participant_name, opponent_contro
     print('\nRunning participant\'s controller...')
     webots_docker = subprocess.Popen(
         [
-            'docker', 'run', '-t', '--rm', '--gpu all', '--init',
+            'docker', 'run', '-t', '--rm', '--gpus', 'all', '--init',
             '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
             '-p', '3005:1234',
             '--env', 'CI=true',

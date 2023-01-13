@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 import json
 import os
 import shutil
+import subprocess
 from pathlib import Path
 from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git
@@ -39,8 +40,15 @@ class Participant:
 
 
 def competition(config):
-    git.init()
+    # Determine if GPU acceleration is available (typically on a self-hosted runner)
+    if shutil.which('docker-nvidia'):
+        print(subprocess.check_output("docker-nvidia -v"))
+        gpu = True
+    else:
+        gpu = False
 
+    git.init()
+    
     # Parse input participant
     participant = _get_participant()
     performance = None
@@ -62,7 +70,7 @@ def competition(config):
                                 _update_participant(p, participant, 1)
                     _save_participants(participants)                        
                 break
-            performance = int(record_animations(config, participant.controller_path, participant.data['name'],
+            performance = int(record_animations(gpu, config, participant.controller_path, participant.data['name'],
                                                 opponent.controller_path, opponent.data['name']))
             _update_ranking(performance, participant, opponent)
             _update_animation_files(opponent if performance == 1 else participant)
@@ -70,7 +78,7 @@ def competition(config):
             if performance != 1:  # draw or loose, stopping duals
                 break
     else:  # run a simple performance evaluation
-        performance = record_animations(config, participant.controller_path, participant.data['name'])
+        performance = record_animations(gpu, config, participant.controller_path, participant.data['name'])
         higher_is_better = config['world']['higher-is-better'] if 'higher-is-better' in config['world'] else true
         _update_performance(performance, participant, higher_is_better)
         _update_animation_files(participant)

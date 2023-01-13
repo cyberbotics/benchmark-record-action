@@ -71,7 +71,7 @@ def competition(config):
                 break
     else:  # run a simple performance evaluation
         performance = record_animations(config, participant.controller_path, participant.data['name'])
-        higher_is_better = config['world']['higher-is-better'].lower() == 'true' if 'higher-is-better' in config['world'] else true
+        higher_is_better = config['world']['higher-is-better'] if 'higher-is-better' in config['world'] else true
         _update_performance(performance, participant, higher_is_better)
         _update_animation_files(participant)
     _remove_directory(participant.controller_path)

@@ -177,9 +177,9 @@ def record_animations(config, controller_path, participant_name, opponent_contro
     if not participant_controller_connected:
         _print_error('Competition finished before the participant controller connected to Webots',
                      'Your controller crashed. Please debug your controller locally before submitting it.')
-    if not opponent_controller_connected:
+    if opponent_docker and not opponent_controller_connected:
         _print_error('Competition finished before the opponent controller connected to Webots',
-                     'Therefore, you won.',
+                     'The opponent controller failed conntected to Webots, therefore you won.',
                      throw_exception=False)
         performance = 1
 

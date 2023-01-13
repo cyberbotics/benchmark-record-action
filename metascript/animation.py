@@ -24,7 +24,7 @@ TMP_ANIMATION_DIRECTORY = 'tmp'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-def record_animations(config, controller_path, participant_name, opponent_controller_path=None, opponent_name=''):
+def record_animations(gpu, config, controller_path, participant_name, opponent_controller_path=None, opponent_name=''):
     world_config = config['world']
     default_controller_name = config['dockerCompose'].split('/')[2]
 
@@ -111,20 +111,23 @@ def record_animations(config, controller_path, participant_name, opponent_contro
 
     # Run Webots container with Popen to read the stdout
     print('\nRunning participant\'s controller...')
-    webots_docker = subprocess.Popen(
-        [
-            'docker', 'run', '-t', '--rm', '--gpus', 'all', '--init',
-            '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
-            '-p', '3005:1234',
-            '--env', 'CI=true',
-            '--env', f'PARTICIPANT_NAME={participant_name}',
-            '--env', f'OPPONENT_NAME={opponent_name}',
-            'recorder-webots'
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        encoding='utf-8'
-    )
+    command_line = [ 'docker', 'run' ]
+    if gpu:
+        command_line += [ '-gpus=all', '-it', '-e', 'DISPLAY', '-v', '/tmp/.X11-unix:/tmp/.X11-unix:rw' ]
+    else:
+        command_line += [ '-t', '--rm', '--init' ]  # FIXME: check all these options
+
+    command_line += [
+        '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
+        '-p', '3005:1234',
+        '--env', 'CI=true',
+        '--env', f'PARTICIPANT_NAME={participant_name}',
+        '--env', f'OPPONENT_NAME={opponent_name}',
+        'recorder-webots' ]
+
+    # FIXME: we want to launch webots manually, not from the Dockerfile CMD
+
+    webots_docker = subprocess.Popen(command_line, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
 
     participant_docker = None
     opponent_docker = None

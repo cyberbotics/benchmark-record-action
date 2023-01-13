@@ -200,10 +200,9 @@ def record_animations(config, controller_path, participant_name, opponent_contro
         f.write(original_world_content)
 
     # compute performance line
-    metric = world_config['metric']
-    higher_is_better = world_config['higher-is-better'] == 'true'
     if timeout:
-        if metric == 'time' and higher_is_better:  # time-duration competition completed with maximum time
+        if world_config['metric'] == 'time' and world_config['higher-is-better']:
+            # time-duration competition completed with maximum time
             performance = float(world_config['max-duration'])
         else:  # competition failed: time limit reached
             raise Exception(

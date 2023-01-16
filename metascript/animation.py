@@ -123,7 +123,9 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         '--env', f'OPPONENT_NAME={opponent_name}',
         'recorder-webots' ]
 
-    # FIXME: we want to launch webots manually, not from the Dockerfile CMD
+    if not gpu:
+        command_line += [ 'xvfb-run', '-e', '/dev/stdout', '-a' ]    
+    command_line += [ 'webots', '--stdout', '--stderr', '--batch', '--mode=false', '--no-rendering', f'/usr/local/webots-projects/{world_config["file"]}' ]
 
     webots_docker = subprocess.Popen(command_line, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
 

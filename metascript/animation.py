@@ -128,8 +128,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     command_line += ['webots', '--stdout', '--stderr', '--batch', '--mode=fast',
                      '--no-rendering', f'/usr/local/webots-project/{world_config["file"]}']
 
-    webots_docker = subprocess.Popen(
-        command_line, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+    webots_docker = subprocess.Popen(command_line, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
 
     participant_docker = None
     opponent_docker = None

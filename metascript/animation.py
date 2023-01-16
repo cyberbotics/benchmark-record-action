@@ -56,8 +56,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         [
             'docker', 'build',
             '--tag', 'recorder-webots',
-            '--file', 'Dockerfile',
-            '--build-arg', f'WORLD_PATH={world_config["file"]}',
+            '--file', 'Dockerfile'
             '.'
         ],
         stdout=subprocess.PIPE,

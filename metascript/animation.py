@@ -17,7 +17,6 @@
 import os
 import select
 import subprocess
-from datetime import datetime
 from math import floor
 
 TMP_ANIMATION_DIRECTORY = 'tmp'
@@ -36,7 +35,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         original_world_content = f.read()
     world_content = original_world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"')
     if opponent_controller_path:
-        world_content = world_content.replace(f'controller "opponent"', 'controller "<extern>"')
+        world_content = world_content.replace('controller "opponent"', 'controller "<extern>"')
     world_content += f'''
     DEF ANIMATION_RECORDER_SUPERVISOR Robot {{
     name "animation_recorder_supervisor"
@@ -111,23 +110,27 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
 
     # Run Webots container with Popen to read the stdout
     print('\nRunning participant\'s controller...')
-    command_line = [ 'docker', 'run', '--tty', '--rm' ]
+    command_line = ['docker', 'run', '--tty', '--rm']
     if gpu:
-        command_line += [ '--gpus=all', '--env', 'DISPLAY', '--volume', '/tmp/.X11-unix:/tmp/.X11-unix:rw' ]
+        command_line += ['--gpus=all', '--env', 'DISPLAY',
+                         '--volume', '/tmp/.X11-unix:/tmp/.X11-unix:rw']
 
     command_line += [
-        '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
+        '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},' +
+                   f'target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
         '--publish', '3005:1234',
         '--env', 'CI=true',
         '--env', f'PARTICIPANT_NAME={participant_name}',
         '--env', f'OPPONENT_NAME={opponent_name}',
-        'recorder-webots' ]
+        'recorder-webots']
 
     if not gpu:
-        command_line += [ 'xvfb-run', '-e', '/dev/stdout', '-a' ]    
-    command_line += [ 'webots', '--stdout', '--stderr', '--batch', '--mode=false', '--no-rendering', f'/usr/local/webots-projects/{world_config["file"]}' ]
+        command_line += ['xvfb-run', '-e', '/dev/stdout', '-a']
+    command_line += ['webots', '--stdout', '--stderr', '--batch', '--mode=false',
+                     '--no-rendering', f'/usr/local/webots-projects/{world_config["file"]}']
 
-    webots_docker = subprocess.Popen(command_line, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+    webots_docker = subprocess.Popen(
+        command_line, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
 
     participant_docker = None
     opponent_docker = None
@@ -137,15 +140,17 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     timeout = False
 
     while webots_docker.poll() is None:
-        fds = [ webots_docker.stdout ]
+        fds = [webots_docker.stdout]
         if participant_docker:
             fds.append(participant_docker.stdout)
         if opponent_docker:
             fds.append(opponent_docker.stdout)
         fd = select.select(fds, [], [])[0]
         webots_line = webots_docker.stdout.readline().strip() if webots_docker.stdout in fd else None
-        participant_line = participant_docker.stdout.readline().strip() if participant_docker and participant_docker.stdout in fd else None
-        opponent_line = opponent_docker.stdout.readline().strip() if opponent_docker and opponent_docker.stdout in fd else None
+        participant_available = participant_docker and participant_docker.stdout in fd
+        participant_line = participant_docker.stdout.readline().strip() if participant_available else None
+        opponent_available = opponent_docker and opponent_docker.stdout in fd
+        opponent_line = opponent_docker.stdout.readline().strip() if opponent_available else None
         if participant_line:
             print(participant_line)
         if opponent_line:
@@ -214,6 +219,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     print('done running controller and recording animations')
     return performance
 
+
 def _time_convert(time):
     minutes = time / 60
     absolute_minutes = floor(minutes)
@@ -225,9 +231,11 @@ def _time_convert(time):
     cs_string = str(cs).zfill(2)
     return minutes_string + '.' + seconds_string + '.' + cs_string
 
+
 def _get_container_id(container_name):
     container_id = subprocess.check_output(['docker', 'ps', '-f', f'ancestor={container_name}', '-q']).decode('utf-8').strip()
     return container_id
+
 
 def _get_realtime_stdout(process):
     while process.poll() is None:
@@ -235,6 +243,7 @@ def _get_realtime_stdout(process):
         if realtime_output:
             print(realtime_output.strip())
     return process.returncode
+
 
 def _print_error(title, message, throw_exception=True):
     if throw_exception:

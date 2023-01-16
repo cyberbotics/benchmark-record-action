@@ -108,7 +108,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
             performance = 1
 
     # Run Webots container with Popen to read the stdout
-    print('\nRunning participant\'s controller...')
+    print('\nStarting Webots...')
     command_line = ['docker', 'run', '--tty', '--rm']
     if gpu:
         command_line += ['--gpus=all', '--env', 'DISPLAY',
@@ -127,6 +127,8 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         command_line += ['xvfb-run', '-e', '/dev/stdout', '-a']
     command_line += ['webots', '--stdout', '--stderr', '--batch', '--minimize', '--mode=fast',
                      '--no-rendering', f'/usr/local/webots-project/{world_config["file"]}']
+
+    print('Command line = ' + ' '.join(command_line))
 
     webots_docker = subprocess.Popen(command_line, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
 

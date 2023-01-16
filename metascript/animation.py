@@ -111,15 +111,13 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
 
     # Run Webots container with Popen to read the stdout
     print('\nRunning participant\'s controller...')
-    command_line = [ 'docker', 'run' ]
+    command_line = [ 'docker', 'run', '--tty', '--rm' ]
     if gpu:
-        command_line += [ '-gpus=all', '-it', '-e', 'DISPLAY', '-v', '/tmp/.X11-unix:/tmp/.X11-unix:rw' ]
-    else:
-        command_line += [ '-t', '--rm', '--init' ]  # FIXME: check all these options
+        command_line += [ '--gpus=all', '--env', 'DISPLAY', '--volume', '/tmp/.X11-unix:/tmp/.X11-unix:rw' ]
 
     command_line += [
         '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
-        '-p', '3005:1234',
+        '--publish', '3005:1234',
         '--env', 'CI=true',
         '--env', f'PARTICIPANT_NAME={participant_name}',
         '--env', f'OPPONENT_NAME={opponent_name}',

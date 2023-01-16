@@ -73,7 +73,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     controller_build = subprocess.Popen(
         [
             'docker', 'build',
-            '--tag', 'controller-docker',
+            '--tag', 'participant-controller',
             '--file', f'{controller_path}/controllers/Dockerfile',
             '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
             '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/participant',
@@ -92,7 +92,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         opponent_controller_build = subprocess.Popen(
             [
                 'docker', 'build',
-                '--tag', 'opponent-controller-docker',
+                '--tag', 'opponent-controller',
                 '--file', f'{opponent_controller_path}/controllers/Dockerfile',
                 '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
                 '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/opponent',
@@ -153,10 +153,10 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         print(webots_line)
         if "' extern controller: waiting for connection on ipc://" in webots_line:
             if participant_docker is None and "INFO: 'participant' " in webots_line:
-                participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
+                participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'participant-controller'],
                                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
             elif opponent_docker is None and "INFO: 'opponent' " in webots_line:
-                opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
+                opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller'],
                                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
         elif "' extern controller: connected" in webots_line:
             if "INFO: 'participant' " in webots_line:
@@ -188,11 +188,11 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
-    controller_container_id = _get_container_id('controller-docker')
-    if controller_container_id != '':
-        subprocess.run(['/bin/bash', '-c', f'docker kill {controller_container_id}'])
+    participant_controller_container_id = _get_container_id('participant-controller')
+    if participant_controller_container_id != '':
+        subprocess.run(['/bin/bash', '-c', f'docker kill {participant_controller_container_id}'])
     if opponent_controller_path:
-        opponent_controller_container_id = _get_container_id('opponent-controller-docker')
+        opponent_controller_container_id = _get_container_id('opponent-controller')
         if opponent_controller_container_id != '':
             subprocess.run(['/bin/bash', '-c', f'docker kill {opponent_controller_container_id}'])
 

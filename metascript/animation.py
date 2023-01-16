@@ -56,8 +56,8 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     recorder_build = subprocess.Popen(
         [
             'docker', 'build',
-            '-t', 'recorder-webots',
-            '-f', 'Dockerfile',
+            '--tag', 'recorder-webots',
+            '--file', 'Dockerfile',
             '--build-arg', f'WORLD_PATH={world_config["file"]}',
             '.'
         ],
@@ -73,8 +73,8 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     controller_build = subprocess.Popen(
         [
             'docker', 'build',
-            '-t', 'controller-docker',
-            '-f', f'{controller_path}/controllers/Dockerfile',
+            '--tag', 'controller-docker',
+            '--file', f'{controller_path}/controllers/Dockerfile',
             '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
             '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/participant',
             f'{controller_path}/controllers'
@@ -92,8 +92,8 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         opponent_controller_build = subprocess.Popen(
             [
                 'docker', 'build',
-                '-t', 'opponent-controller-docker',
-                '-f', f'{opponent_controller_path}/controllers/Dockerfile',
+                '--tag', 'opponent-controller-docker',
+                '--file', f'{opponent_controller_path}/controllers/Dockerfile',
                 '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
                 '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/opponent',
                 f'{opponent_controller_path}/controllers'

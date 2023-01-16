@@ -113,8 +113,8 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     if gpu:
         command_line += ['--gpus=all', '--env', 'DISPLAY',
                          '--volume', '/tmp/.X11-unix:/tmp/.X11-unix:rw']
-    else:
-        command_line += ['--init']
+    # else:
+    #    command_line += ['--init']
 
     command_line += [
         '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},' +

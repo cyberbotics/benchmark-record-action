@@ -125,7 +125,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
 
     if not gpu:
         command_line += ['xvfb-run', '-e', '/dev/stdout', '-a']
-    command_line += ['webots', '--stdout', '--stderr', '--batch', '--mode=false',
+    command_line += ['webots', '--stdout', '--stderr', '--batch', '--mode=fast',
                      '--no-rendering', f'/usr/local/webots-projects/{world_config["file"]}']
 
     webots_docker = subprocess.Popen(

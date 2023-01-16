@@ -46,6 +46,7 @@ def competition(config):
         print(subprocess.check_outout('xhost +local:root'))
         gpu = True
     else:
+        print('No GPU detected, running on CPU.')
         gpu = False
 
     git.init()

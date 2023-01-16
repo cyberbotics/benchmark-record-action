@@ -41,7 +41,7 @@ class Participant:
 
 def competition(config):
     # Determine if GPU acceleration is available (typically on a self-hosted runner)
-    if shutil.which('nvidia-docker'):
+    if shutil.which('nvidia-docker-disabled'):
         print(subprocess.check_output(['nvidia-docker', '-v']).decode('utf-8').strip())
         print(subprocess.check_output(['xhost', '+local:root']).decode('utf-8').strip())
         gpu = True

@@ -17,14 +17,13 @@
 import os
 import select
 import subprocess
-from datetime import datetime
 from math import floor
 
 TMP_ANIMATION_DIRECTORY = 'tmp'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-def record_animations(config, controller_path, participant_name, opponent_controller_path=None, opponent_name=''):
+def record_animations(gpu, config, controller_path, participant_name, opponent_controller_path=None, opponent_name=''):
     world_config = config['world']
     default_controller_name = config['dockerCompose'].split('/')[2]
 
@@ -36,7 +35,7 @@ def record_animations(config, controller_path, participant_name, opponent_contro
         original_world_content = f.read()
     world_content = original_world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"')
     if opponent_controller_path:
-        world_content = world_content.replace(f'controller "opponent"', 'controller "<extern>"')
+        world_content = world_content.replace('controller "opponent"', 'controller "<extern>"')
     world_content += f'''
     DEF ANIMATION_RECORDER_SUPERVISOR Robot {{
     name "animation_recorder_supervisor"
@@ -56,9 +55,8 @@ def record_animations(config, controller_path, participant_name, opponent_contro
     recorder_build = subprocess.Popen(
         [
             'docker', 'build',
-            '-t', 'recorder-webots',
-            '-f', 'Dockerfile',
-            '--build-arg', f'WORLD_PATH={world_config["file"]}',
+            '--tag', 'recorder-webots',
+            '--file', 'Dockerfile',
             '.'
         ],
         stdout=subprocess.PIPE,
@@ -73,8 +71,8 @@ def record_animations(config, controller_path, participant_name, opponent_contro
     controller_build = subprocess.Popen(
         [
             'docker', 'build',
-            '-t', 'controller-docker',
-            '-f', f'{controller_path}/controllers/Dockerfile',
+            '--tag', 'participant-controller',
+            '--file', f'{controller_path}/controllers/Dockerfile',
             '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
             '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/participant',
             f'{controller_path}/controllers'
@@ -92,8 +90,8 @@ def record_animations(config, controller_path, participant_name, opponent_contro
         opponent_controller_build = subprocess.Popen(
             [
                 'docker', 'build',
-                '-t', 'opponent-controller-docker',
-                '-f', f'{opponent_controller_path}/controllers/Dockerfile',
+                '--tag', 'opponent-controller',
+                '--file', f'{opponent_controller_path}/controllers/Dockerfile',
                 '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
                 '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/opponent',
                 f'{opponent_controller_path}/controllers'
@@ -110,21 +108,29 @@ def record_animations(config, controller_path, participant_name, opponent_contro
             performance = 1
 
     # Run Webots container with Popen to read the stdout
-    print('\nRunning participant\'s controller...')
-    webots_docker = subprocess.Popen(
-        [
-            'docker', 'run', '-t', '--rm', '--init',
-            '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
-            '-p', '3005:1234',
-            '--env', 'CI=true',
-            '--env', f'PARTICIPANT_NAME={participant_name}',
-            '--env', f'OPPONENT_NAME={opponent_name}',
-            'recorder-webots'
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        encoding='utf-8'
-    )
+    print('\nStarting Webots...')
+    command_line = ['docker', 'run', '--tty', '--rm']
+    if gpu:
+        command_line += ['--gpus=all', '--env', 'DISPLAY',
+                         '--volume', '/tmp/.X11-unix:/tmp/.X11-unix:rw']
+    else:
+        command_line += ['--init']
+
+    command_line += [
+        '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},' +
+                   f'target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
+        '--publish', '3005:1234',
+        '--env', 'CI=true',
+        '--env', f'PARTICIPANT_NAME={participant_name}',
+        '--env', f'OPPONENT_NAME={opponent_name}',
+        'recorder-webots']
+
+    if not gpu:
+        command_line += ['xvfb-run', '-e', '/dev/stdout', '-a']
+    command_line += ['webots', '--stdout', '--stderr', '--batch', '--minimize', '--mode=fast',
+                     '--no-rendering', f'/usr/local/webots-project/{world_config["file"]}']
+
+    webots_docker = subprocess.Popen(command_line, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
 
     participant_docker = None
     opponent_docker = None
@@ -134,15 +140,17 @@ def record_animations(config, controller_path, participant_name, opponent_contro
     timeout = False
 
     while webots_docker.poll() is None:
-        fds = [ webots_docker.stdout ]
+        fds = [webots_docker.stdout]
         if participant_docker:
             fds.append(participant_docker.stdout)
         if opponent_docker:
             fds.append(opponent_docker.stdout)
         fd = select.select(fds, [], [])[0]
         webots_line = webots_docker.stdout.readline().strip() if webots_docker.stdout in fd else None
-        participant_line = participant_docker.stdout.readline().strip() if participant_docker and participant_docker.stdout in fd else None
-        opponent_line = opponent_docker.stdout.readline().strip() if opponent_docker and opponent_docker.stdout in fd else None
+        participant_available = participant_docker and participant_docker.stdout in fd
+        participant_line = participant_docker.stdout.readline().strip() if participant_available else None
+        opponent_available = opponent_docker and opponent_docker.stdout in fd
+        opponent_line = opponent_docker.stdout.readline().strip() if opponent_available else None
         if participant_line:
             print(participant_line)
         if opponent_line:
@@ -152,10 +160,10 @@ def record_animations(config, controller_path, participant_name, opponent_contro
         print(webots_line)
         if "' extern controller: waiting for connection on ipc://" in webots_line:
             if participant_docker is None and "INFO: 'participant' " in webots_line:
-                participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'controller-docker'],
+                participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'participant-controller'],
                                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
             elif opponent_docker is None and "INFO: 'opponent' " in webots_line:
-                opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller-docker'],
+                opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller'],
                                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
         elif "' extern controller: connected" in webots_line:
             if "INFO: 'participant' " in webots_line:
@@ -187,11 +195,11 @@ def record_animations(config, controller_path, participant_name, opponent_contro
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
-    controller_container_id = _get_container_id('controller-docker')
-    if controller_container_id != '':
-        subprocess.run(['/bin/bash', '-c', f'docker kill {controller_container_id}'])
+    participant_controller_container_id = _get_container_id('participant-controller')
+    if participant_controller_container_id != '':
+        subprocess.run(['/bin/bash', '-c', f'docker kill {participant_controller_container_id}'])
     if opponent_controller_path:
-        opponent_controller_container_id = _get_container_id('opponent-controller-docker')
+        opponent_controller_container_id = _get_container_id('opponent-controller')
         if opponent_controller_container_id != '':
             subprocess.run(['/bin/bash', '-c', f'docker kill {opponent_controller_container_id}'])
 
@@ -211,6 +219,7 @@ def record_animations(config, controller_path, participant_name, opponent_contro
     print('done running controller and recording animations')
     return performance
 
+
 def _time_convert(time):
     minutes = time / 60
     absolute_minutes = floor(minutes)
@@ -222,9 +231,11 @@ def _time_convert(time):
     cs_string = str(cs).zfill(2)
     return minutes_string + '.' + seconds_string + '.' + cs_string
 
+
 def _get_container_id(container_name):
     container_id = subprocess.check_output(['docker', 'ps', '-f', f'ancestor={container_name}', '-q']).decode('utf-8').strip()
     return container_id
+
 
 def _get_realtime_stdout(process):
     while process.poll() is None:
@@ -232,6 +243,7 @@ def _get_realtime_stdout(process):
         if realtime_output:
             print(realtime_output.strip())
     return process.returncode
+
 
 def _print_error(title, message, throw_exception=True):
     if throw_exception:

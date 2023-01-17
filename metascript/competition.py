@@ -126,7 +126,7 @@ def _get_opponent(participant):
         del participants['participants'][i - 1]
         _save_participants(participants)
         i -= 1
-    print('All opponents have left, you become number 1.')
+    print(f'All opponents have left, {participant.repository} becomes number 1.')
     return None
 
 

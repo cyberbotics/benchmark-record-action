@@ -69,7 +69,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     if return_code != 0:
         print('::error ::Missing or misconfigured Dockerfile while building the Webots container.')
 
-    controller_build = subprocess.Popen(
+    participant_controller_build = subprocess.Popen(
         [
             'docker', 'build',
             '--tag', 'participant-controller',
@@ -82,7 +82,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         stderr=subprocess.STDOUT,
         encoding='utf-8'
     )
-    return_code = _get_realtime_stdout(controller_build)
+    return_code = _get_realtime_stdout(participant_controller_build)
     if return_code != 0:
         print('::error ::Missing or misconfigured Dockerfile while building the participant controller container.')
 

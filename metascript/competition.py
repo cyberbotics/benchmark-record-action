@@ -257,7 +257,8 @@ def _cleanup_storage_files(directory):
 
 def _remove_directory(directory):
     if Path(directory).exists():
-        shutil.rmtree(directory, ignore_errors=True)
+        shutil.rmtree(directory)
+        # shutil.rmtree(directory, ignore_errors=True)
 
 
 def _copy_directory(source, destination):

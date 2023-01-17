@@ -32,23 +32,24 @@ class Participant:
         self.repository = repository
         self.private = private
         self.controller_path = os.path.join('controllers', id)
-        print(f'\nCloning {repository} repository...')
+        print(f'::notice ::Cloning {repository} repository...')
         repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['INPUT_REPO_TOKEN'], self.repository)
         if git.clone(repo, self.controller_path):
             self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
         else:
             self.data = None
-        print('Cloning complete.')
+        print('::notice ::Cloning complete.')
 
 
 def competition(config):
     # Determine if GPU acceleration is available (typically on a self-hosted runner)
     if shutil.which('nvidia-docker'):
+        print('::notice ::GPU detected on runner machine:')
         print(subprocess.check_output(['nvidia-docker', '-v']).decode('utf-8').strip())
         print(subprocess.check_output(['xhost', '+local:root']).decode('utf-8').strip())
         gpu = True
     else:
-        print('No GPU detected, running on CPU.')
+        print('::notice ::No GPU detected, running on CPU.')
         gpu = False
 
     git.init()
@@ -100,7 +101,7 @@ def _get_opponent(participant):
         _update_participant(p, participant, 1)
         participants['participants'].append(p)
         _save_participants(participants)
-        print(f'Welcome {participant.repository}, you are the first participant there.')
+        print(f'::notice ::Welcome {participant.repository}, you are the first participant there.')
         return None
 
     i = 0
@@ -111,22 +112,22 @@ def _get_opponent(participant):
             break
         i += 1
     if i == 0 and found:
-        print(f'{participant.repository} is number 1 in the ranking.')
+        print(f'::notice ::{participant.repository} is number 1 in the ranking.')
         return None
     if not found:
-        print(f'Welcome {participant.repository} and good luck for the competition.')
+        print(f'::notice ::Welcome {participant.repository} and good luck for the competition.')
     else:
-        print(f'Welcome back {participant.repository} and good luck for this round.')
+        print(f'::notice ::Welcome back {participant.repository} and good luck for this round.')
     while i > 0:
         o = participants['participants'][i - 1]
         opponent = Participant(o['id'], o['repository'], o['private'])
         if opponent.data is not None:
             return opponent
-        print(f'{o["repository"]} is not participating any more, removing it.')
+        print(f'::notice ::{o["repository"]} is not participating any more, removing it.')
         del participants['participants'][i - 1]
         _save_participants(participants)
         i -= 1
-    print(f'All opponents have left, {participant.repository} becomes number 1.')
+    print(f'::notice ::All opponents have left, {participant.repository} becomes number 1.')
     return None
 
 
@@ -195,7 +196,7 @@ def _update_ranking(performance, participant, opponent):
             if found_opponent:
                 break
     if not found_opponent:
-        print('Error: missing opponent in participants.json.')
+        print('::error ::Missing opponent in participants.json.')
         return
     count = len(participants['participants']) + 1
     if performance != 1:  # participant lost
@@ -214,7 +215,7 @@ def _update_ranking(performance, participant, opponent):
             _update_participant(found_participant, opponent, rank + 1, False)
         else:  # insert participant at last but one position, move opponent to last position
             if found_opponent['performance'] != count - 1:
-                print('Error: opponent should be ranked last in participants.json')
+                print('::error ::Opponent should be ranked last in participants.json')
             _update_participant(found_opponent, opponent, count, False)
             p = {}
             _update_participant(p, participant, count - 1)

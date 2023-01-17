@@ -40,7 +40,7 @@ def push(message='Updated competition recordings'):
         os.environ['INPUT_REPO_TOKEN'],
         os.environ['GITHUB_REPOSITORY']
     )
-    print(f'GitHub repository: https://github.com/{os.environ["GITHUB_REPOSITORY"]}')
+    print(f'::notice ::GitHub repository: https://github.com/{os.environ["GITHUB_REPOSITORY"]}')
     try:
         if os.path.exists('participants.json'):
             subprocess.check_output(['git', 'add', '-A', 'participants.json'])
@@ -49,7 +49,7 @@ def push(message='Updated competition recordings'):
         print(subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT).decode('utf-8'))
         print(subprocess.check_output(['git', 'push', '-f', github_repository]).decode('utf-8'))
     except subprocess.CalledProcessError:
-        print('Nothing to commit and push.')
+        print('::notice ::Nothing to commit and push.')
 
 
 def clone(repo, path):

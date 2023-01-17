@@ -29,6 +29,6 @@ def load_config(files=['webots.yaml', 'webots.yml']):
                 config = yaml.load(f.read(), Loader=yaml.FullLoader) or {}
             break
     if config is None:
-        print('Cannot load `webots.yaml`')
+        print('::error ::Cannot load `webots.yaml`')
         sys.exit(1)
     return config

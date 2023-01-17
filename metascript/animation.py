@@ -117,7 +117,8 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         command_line += ['--init']
 
     command_line += [
-        '--mount', f'type=bind,source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},' +
+        '--mount', 'type=bind,' +
+                   'source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},' +
                    f'target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
         '--publish', '3005:1234',
         '--env', 'CI=true',

@@ -27,8 +27,8 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     world_config = config['world']
     default_controller_name = config['dockerCompose'].split('/')[2]
 
-    # Create temporary directory
-    subprocess.check_output(['mkdir', '-p', TMP_ANIMATION_DIRECTORY])
+    # Create temporary directory for animations and textures
+    subprocess.check_output(['mkdir', '-p', os.path.join(TMP_ANIMATION_DIRECTORY, 'textures')])
 
     # Temporary world file changes
     with open(world_config['file'], 'r') as f:

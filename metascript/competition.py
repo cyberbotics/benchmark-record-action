@@ -34,8 +34,10 @@ class Participant:
         self.controller_path = os.path.join('controllers', id)
         print(f'\nCloning {repository} repository...')
         repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['INPUT_REPO_TOKEN'], self.repository)
-        git.clone(repo, self.controller_path)
-        self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
+        if git.clone(repo, self.controller_path):
+            self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
+        else:
+            self.data = None
         print('Cloning complete.')
 
 
@@ -115,8 +117,16 @@ def _get_opponent(participant):
         print(f'Welcome {participant.repository} and good luck for the competition.')
     else:
         print(f'Welcome back {participant.repository} and good luck for this round.')
-    opponent = participants['participants'][i - 1]
-    return Participant(opponent['id'], opponent['repository'], opponent['private'])
+    while i > 0:
+        o = participants['participants'][i - 1]
+        opponent = Participant(o['id'], o['repository'], o['private'])
+        if opponent.data is not None:
+            return opponent
+        print(f'{o["repository"]} is not participating any more, removing it.')
+        del participants['participants'][i - 1]
+        _save_participants(participants)
+    print('All opponents have left, you become number 1.')
+    return None
 
 
 def _get_participant():

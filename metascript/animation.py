@@ -17,7 +17,6 @@
 import os
 import select
 import subprocess
-from math import floor
 
 TMP_ANIMATION_DIRECTORY = 'tmp'
 PERFORMANCE_KEYWORD = 'performance:'
@@ -221,18 +220,6 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
             )
     print('done running controller and recording animations')
     return performance
-
-
-def _time_convert(time):
-    minutes = time / 60
-    absolute_minutes = floor(minutes)
-    minutes_string = str(absolute_minutes).zfill(2)
-    seconds = (minutes - absolute_minutes) * 60
-    absolute_seconds = floor(seconds)
-    seconds_string = str(absolute_seconds).zfill(2)
-    cs = floor((seconds - absolute_seconds) * 100)
-    cs_string = str(cs).zfill(2)
-    return minutes_string + '.' + seconds_string + '.' + cs_string
 
 
 def _get_container_id(container_name):

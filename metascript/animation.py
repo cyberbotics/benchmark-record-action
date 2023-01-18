@@ -69,7 +69,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     return_code = _get_realtime_stdout(recorder_build)
     print('::endgroup::')
     if return_code != 0:
-        print('::error ::Missing or misconfigured Dockerfile while building the Webots container.')
+        print('::error ::Missing or misconfigured Dockerfile while building the Webots container')
 
     print('::group::Building participant docker')
     participant_controller_build = subprocess.Popen(
@@ -87,7 +87,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     return_code = _get_realtime_stdout(participant_controller_build)
     print('::endgroup::')
     if return_code != 0:
-        print('::error ::Missing or misconfigured Dockerfile while building the participant controller container.')
+        print('::error ::Missing or misconfigured Dockerfile while building the participant controller container')
 
     if opponent_controller_path:
         print('::group::Building opponent docker')
@@ -106,11 +106,11 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         return_code = _get_realtime_stdout(opponent_controller_build)
         print('::endgroup::')
         if return_code != 0:
-            print('::error ::Missing or misconfigured Dockerfile while building the opponent controller container.')
+            print('::error ::Missing or misconfigured Dockerfile while building the opponent controller container')
             performance = 1
 
     # Run Webots container with Popen to read the stdout
-    print('::group::Running Webots.')
+    print('::group::Running Webots')
     command_line = ['docker', 'run', '--tty', '--rm']
     if gpu:
         command_line += ['--gpus=all', '--env', 'DISPLAY',
@@ -179,20 +179,20 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             timeout = True
             break
     if webots_docker.returncode:
-        print(f'::error ::Webots container exited with code {webots_docker.returncode}.')
+        print(f'::error ::Webots container exited with code {webots_docker.returncode}')
     if not participant_docker:
-        print('::error ::Competition finished before launching the participant controller. ' +
-              'Check that the controller in the world file is named "participant".')
+        print('::error ::Competition finished before launching the participant controller: ' +
+              'check that the controller in the world file is named "participant"')
     if not participant_controller_connected:
-        print('::error ::Competition finished before the participant controller connected to Webots. ' +
-              'Your controller crashed. Please debug your controller locally before submitting it.')
+        print('::error ::Competition finished before the participant controller connected to Webots: ' +
+              'your controller crashed. Please debug your controller locally before submitting it')
     if opponent_docker and not opponent_controller_connected:
-        print('::error ::Competition finished before the opponent controller connected to Webots. ' +
-              'The opponent controller failed conntected to Webots, therefore you won.')
+        print('::error ::Competition finished before the opponent controller connected to Webots: ' +
+              'the opponent controller failed conntected to Webots, therefore you won')
         performance = 1
 
     print('::endgroup::')
-    print('::group::Closing the containers.')
+    print('::group::Closing the containers')
     participant_controller_container_id = _get_container_id('participant-controller')
     if participant_controller_container_id != '':
         subprocess.run(['/bin/bash', '-c', f'docker kill {participant_controller_container_id}'])
@@ -216,7 +216,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             performance = float(world_config['max-duration'])
         else:  # competition failed: time limit reached
             raise Exception(
-                f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition.'
+                f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition'
             )
     return performance
 

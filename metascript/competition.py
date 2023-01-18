@@ -43,11 +43,11 @@ def competition(config):
     # Determine if GPU acceleration is available (typically on a self-hosted runner)
     if shutil.which('nvidia-docker'):
         version = subprocess.check_output(['nvidia-docker', '-v']).decode('utf-8').strip().split(' ')[2][:-1]
-        print(f'::notice ::GPU detected on runner machine: nvidia-docker version {version}.')
+        print(f'::notice ::GPU detected on runner machine: nvidia-docker version {version}')
         subprocess.check_output(['xhost', '+local:root'])
         gpu = True
     else:
-        print('::notice ::No GPU detected, running on CPU.')
+        print('::notice ::No GPU detected, running on CPU')
         gpu = False
 
     git.init()
@@ -82,7 +82,7 @@ def competition(config):
                 break
     else:  # run a simple performance evaluation
         performance = record_animations(gpu, config, participant.controller_path, participant.data['name'])
-        higher_is_better = config['world']['higher-is-better'] if 'higher-is-better' in config['world'] else true
+        higher_is_better = config['world']['higher-is-better'] if 'higher-is-better' in config['world'] else True
         _update_performance(performance, participant, higher_is_better)
         _update_animation_files(participant)
     _remove_directory(participant.controller_path)
@@ -99,7 +99,7 @@ def _get_opponent(participant):
         _update_participant(p, participant, 1)
         participants['participants'].append(p)
         _save_participants(participants)
-        print(f'::notice ::Welcome {participant.repository}, you are the first participant there.')
+        print(f'::notice ::Welcome {participant.repository}, you are the first participant there')
         return None
 
     i = 0
@@ -110,30 +110,30 @@ def _get_opponent(participant):
             break
         i += 1
     if i == 0 and found:
-        print(f'::notice ::{participant.repository} is number 1 in the ranking.')
+        print(f'::notice ::{participant.repository} is number 1 in the ranking')
         return None
     if not found:
-        print(f'::notice ::Welcome {participant.repository} and good luck for the competition.')
+        print(f'::notice ::Welcome {participant.repository} and good luck for the competition')
     else:
-        print(f'::notice ::Welcome back {participant.repository} and good luck for this round.')
+        print(f'::notice ::Welcome back {participant.repository} and good luck for this round')
     while i > 0:
         o = participants['participants'][i - 1]
-        print(f'::notice ::Cloning opponent repository: {o["repository"]}.')
+        print(f'::notice ::Cloning opponent repository: {o["repository"]}')
         opponent = Participant(o['id'], o['repository'], o['private'])
         if opponent.data is not None:
             return opponent
-        print(f'::notice ::{o["repository"]} is not participating any more, removing it.')
+        print(f'::notice ::{o["repository"]} is not participating any more, removing it')
         del participants['participants'][i - 1]
         _save_participants(participants)
         i -= 1
-    print(f'::notice ::All opponents have left, {participant.repository} becomes number 1.')
+    print(f'::notice ::All opponents have left, {participant.repository} becomes number 1')
     return None
 
 
 def _get_participant():
     input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
     split = input_participant.split(':')
-    print(f'::notice ::Cloning participant repository: {split[1]}.')
+    print(f'::notice ::Cloning participant repository: {split[1]}')
     participant = Participant(split[0], split[1], split[2] == 'true')
     return participant
 
@@ -196,7 +196,7 @@ def _update_ranking(performance, participant, opponent):
             if found_opponent:
                 break
     if not found_opponent:
-        print('::error ::Missing opponent in participants.json.')
+        print('::error ::Missing opponent in participants.json')
         return
     count = len(participants['participants']) + 1
     if performance != 1:  # participant lost

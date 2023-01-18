@@ -22,9 +22,9 @@ TMP_ANIMATION_DIRECTORY = 'tmp'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-def record_animations(gpu, config, controller_path, participant_name, opponent_controller_path=None, opponent_name=''):
+def record_animations(gpu, config, participant_controller_path, participant_name,
+                      opponent_controller_path=None, opponent_name=''):
     world_config = config['world']
-    default_controller_name = config['dockerCompose'].split('/')[2]
     performance = 0
 
     # Create temporary directory for animations, textures and meshes
@@ -35,7 +35,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
     # Temporary world file changes
     with open(world_config['file'], 'r') as f:
         original_world_content = f.read()
-    world_content = original_world_content.replace(f'controller "{default_controller_name}"', 'controller "<extern>"')
+    world_content = original_world_content.replace('controller "participant"', 'controller "<extern>"')
     if opponent_controller_path:
         world_content = world_content.replace('controller "opponent"', 'controller "<extern>"')
     world_content += f'''
@@ -73,10 +73,9 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         [
             'docker', 'build',
             '--tag', 'participant-controller',
-            '--file', f'{controller_path}/controllers/Dockerfile',
-            '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
+            '--file', f'{participant_controller_path}/controllers/Dockerfile',
             '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/participant',
-            f'{controller_path}/controllers'
+            f'{participant_controller_path}/controllers'
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -92,7 +91,6 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
                 'docker', 'build',
                 '--tag', 'opponent-controller',
                 '--file', f'{opponent_controller_path}/controllers/Dockerfile',
-                '--build-arg', f'DEFAULT_CONTROLLER={default_controller_name}',
                 '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/opponent',
                 f'{opponent_controller_path}/controllers'
             ],
@@ -178,7 +176,7 @@ def record_animations(gpu, config, controller_path, participant_name, opponent_c
         print(f'::error ::Webots container exited with code {webots_docker.returncode}.')
     if not participant_docker:
         print('::error ::Competition finished before launching the participant controller. ' +
-              'Check that the controller in the world file is the same as the one in webots.yml.')
+              'Check that the controller in the world file is named "participant".')
     if not participant_controller_connected:
         print('::error ::Competition finished before the participant controller connected to Webots. ' +
               'Your controller crashed. Please debug your controller locally before submitting it.')

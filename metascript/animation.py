@@ -90,7 +90,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         print('::error ::Missing or misconfigured Dockerfile while building the participant controller container')
 
     if opponent_controller_path:
-        print('::group::Building \033[33mopponent\033[0m docker')
+        print('::group::Building \033[34mopponent\033[0m docker')
         opponent_controller_build = subprocess.Popen(
             [
                 'docker', 'build',
@@ -156,7 +156,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         if participant_line:
             print(f'\033[31m{participant_line}\033[0m')
         if opponent_line:
-            print(f'\033[33m{opponent_line}\033[0m')
+            print(f'\033[34m{opponent_line}\033[0m')
         if webots_line is None:
             continue
         print(f'\033[32m{webots_line}\033[0m')

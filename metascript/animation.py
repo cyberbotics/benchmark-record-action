@@ -54,7 +54,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         f.write(world_content)
 
     # Building the Docker containers
-    print('::group::Building Webots docker')
+    print('::group::Building \033[32;1;4mWebots\033[0m docker')
     recorder_build = subprocess.Popen(
         [
             'docker', 'build',

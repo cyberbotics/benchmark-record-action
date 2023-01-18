@@ -192,7 +192,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         performance = 1
 
     print('::endgroup::')
-    print('::notice ::Closing the containers.')
+    print('::group::Closing the containers.')
     participant_controller_container_id = _get_container_id('participant-controller')
     if participant_controller_container_id != '':
         subprocess.run(['/bin/bash', '-c', f'docker kill {participant_controller_container_id}'])
@@ -203,6 +203,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
+    print('::endgroup::')
 
     # restore temporary file changes
     with open(world_config['file'], 'w') as f:

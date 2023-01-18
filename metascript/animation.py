@@ -54,7 +54,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         f.write(world_content)
 
     # Building the Docker containers
-    print('::group::Building \033[32;1;4mWebots\033[0m docker')
+    print('::group::Building \033[32mWebots\033[0m docker')
     recorder_build = subprocess.Popen(
         [
             'docker', 'build',
@@ -71,7 +71,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     if return_code != 0:
         print('::error ::Missing or misconfigured Dockerfile while building the Webots container')
 
-    print('::group::Building participant docker')
+    print('::group::Building \033[31mparticipant\033[0m docker')
     participant_controller_build = subprocess.Popen(
         [
             'docker', 'build',
@@ -90,7 +90,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         print('::error ::Missing or misconfigured Dockerfile while building the participant controller container')
 
     if opponent_controller_path:
-        print('::group::Building opponent docker')
+        print('::group::Building \033[33mopponent\033[0m docker')
         opponent_controller_build = subprocess.Popen(
             [
                 'docker', 'build',
@@ -154,12 +154,12 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         opponent_available = opponent_docker and opponent_docker.stdout in fd
         opponent_line = opponent_docker.stdout.readline().strip() if opponent_available else None
         if participant_line:
-            print(f"\033[31;1;4m{participant_line}\033[0m")
+            print(f'\033[31m{participant_line}\033[0m')
         if opponent_line:
-            print(f"\033[33;1;4m{opponent_line}\033[0m")
+            print(f'\033[33m{opponent_line}\033[0m')
         if webots_line is None:
             continue
-        print(f"\033[32;1;4m{webots_line}\033[0m")
+        print(f'\033[32m{webots_line}\033[0m')
         if "' extern controller: waiting for connection on ipc://" in webots_line:
             if participant_docker is None and "INFO: 'participant' " in webots_line:
                 participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'participant-controller'],

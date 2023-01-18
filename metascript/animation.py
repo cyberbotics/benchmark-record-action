@@ -154,12 +154,12 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         opponent_available = opponent_docker and opponent_docker.stdout in fd
         opponent_line = opponent_docker.stdout.readline().strip() if opponent_available else None
         if participant_line:
-            print('[Participant]: ' + participant_line)
+            print(f"\033[31;1;4m{participant_line}\033[0m")
         if opponent_line:
-            print('[Opponent]: ' + opponent_line)
+            print(f"\033[33;1;4m{opponent_line}\033[0m")
         if webots_line is None:
             continue
-        print('[Webots]: ' + webots_line)
+        print(f"\033[32;1;4m{webots_line}\033[0m")
         if "' extern controller: waiting for connection on ipc://" in webots_line:
             if participant_docker is None and "INFO: 'participant' " in webots_line:
                 participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'participant-controller'],

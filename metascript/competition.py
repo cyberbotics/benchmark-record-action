@@ -32,21 +32,19 @@ class Participant:
         self.repository = repository
         self.private = private
         self.controller_path = os.path.join('controllers', id)
-        print(f'::notice ::Cloning {repository} repository...')
         repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['INPUT_REPO_TOKEN'], self.repository)
         if git.clone(repo, self.controller_path):
             self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
         else:
             self.data = None
-        print('::notice ::Cloning complete.')
 
 
 def competition(config):
     # Determine if GPU acceleration is available (typically on a self-hosted runner)
     if shutil.which('nvidia-docker'):
-        print('::notice ::GPU detected on runner machine:')
-        print(subprocess.check_output(['nvidia-docker', '-v']).decode('utf-8').strip())
-        print(subprocess.check_output(['xhost', '+local:root']).decode('utf-8').strip())
+        version = subprocess.check_output(['nvidia-docker', '-v']).decode('utf-8').strip().split(' ')[2][:-1]
+        print(f'::notice ::GPU detected on runner machine: nvidia-docker version {version}.')
+        subprocess.check_output(['xhost', '+local:root'])
         gpu = True
     else:
         print('::notice ::No GPU detected, running on CPU.')
@@ -120,6 +118,7 @@ def _get_opponent(participant):
         print(f'::notice ::Welcome back {participant.repository} and good luck for this round.')
     while i > 0:
         o = participants['participants'][i - 1]
+        print(f'::notice ::Cloning opponent repository: {o["repository"]}.')
         opponent = Participant(o['id'], o['repository'], o['private'])
         if opponent.data is not None:
             return opponent
@@ -134,6 +133,7 @@ def _get_opponent(participant):
 def _get_participant():
     input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
     split = input_participant.split(':')
+    print(f'::notice ::Cloning participant repository: {split[1]}.')
     participant = Participant(split[0], split[1], split[2] == 'true')
     return participant
 

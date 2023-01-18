@@ -54,6 +54,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         f.write(world_content)
 
     # Building the Docker containers
+    print('::group::{Building Webots docker}')
     recorder_build = subprocess.Popen(
         [
             'docker', 'build',
@@ -66,9 +67,11 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         encoding='utf-8'
     )
     return_code = _get_realtime_stdout(recorder_build)
+    print('::endgroup::')
     if return_code != 0:
         print('::error ::Missing or misconfigured Dockerfile while building the Webots container.')
 
+    print('::group::{Building participant docker}')
     participant_controller_build = subprocess.Popen(
         [
             'docker', 'build',
@@ -82,10 +85,12 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         encoding='utf-8'
     )
     return_code = _get_realtime_stdout(participant_controller_build)
+    print('::endgroup::')
     if return_code != 0:
         print('::error ::Missing or misconfigured Dockerfile while building the participant controller container.')
 
     if opponent_controller_path:
+        print('::group::{Building opponent docker}')
         opponent_controller_build = subprocess.Popen(
             [
                 'docker', 'build',
@@ -99,12 +104,13 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             encoding='utf-8'
         )
         return_code = _get_realtime_stdout(opponent_controller_build)
+        print('::endgroup::')
         if return_code != 0:
             print('::error ::Missing or misconfigured Dockerfile while building the opponent controller container.')
             performance = 1
 
     # Run Webots container with Popen to read the stdout
-    print('\nStarting Webots...')
+    print('::group::{Starting Webots.}')
     command_line = ['docker', 'run', '--tty', '--rm']
     if gpu:
         command_line += ['--gpus=all', '--env', 'DISPLAY',
@@ -148,12 +154,12 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         opponent_available = opponent_docker and opponent_docker.stdout in fd
         opponent_line = opponent_docker.stdout.readline().strip() if opponent_available else None
         if participant_line:
-            print(participant_line)
+            print('participant: ' + participant_line)
         if opponent_line:
-            print(opponent_line)
+            print('opponent: ' + opponent_line)
         if webots_line is None:
             continue
-        print(webots_line)
+        print('Webots: ' + webots_line)
         if "' extern controller: waiting for connection on ipc://" in webots_line:
             if participant_docker is None and "INFO: 'participant' " in webots_line:
                 participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'participant-controller'],
@@ -185,7 +191,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
               'The opponent controller failed conntected to Webots, therefore you won.')
         performance = 1
 
-    print('Closing the containers...')
+    print('::notice ::Closing the containers.')
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
@@ -210,7 +216,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             raise Exception(
                 f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition.'
             )
-    print('done running controller and recording animations')
+    print('::endgroup::')
     return performance
 
 

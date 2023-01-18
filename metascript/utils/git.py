@@ -54,7 +54,7 @@ def push(message='Updated competition recordings'):
 
 def clone(repo, path):
     try:
-        subprocess.check_output(['git', 'clone', repo, path])
+        subprocess.check_output(['git', 'clone', '-q', repo, path])
         return True
     except subprocess.CalledProcessError:
         return False

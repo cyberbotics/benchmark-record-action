@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 from .utils.webots import load_config
 from .competition import competition
 
@@ -23,7 +24,7 @@ def main():
 
     if 'type' not in config or config['type'] != 'competition':
         print('You have to specify the `type` parameter in `webots.yaml` and set it to `competition`')
-        return
+        sys.exit(1)
 
     competition(config)  # run the competition
 

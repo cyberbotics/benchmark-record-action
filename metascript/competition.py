@@ -19,6 +19,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git
@@ -39,18 +40,18 @@ class Participant:
                 url = f'https://github.com/{repository}/blob/main/controllers/participant/participant.json'
                 if 'name' not in self.data:
                     print(f'::error ::Missing name in {url}')
-                    self.data = None
-                elif 'description' not in self.data:
+                    sys.exit(1)
+                if 'description' not in self.data:
                     print(f'::error ::Missing description in {url}')
-                    self.data = None                    
+                    sys.exit(1)                    
                 elif 'country' not in self.data:
                     print(f'::error ::Missing country code in {url}')
-                    self.data = None
+                    sys.exit(1)
                 else:
                     country = self.data['country']
                     if len(country) != 2:
                         print(f'::error ::Bad country code in {url}')
-                        self.data = None
+                        sys.exit(1)
         else:
             self.data = None
 
@@ -72,7 +73,7 @@ def competition(config):
     participant = _get_participant()
     if participant.data is None:
         print('::error ::Cannot parse controllers/participant/participant.json, please provide or fix this file.')
-        return
+        sys.exit(1)
     performance = None
     animator_controller_destination_path = _copy_animator_files()
     if config['world']['metric'] == 'ranking':  # run a bubble sort ranking
@@ -216,7 +217,7 @@ def _update_ranking(performance, participant, opponent):
                 break
     if not found_opponent:
         print('::error ::Missing opponent in participants.json')
-        return
+        sys.exit(1)
     count = len(participants['participants']) + 1
     if performance != 1:  # participant lost
         if found_participant:  # nothing to change, however, the participant.json data may have changed
@@ -235,6 +236,7 @@ def _update_ranking(performance, participant, opponent):
         else:  # insert participant at last but one position, move opponent to last position
             if found_opponent['performance'] != count - 1:
                 print('::error ::Opponent should be ranked last in participants.json')
+                sys.exit(1)
             _update_participant(found_opponent, opponent, count, False)
             p = {}
             _update_participant(p, participant, count - 1)

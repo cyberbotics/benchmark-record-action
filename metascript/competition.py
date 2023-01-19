@@ -36,19 +36,20 @@ class Participant:
         if git.clone(repo, self.controller_path):
             self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
             if self.data:  # sanity checks
+                url = f'https://github.com/{repository}/blob/main/controllers/participant/participant.json'
                 if 'name' not in self.data:
-                    print('::error ::Missing name in controllers/participant/participant.json')
+                    print(f'::error ::Missing name in {url}')
                     self.data = None
                 elif 'description' not in self.data:
-                    print('::error ::Missing description in controllers/participant/participant.json')
+                    print(f'::error ::Missing description in {url')
                     self.data = None                    
                 elif 'country' not in self.data:
-                    print('::error ::Missing country in controllers/participant/participant.json')
+                    print(f'::error ::Missing country code in {url}')
                     self.data = None
                 else:
                     country = self.data['country']
                     if len(country) != 2:
-                        print('::error ::Bad country code in controllers/participant/participant.json')
+                        print(f'::error ::Bad country code in {url}')
                         self.data = None
         else:
             self.data = None

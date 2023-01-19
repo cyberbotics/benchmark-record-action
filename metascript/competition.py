@@ -28,7 +28,7 @@ ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
 
 
 class Participant:
-    def __init__(self, id, repository, private):
+    def __init__(self, id, repository, private, opponent=False):
         self.id = id
         self.repository = repository
         self.private = private
@@ -38,20 +38,25 @@ class Participant:
             self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
             if self.data:  # sanity checks
                 url = f'https://github.com/{repository}/blob/main/controllers/participant/participant.json'
+                message = '::warning ::' if opponent else '::error ::'
                 if 'name' not in self.data:
-                    print(f'::error ::Missing name in {url}')
-                    sys.exit(1)
+                    print(f'{message}Missing name in {url}')
+                    if not opponent:
+                        sys.exit(1)
                 if 'description' not in self.data:
-                    print(f'::error ::Missing description in {url}')
-                    sys.exit(1)                    
+                    print(f'{message}Missing description in {url}')
+                    if not opponent:
+                        sys.exit(1)
                 elif 'country' not in self.data:
-                    print(f'::error ::Missing country code in {url}')
-                    sys.exit(1)
+                    print(f'{message}Missing country code in {url}')
+                    if not opponent:
+                        sys.exit(1)
                 else:
                     country = self.data['country']
                     if len(country) != 2:
-                        print(f'::error ::Bad country code in {url}')
-                        sys.exit(1)
+                        print(f'{message}Bad country code in {url}')
+                        if not opponent:
+                            sys.exit(1)
         else:
             self.data = None
 
@@ -139,7 +144,7 @@ def _get_opponent(participant):
     while i > 0:
         o = participants['participants'][i - 1]
         print(f'::notice ::Cloning opponent repository: {o["repository"]}')
-        opponent = Participant(o['id'], o['repository'], o['private'])
+        opponent = Participant(o['id'], o['repository'], o['private'], True)
         if opponent.data is not None:
             return opponent
         print(f'::notice ::{o["repository"]} is not participating any more, removing it')

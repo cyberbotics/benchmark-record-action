@@ -17,6 +17,7 @@
 import os
 import select
 import subprocess
+import sys
 
 TMP_ANIMATION_DIRECTORY = 'tmp'
 PERFORMANCE_KEYWORD = 'performance:'
@@ -70,6 +71,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     print('::endgroup::')
     if return_code != 0:
         print('::error ::Missing or misconfigured Dockerfile while building the Webots container')
+        sys.exit(1)
 
     print('::group::Building \033[31mparticipant\033[0m docker')
     participant_controller_build = subprocess.Popen(
@@ -88,6 +90,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     print('::endgroup::')
     if return_code != 0:
         print('::error ::Missing or misconfigured Dockerfile while building the participant controller container')
+        sys.exit(1)
 
     if opponent_controller_path:
         print('::group::Building \033[34mopponent\033[0m docker')
@@ -106,8 +109,16 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         return_code = _get_realtime_stdout(opponent_controller_build)
         print('::endgroup::')
         if return_code != 0:
-            print('::error ::Missing or misconfigured Dockerfile while building the opponent controller container')
+            print('::warning ::Missing or misconfigured Dockerfile while building the opponent controller container')
             performance = 1
+
+    # clearning containers possibly remaining after the last job
+    participant_controller_container_id = _get_container_id('participant-controller')
+    if participant_controller_container_id != '':
+        subprocess.run(['/bin/bash', '-c', f'docker kill {participant_controller_container_id}'])
+    opponent_controller_container_id = _get_container_id('opponent-controller')
+    if opponent_controller_container_id != '':
+        subprocess.run(['/bin/bash', '-c', f'docker kill {opponent_controller_container_id}'])
 
     # Run Webots container with Popen to read the stdout
     print('::group::Running Webots')
@@ -180,14 +191,17 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             break
     if webots_docker.returncode:
         print(f'::error ::Webots container exited with code {webots_docker.returncode}')
+        sys.exit(1)
     if not participant_docker:
         print('::error ::Competition finished before launching the participant controller: ' +
               'check that the controller in the world file is named "participant"')
+        sys.exit(1)
     if not participant_controller_connected:
         print('::error ::Competition finished before the participant controller connected to Webots: ' +
               'your controller crashed. Please debug your controller locally before submitting it')
+        sys.exit(1)
     if opponent_docker and not opponent_controller_connected:
-        print('::error ::Competition finished before the opponent controller connected to Webots: ' +
+        print('::warning ::Competition finished before the opponent controller connected to Webots: ' +
               'the opponent controller failed conntected to Webots, therefore you won')
         performance = 1
 
@@ -196,13 +210,6 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
-    participant_controller_container_id = _get_container_id('participant-controller')
-    if participant_controller_container_id != '':
-        subprocess.run(['/bin/bash', '-c', f'docker kill {participant_controller_container_id}'])
-    if opponent_controller_path:
-        opponent_controller_container_id = _get_container_id('opponent-controller')
-        if opponent_controller_container_id != '':
-            subprocess.run(['/bin/bash', '-c', f'docker kill {opponent_controller_container_id}'])
     print('::endgroup::')
 
     # restore temporary file changes
@@ -215,9 +222,8 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             # time-duration competition completed with maximum time
             performance = float(world_config['max-duration'])
         else:  # competition failed: time limit reached
-            raise Exception(
-                f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition'
-            )
+            print(f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition')
+            sys.exit(1)
     return performance
 
 

@@ -199,7 +199,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
 
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
-        subprocess.run(['/bin/bash', '-c', 'docker', 'exec', webots_container_id, 'pkill', '-SIGINT', 'webots-bin'])
+        subprocess.run(['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
 
     # clearning containers possibly remaining after the last job
     participant_controller_container_id = _get_container_id('participant-controller')

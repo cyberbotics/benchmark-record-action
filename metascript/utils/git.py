@@ -20,10 +20,8 @@ import subprocess
 
 
 def init():
-    result = subprocess.run('git config --list | grep user.name', shell=True)
+    result = subprocess.run('git config --list | grep -q user.name', shell=True)
     if result.returncode != 0:
-        # subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
-        # subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/root/repo'])
         subprocess.check_output(['git', 'config', '--global', 'user.name', 'webots.cloud'])
         subprocess.check_output(['git', 'config', '--global', 'user.email', '97463320+webots-cloud@users.noreply.github.com'])
 

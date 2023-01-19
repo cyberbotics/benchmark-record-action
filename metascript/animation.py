@@ -112,14 +112,6 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             print('::warning ::Missing or misconfigured Dockerfile while building the opponent controller container')
             performance = 1
 
-    # clearning containers possibly remaining after the last job
-    participant_controller_container_id = _get_container_id('participant-controller')
-    if participant_controller_container_id != '':
-        subprocess.run(['docker', 'kill', participant_controller_container_id], stdout=subprocess.DEVNULL)
-    opponent_controller_container_id = _get_container_id('opponent-controller')
-    if opponent_controller_container_id != '':
-        subprocess.run(['docker', 'kill', opponent_controller_container_id], stdout=subprocess.DEVNULL)
-
     # Run Webots container with Popen to read the stdout
     print('::group::Running Webots')
     command_line = ['docker', 'run', '--tty', '--rm']
@@ -208,6 +200,14 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['/bin/bash', '-c', 'docker', 'exec', webots_container_id, 'pkill', '-SIGINT', 'webots-bin'])
+
+    # clearning containers possibly remaining after the last job
+    participant_controller_container_id = _get_container_id('participant-controller')
+    if participant_controller_container_id != '':
+        subprocess.run(['docker', 'kill', participant_controller_container_id], stdout=subprocess.DEVNULL)
+    opponent_controller_container_id = _get_container_id('opponent-controller')
+    if opponent_controller_container_id != '':
+        subprocess.run(['docker', 'kill', opponent_controller_container_id], stdout=subprocess.DEVNULL)
 
     # restore temporary file changes
     with open(world_config['file'], 'w') as f:

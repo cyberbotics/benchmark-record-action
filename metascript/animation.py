@@ -205,12 +205,9 @@ def record_animations(gpu, config, participant_controller_path, participant_name
               'the opponent controller failed conntected to Webots, therefore you won')
         performance = 1
 
-    print('::endgroup::')
-    print('::group::Closing the containers')
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['docker', 'exec', webots_container_id, 'pkill', '-SIGINT', 'webots-bin'])
-    print('::endgroup::')
 
     # restore temporary file changes
     with open(world_config['file'], 'w') as f:
@@ -224,6 +221,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         else:  # competition failed: time limit reached
             print(f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition')
             sys.exit(1)
+    print('::endgroup::')
     return performance
 
 

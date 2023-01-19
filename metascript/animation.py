@@ -115,10 +115,10 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     # clearning containers possibly remaining after the last job
     participant_controller_container_id = _get_container_id('participant-controller')
     if participant_controller_container_id != '':
-        subprocess.run(['/bin/bash', '-c', f'docker kill {participant_controller_container_id}'])
+        subprocess.run(['docker', 'kill', participant_controller_container_id], stdout=subprocess.DEVNULL)
     opponent_controller_container_id = _get_container_id('opponent-controller')
     if opponent_controller_container_id != '':
-        subprocess.run(['/bin/bash', '-c', f'docker kill {opponent_controller_container_id}'])
+        subprocess.run(['docker', 'kill', opponent_controller_container_id], stdout=subprocess.DEVNULL)
 
     # Run Webots container with Popen to read the stdout
     print('::group::Running Webots')
@@ -209,7 +209,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     print('::group::Closing the containers')
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
-        subprocess.run(['/bin/bash', '-c', f'docker exec {webots_container_id} pkill -SIGINT webots-bin'])
+        subprocess.run(['docker', 'exec', webots_container_id, 'pkill', '-SIGINT', 'webots-bin'])
     print('::endgroup::')
 
     # restore temporary file changes

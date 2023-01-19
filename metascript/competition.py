@@ -140,7 +140,7 @@ def _get_opponent(participant, first_game):
         return None
     if not found:
         print(f'::notice ::Welcome {participant.repository} and good luck for the competition')
-    else if first_game:
+    elif first_game:
         print(f'::notice ::Welcome back {participant.repository} and good luck for this round')
     while i > 0:
         o = participants['participants'][i - 1]

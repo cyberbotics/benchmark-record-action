@@ -82,8 +82,9 @@ def competition(config):
     performance = None
     animator_controller_destination_path = _copy_animator_files()
     if config['world']['metric'] == 'ranking':  # run a bubble sort ranking
+        first_game = True
         while True:
-            opponent = _get_opponent(participant)
+            opponent = _get_opponent(participant, first_game)
             if opponent is None:  # we reached the top of the ranking
                 if performance is None:  # number 1 was modified, so no performance evaluation was run
                     # we still need to update the participant data in case they were modified
@@ -117,7 +118,7 @@ def competition(config):
         git.push(message='record and update competition animations')
 
 
-def _get_opponent(participant):
+def _get_opponent(participant, first_game):
     participants = _load_participants()
     if len(participants['participants']) == 0:
         p = {}
@@ -139,7 +140,7 @@ def _get_opponent(participant):
         return None
     if not found:
         print(f'::notice ::Welcome {participant.repository} and good luck for the competition')
-    else:
+    else if first_game:
         print(f'::notice ::Welcome back {participant.repository} and good luck for this round')
     while i > 0:
         o = participants['participants'][i - 1]

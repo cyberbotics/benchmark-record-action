@@ -20,18 +20,12 @@ import subprocess
 
 
 def init():
-    username = os.environ['GITHUB_ACTOR']
-    headers = {'Authorization': 'token ' + os.environ['INPUT_REPO_TOKEN']}
-
-    user_info = requests.get(f'https://api.github.com/users/{username}', headers=headers).json()
-
-    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
-    subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/root/repo'])
-    result = subprocess.run('git config --list | grep user.name', shell=True, check=False)
+    result = subprocess.run('git config --list | grep user.name', shell=True)
     if result.returncode != 0:
-        email = '{}+{}@users.noreply.github.com'.format(user_info['id'], username)
-        subprocess.check_output(['git', 'config', '--global', 'user.name', user_info['name'] or username])
-        subprocess.check_output(['git', 'config', '--global', 'user.email', email])
+        # subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/github/workspace'])
+        # subprocess.check_output(['git', 'config', '--global', '--add', 'safe.directory', '/root/repo'])
+        subprocess.check_output(['git', 'config', '--global', 'user.name', 'webots.cloud'])
+        subprocess.check_output(['git', 'config', '--global', 'user.email', '97463320+webots-cloud@users.noreply.github.com'])
 
 
 def push(message='Updated competition recordings'):

@@ -193,7 +193,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
               'the opponent controller failed conntected to Webots, therefore you won')
         performance = 1
 
-    _cleanup_countainers()
+    _cleanup_containers()
 
     # restore temporary file changes
     with open(world_config['file'], 'w') as f:

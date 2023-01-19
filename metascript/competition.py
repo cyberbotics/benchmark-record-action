@@ -41,7 +41,7 @@ class Participant:
                     print(f'::error ::Missing name in {url}')
                     self.data = None
                 elif 'description' not in self.data:
-                    print(f'::error ::Missing description in {url')
+                    print(f'::error ::Missing description in {url}')
                     self.data = None                    
                 elif 'country' not in self.data:
                     print(f'::error ::Missing country code in {url}')

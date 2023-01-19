@@ -141,7 +141,7 @@ def _get_opponent(participant):
         print(f'::notice ::Welcome {participant.repository} and good luck for the competition')
     while i > 0:
         o = participants['participants'][i - 1]
-        print(f'::notice ::Cloning opponent repository: {o["repository"]}')
+        print(f'::notice ::Cloning \033[34mopponent\033[0m repository: {o["repository"]}')
         opponent = Participant(o['id'], o['repository'], o['private'], True)
         if opponent.data is not None:
             return opponent
@@ -156,7 +156,7 @@ def _get_opponent(participant):
 def _get_participant():
     input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
     split = input_participant.split(':')
-    print(f'::notice ::Cloning participant repository: {split[1]}')
+    print(f'::notice ::Cloning \033[31mparticipant\033[0m repository: {split[1]}')
     participant = Participant(split[0], split[1], split[2] == 'true')
     return participant
 

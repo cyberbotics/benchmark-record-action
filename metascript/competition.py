@@ -54,6 +54,9 @@ def competition(config):
 
     # Parse input participant
     participant = _get_participant()
+    if participant.data is None:
+        print('::error ::Cannot read controllers/participant/participant.json, please provide this file.')
+        return
     performance = None
     animator_controller_destination_path = _copy_animator_files()
     if config['world']['metric'] == 'ranking':  # run a bubble sort ranking

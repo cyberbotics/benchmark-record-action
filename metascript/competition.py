@@ -72,7 +72,7 @@ def competition(config):
     # Parse input participant
     participant = _get_participant()
     if participant.data is None:
-        print('::error ::Cannot parse controllers/participant/participant.json, please provide or fix this file.')
+        print(f'::error ::Cannot parse https://github.com/{participant.repository}/blob/main/controllers/participant/participant.json, please provide or fix this file.')
         sys.exit(1)
     performance = None
     animator_controller_destination_path = _copy_animator_files()

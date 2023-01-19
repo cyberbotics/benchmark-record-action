@@ -35,6 +35,21 @@ class Participant:
         repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['INPUT_REPO_TOKEN'], self.repository)
         if git.clone(repo, self.controller_path):
             self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
+            if self.data:  # sanity checks
+                if 'name' not in self.data:
+                    print('::error ::Missing name in controllers/participant/participant.json')
+                    self.data = None
+                elif 'description' not in self.data:
+                    print('::error ::Missing description in controllers/participant/participant.json')
+                    self.data = None                    
+                elif 'country' not in self.data:
+                    print('::error ::Missing country in controllers/participant/participant.json')
+                    self.data = None
+                else:
+                    country = self.data['country']
+                    if len(country) != 2:
+                        print('::error ::Bad country code in controllers/participant/participant.json')
+                        self.data = None
         else:
             self.data = None
 
@@ -55,7 +70,7 @@ def competition(config):
     # Parse input participant
     participant = _get_participant()
     if participant.data is None:
-        print('::error ::Cannot read controllers/participant/participant.json, please provide this file.')
+        print('::error ::Cannot parse controllers/participant/participant.json, please provide or fix this file.')
         return
     performance = None
     animator_controller_destination_path = _copy_animator_files()

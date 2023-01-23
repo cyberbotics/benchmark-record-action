@@ -112,7 +112,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             performance = 1
 
     # Run Webots container with Popen to read the stdout
-    print('::group::Running Webots')
+    print('::group::Running \033[32mWebots\033[0m')
     command_line = ['docker', 'run', '--tty', '--rm']
     if gpu:
         command_line += ['--gpus=all', '--env', 'DISPLAY',

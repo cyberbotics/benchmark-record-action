@@ -267,7 +267,7 @@ def _load_json(filename):
 
 def _save_json(filename, object):
     with open(filename, 'w', encoding='utf-8') as f:
-        json.dump(object, f, ensure_ascii=False)
+        json.dump(object, f, ensure_ascii=False, indent=2)
 
 
 def _update_animation_files(participant):

@@ -238,7 +238,7 @@ def _update_ranking(performance, participant, opponent):
             _update_participant(found_participant, opponent, rank + 1, False)
         else:  # insert participant at last but one position, move opponent to last position
             if found_opponent['performance'] != count - 1:
-                print('::error ::Opponent should be ranked last in participants.json')
+                print(f'::error ::Opponent should be ranked last in participants.json ({found_opponent["performance"]} != {count - 1})')
                 sys.exit(1)
             _update_participant(found_opponent, opponent, count, False)
             p = {}

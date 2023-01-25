@@ -99,7 +99,7 @@ def competition(config):
                     _save_participants(participants)
                 break
             performance = int(record_animations(gpu, config, participant.controller_path, participant.data['name'],
-                                                opponent.controller_path, opponent.data['name']))
+                                                opponent.controller_path, opponent.data['name'], True if performance is None else False))
             _update_ranking(performance, participant, opponent)
             _update_animation_files(opponent if performance == 1 else participant)
             _remove_directory(opponent.controller_path)

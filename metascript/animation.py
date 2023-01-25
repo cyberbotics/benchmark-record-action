@@ -199,10 +199,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
               'the opponent controller failed conntected to Webots, therefore you won')
         performance = 1
 
-    if opponent_controller_path:
-        opponent_controller_container_id = _get_container_id('opponent-controller')
-        if opponent_controller_container_id != '':
-            subprocess.run(['docker', 'kill', opponent_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    _close_containers()
 
     # compute performance line
     if timeout:
@@ -228,13 +225,16 @@ def _get_realtime_stdout(process):
             print(realtime_output.strip())
     return process.returncode
 
-  
-def cleanup_containers():  # clearning containers possibly remaining after the last job
+
+def _close_containers():  # clearning containers possibly remaining after the last job
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['docker', 'exec', webots_container_id, 'pkill', '-SIGINT', 'webots-bin'])
     participant_controller_container_id = _get_container_id('participant-controller')
     if participant_controller_container_id != '':
         subprocess.run(['docker', 'kill', participant_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    opponent_controller_container_id = _get_container_id('opponent-controller')
+    if opponent_controller_container_id != '':
+        subprocess.run(['docker', 'kill', opponent_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     

@@ -197,8 +197,8 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     _cleanup_containers()
 
     # restore temporary file changes
-    with open(world_config['file'], 'w') as f:
-        f.write(original_world_content)
+    # with open(world_config['file'], 'w') as f:
+    #    f.write(original_world_content)
 
     # compute performance line
     if timeout:

@@ -107,7 +107,8 @@ def competition(config):
                                                 opponent.controller_path, opponent.data['name'], True if performance is None else False))
             if performance == -1:
                 failure = True
-                performance = 0
+            elif performance == 1:
+                opponent.log = os.environ['LOG_URL']
             _update_ranking(performance, participant, opponent)
             _update_animation_files(opponent if performance == 1 else participant)
             _remove_directory(opponent.controller_path)

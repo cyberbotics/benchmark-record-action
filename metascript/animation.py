@@ -90,7 +90,8 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         return_code = _get_realtime_stdout(participant_controller_build)
         print('::endgroup::')
         if return_code != 0:
-            _error_and_exit('Missing or misconfigured Dockerfile while building the participant controller container')
+            print('::error ::Missing or misconfigured Dockerfile while building the participant controller container')
+            return -1
 
     if opponent_controller_path:
         print('::group::Building \033[34mopponent\033[0m docker')
@@ -182,19 +183,25 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             timeout = True
             break
     if webots_docker.returncode:
-        _error_and_exit(f'Webots container exited with code {webots_docker.returncode}')
+        print(f'::error ::Webots container exited with code {webots_docker.returncode}')
+        performance = -1
     if not participant_docker:
-        _error_and_exit('Competition finished before launching the participant controller: ' +
-                        'check that the controller in the world file is named "participant"')
+        print('::error ::Competition finished before launching the participant controller: ' +
+              'check that the controller in the world file is named "participant"')
+        performance = -1
     if not participant_controller_connected:
-        _error_and_exit('Competition finished before the participant controller connected to Webots: ' +
-                        'your controller crashed. Please debug your controller locally before submitting it')
+        print('::error ::Competition finished before the participant controller connected to Webots: ' +
+              'your controller crashed. Please debug your controller locally before submitting it')
+        performance = -1
     if opponent_docker and not opponent_controller_connected:
         print('::warning ::Competition finished before the opponent controller connected to Webots: ' +
               'the opponent controller failed conntected to Webots, therefore you won')
         performance = 1
 
-    _cleanup_containers()
+    if opponent_controller_path:
+        opponent_controller_container_id = _get_container_id('opponent-controller')
+        if opponent_controller_container_id != '':
+            subprocess.run(['docker', 'kill', opponent_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     # compute performance line
     if timeout:
@@ -221,21 +228,12 @@ def _get_realtime_stdout(process):
     return process.returncode
 
   
-def _cleanup_containers():  # clearning containers possibly remaining after the last job
+def cleanup_containers():  # clearning containers possibly remaining after the last job
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['docker', 'exec', webots_container_id, 'pkill', '-SIGINT', 'webots-bin'])
     participant_controller_container_id = _get_container_id('participant-controller')
     if participant_controller_container_id != '':
         subprocess.run(['docker', 'kill', participant_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    opponent_controller_container_id = _get_container_id('opponent-controller')
-    if opponent_controller_container_id != '':
-        subprocess.run(['docker', 'kill', opponent_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-
-def _error_and_exit(message):
-    _cleanup_containers()
-    print(f'::error ::{message}')
-    sys.exit(1)
 
     

@@ -24,7 +24,7 @@ PERFORMANCE_KEYWORD = 'performance:'
 
 
 def record_animations(gpu, config, participant_controller_path, participant_name,
-                      opponent_controller_path=None, opponent_name=''):
+                      opponent_controller_path=None, opponent_name='', first_run=True):
     world_config = config['world']
     performance = 0
 

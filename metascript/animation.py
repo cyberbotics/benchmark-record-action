@@ -33,63 +33,64 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     subprocess.check_output(['mkdir', '-p', os.path.join(TMP_ANIMATION_DIRECTORY, 'textures')])
     subprocess.check_output(['mkdir', '-p', os.path.join(TMP_ANIMATION_DIRECTORY, 'meshes')])
 
-    # Temporary world file changes
-    with open(world_config['file'], 'r') as f:
-        original_world_content = f.read()
-    world_content = original_world_content.replace('controller "participant"', 'controller "<extern>"')
-    if opponent_controller_path:
-        world_content = world_content.replace('controller "opponent"', 'controller "<extern>"')
-    world_content += f'''
-    DEF ANIMATION_RECORDER_SUPERVISOR Robot {{
-    name "animation_recorder_supervisor"
-    controller "animator"
-    controllerArgs [
-        "--duration={world_config['max-duration']}"
-        "--output={TMP_ANIMATION_DIRECTORY}"
-    ]
-    supervisor TRUE
-    }}
-    '''
+    if first_run:
+        # Temporary world file changes
+        with open(world_config['file'], 'r') as f:
+            original_world_content = f.read()
+        world_content = original_world_content.replace('controller "participant"', 'controller "<extern>"')
+        if opponent_controller_path:
+            world_content = world_content.replace('controller "opponent"', 'controller "<extern>"')
+        world_content += f'''
+        DEF ANIMATION_RECORDER_SUPERVISOR Robot {{
+        name "animation_recorder_supervisor"
+        controller "animator"
+        controllerArgs [
+            "--duration={world_config['max-duration']}"
+            "--output={TMP_ANIMATION_DIRECTORY}"
+        ]
+        supervisor TRUE
+        }}
+        '''
 
-    with open(world_config['file'], 'w') as f:
-        f.write(world_content)
+        with open(world_config['file'], 'w') as f:
+            f.write(world_content)
 
-    # Building the Docker containers
-    print('::group::Building \033[32mWebots\033[0m docker')
-    recorder_build = subprocess.Popen(
-        [
-            'docker', 'build',
-            '--tag', 'recorder-webots',
-            '--file', 'Dockerfile',
-            '.'
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        encoding='utf-8'
-    )
-    return_code = _get_realtime_stdout(recorder_build)
-    print('::endgroup::')
-    if return_code != 0:
-        print('::error ::Missing or misconfigured Dockerfile while building the Webots container')
-        sys.exit(1)
+        # Building the Docker containers
+        print('::group::Building \033[32mWebots\033[0m docker')
+        recorder_build = subprocess.Popen(
+            [
+                'docker', 'build',
+                '--tag', 'recorder-webots',
+                '--file', 'Dockerfile',
+                '.'
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='utf-8'
+        )
+        return_code = _get_realtime_stdout(recorder_build)
+        print('::endgroup::')
+        if return_code != 0:
+            print('::error ::Missing or misconfigured Dockerfile while building the Webots container')
+            sys.exit(1)
 
-    print('::group::Building \033[31mparticipant\033[0m docker')
-    participant_controller_build = subprocess.Popen(
-        [
-            'docker', 'build',
-            '--tag', 'participant-controller',
-            '--file', f'{participant_controller_path}/controllers/Dockerfile',
-            '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/participant',
-            f'{participant_controller_path}/controllers'
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        encoding='utf-8'
-    )
-    return_code = _get_realtime_stdout(participant_controller_build)
-    print('::endgroup::')
-    if return_code != 0:
-        _error_and_exit('Missing or misconfigured Dockerfile while building the participant controller container')
+        print('::group::Building \033[31mparticipant\033[0m docker')
+        participant_controller_build = subprocess.Popen(
+            [
+                'docker', 'build',
+                '--tag', 'participant-controller',
+                '--file', f'{participant_controller_path}/controllers/Dockerfile',
+                '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/participant',
+                f'{participant_controller_path}/controllers'
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='utf-8'
+        )
+        return_code = _get_realtime_stdout(participant_controller_build)
+        print('::endgroup::')
+        if return_code != 0:
+            _error_and_exit('Missing or misconfigured Dockerfile while building the participant controller container')
 
     if opponent_controller_path:
         print('::group::Building \033[34mopponent\033[0m docker')

@@ -85,6 +85,7 @@ def competition(config):
         sys.exit(1)
     performance = None
     animator_controller_destination_path = _copy_animator_files()
+    failure = False
     if config['world']['metric'] == 'ranking':  # run a bubble sort ranking
         while True:
             opponent = _get_opponent(participant)
@@ -104,6 +105,9 @@ def competition(config):
                 break
             performance = int(record_animations(gpu, config, participant.controller_path, participant.data['name'],
                                                 opponent.controller_path, opponent.data['name'], True if performance is None else False))
+            if performance == -1:
+                failure = True
+                performance = 0
             _update_ranking(performance, participant, opponent)
             _update_animation_files(opponent if performance == 1 else participant)
             _remove_directory(opponent.controller_path)
@@ -124,6 +128,9 @@ def competition(config):
 
     if ALLOW_PUSH:
         git.push(message='record and update competition animations')
+    
+    if failure:
+        sys.exit(1)
 
 
 def _get_opponent(participant):

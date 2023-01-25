@@ -36,8 +36,8 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     if first_run:
         # Temporary world file changes
         with open(world_config['file'], 'r') as f:
-            original_world_content = f.read()
-        world_content = original_world_content.replace('controller "participant"', 'controller "<extern>"')
+            world_content = f.read()
+        world_content = world_content.replace('controller "participant"', 'controller "<extern>"')
         if opponent_controller_path:
             world_content = world_content.replace('controller "opponent"', 'controller "<extern>"')
         world_content += f'''
@@ -195,10 +195,6 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         performance = 1
 
     _cleanup_containers()
-
-    # restore temporary file changes
-    # with open(world_config['file'], 'w') as f:
-    #    f.write(original_world_content)
 
     # compute performance line
     if timeout:

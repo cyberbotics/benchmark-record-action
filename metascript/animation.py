@@ -23,6 +23,7 @@ TMP_ANIMATION_DIRECTORY = 'tmp'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
+# return 1 if participant wins, 0 if participan loses and -1 if participant fails (due to an error)
 def record_animations(gpu, config, participant_controller_path, participant_name,
                       opponent_controller_path=None, opponent_name='', first_run=True):
     world_config = config['world']

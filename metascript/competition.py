@@ -185,7 +185,7 @@ def _copy_animator_files():
     return animator_controller_destination
 
 
-def _update_participant(p, participant, performance=None, date=True):
+def _update_participant(p, participant, performance=None):
     p['id'] = participant.id
     p['repository'] = participant.repository
     p['private'] = participant.private
@@ -194,10 +194,9 @@ def _update_participant(p, participant, performance=None, date=True):
     p['country'] = participant.data['country']
     if participant.log is not None:
         p['log'] = participant.log
+        p['date'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     if performance is not None:
         p['performance'] = performance
-    if date:
-        p['date'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _update_performance(performance, participant, higher_is_better):
@@ -254,12 +253,12 @@ def _update_ranking(performance, participant, opponent):
         if found_participant:  # swap
             rank = found_opponent['performance']
             _update_participant(found_opponent, participant, rank)
-            _update_participant(found_participant, opponent, rank + 1, False)
+            _update_participant(found_participant, opponent, rank + 1)
         else:  # insert participant at last but one position, move opponent to last position
             if found_opponent['performance'] != count - 1:
                 print(f'::error ::Opponent should be ranked last in participants.json ({found_opponent["performance"]} != {count - 1})')
                 sys.exit(1)
-            _update_participant(found_opponent, opponent, count, False)
+            _update_participant(found_opponent, opponent, count)
             p = {}
             _update_participant(p, participant, count - 1)
             participants['participants'].insert(count - 2, p)

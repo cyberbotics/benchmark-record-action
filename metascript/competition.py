@@ -122,7 +122,6 @@ def competition(config):
     _remove_directory(participant.controller_path)
     _remove_directory(animator_controller_destination_path)
 
-    cleanup_containers()
     # cleanup docker containers, images, networks and volumes not used in the last 2.5 days
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=60h'])
     subprocess.check_output(['docker', 'volume', 'prune', '--force'])

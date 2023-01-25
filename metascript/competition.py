@@ -244,8 +244,6 @@ def _update_ranking(performance, participant, opponent):
             p = {}
             _update_participant(p, participant, count - 1)
             participants['participants'].insert(count - 2, p)
-            for p in participants['participants']:
-                print(str(p['performance']) + ': ' + p['repository'])
     _save_participants(participants)
 
 

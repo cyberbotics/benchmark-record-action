@@ -21,7 +21,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from .animation import record_animations, cleanup_containers, TMP_ANIMATION_DIRECTORY
+from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git
 
 ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)

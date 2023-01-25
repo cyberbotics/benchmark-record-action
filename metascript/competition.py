@@ -21,7 +21,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from .animation import record_animations, TMP_ANIMATION_DIRECTORY
+from .animation import record_animations, cleanup_containers, TMP_ANIMATION_DIRECTORY
 from .utils import git
 
 ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
@@ -117,6 +117,7 @@ def competition(config):
     _remove_directory(participant.controller_path)
     _remove_directory(animator_controller_destination_path)
 
+    cleanup_containers()
     # cleanup docker containers, images, networks and volumes not used in the last 2.5 days
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=60h'])
     subprocess.check_output(['docker', 'volume', 'prune', '--force'])

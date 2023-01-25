@@ -59,6 +59,10 @@ class Participant:
                             sys.exit(1)
         else:
             self.data = None
+        if opponent:
+            self.log = None
+        else:
+            self.log = os.environ['LOG_URL']
 
 
 def competition(config):
@@ -179,6 +183,8 @@ def _update_participant(p, participant, performance=None, date=True):
     p['name'] = participant.data['name']
     p['description'] = participant.data['description']
     p['country'] = participant.data['country']
+    if participant.log is not None:
+        p['log'] = participant.log
     if performance is not None:
         p['performance'] = performance
     if date:

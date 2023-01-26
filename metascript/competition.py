@@ -54,7 +54,7 @@ class Participant:
                 else:
                     country = self.data['country']
                     if len(country) != 2:
-                        print(f'{message}Bad country code in {url}')
+                        print(f'{message}Bad country code in {url} (you should set a two-letter country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 for details)')
                         if not opponent:
                             sys.exit(1)
         else:

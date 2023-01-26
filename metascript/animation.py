@@ -95,7 +95,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             return -1
 
     if opponent_controller_path:
-        print(f'::group::Building \033[34mopponent\033[0m docker ({\033[34m{opponent_name}\033[0m})')
+        print(f'::group::Building \033[34mopponent\033[0m docker (\033[34m{opponent_name}\033[0m)')
         opponent_controller_build = subprocess.Popen(
             [
                 'docker', 'build',

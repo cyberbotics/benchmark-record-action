@@ -67,7 +67,6 @@ class Participant:
 
 def competition(config):
     # Determine if GPU acceleration is available (typically on a self-hosted runner)
-    print('::group ::Host machine detection')
     if shutil.which('nvidia-docker'):
         version = subprocess.check_output(['nvidia-docker', '-v']).decode('utf-8').strip().split(' ')[2][:-1]
         print(f'GPU detected on runner machine: nvidia-docker version {version}')

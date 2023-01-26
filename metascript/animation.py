@@ -115,7 +115,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             performance = 1
 
     # Run Webots container with Popen to read the stdout
-    print(f'::group::Running game in \033[32mWebots\033[0m: \033[31m{participant_name}\033[0m versus \033[34{opponent_name}\033[0m')
+    print(f'::group::Running game in \033[32mWebots\033[0m: \033[31m{participant_name}\033[0m versus \033[34m{opponent_name}\033[0m')
     command_line = ['docker', 'run', '--tty', '--rm']
     if gpu:
         command_line += ['--gpus=all', '--env', 'DISPLAY',

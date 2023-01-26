@@ -140,7 +140,7 @@ def _get_opponent(participant):
         _update_participant(p, participant, 1)
         participants['participants'].append(p)
         _save_participants(participants)
-        print(f'::notice ::Welcome {participant.repository}, you are the first participant there')
+        print(f'Welcome {participant.repository}, you are the first participant there')
         return None
 
     i = 0
@@ -151,21 +151,21 @@ def _get_opponent(participant):
             break
         i += 1
     if i == 0 and found:
-        print(f'::notice ::{participant.repository} is number 1 in the ranking')
+        print(f'{participant.repository} is number 1 in the ranking')
         return None
     if not found:
-        print(f'::notice ::Welcome {participant.repository} and good luck for the competition')
+        print(f'Welcome {participant.repository} and good luck for the competition')
     while i > 0:
         o = participants['participants'][i - 1]
         print(f'Cloning \033[34mopponent\033[0m repository: {o["repository"]}')
         opponent = Participant(o['id'], o['repository'], o['private'], True)
         if opponent.data is not None:
             return opponent
-        print(f'::notice ::{o["repository"]} is not participating any more, removing it')
+        print(f'{o["repository"]} is not participating any more, removing it')
         del participants['participants'][i - 1]
         _save_participants(participants)
         i -= 1
-    print(f'::notice ::All opponents have left, {participant.repository} becomes number 1')
+    print(f'All opponents have left, {participant.repository} becomes number 1')
     return None
 
 

@@ -210,6 +210,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             print(f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition')
             sys.exit(1)
     print('::endgroup::')
+    print(f'::notice ::{participant_name} {"won" if performance == 1 else "lost"} over {opponent_name}')
     return performance
 
 

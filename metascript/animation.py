@@ -75,7 +75,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             print('::error ::Missing or misconfigured Dockerfile while building the Webots container')
             sys.exit(1)
 
-        print('::group::Building \033[31mparticipant\033[0m docker')
+        print(f'::group::Building \033[31mparticipant\033[0m docker (\033[31m{participant_name}\033[0m)')
         participant_controller_build = subprocess.Popen(
             [
                 'docker', 'build',
@@ -95,7 +95,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             return -1
 
     if opponent_controller_path:
-        print('::group::Building \033[34mopponent\033[0m docker')
+        print(f'::group::Building \033[34mopponent\033[0m docker ({\033[34m{opponent_name}\033[0m})')
         opponent_controller_build = subprocess.Popen(
             [
                 'docker', 'build',
@@ -115,7 +115,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             performance = 1
 
     # Run Webots container with Popen to read the stdout
-    print('::group::Running \033[32mWebots\033[0m')
+    print(f'::group::Running game in \033[32mWebots\033[0m: \033[31m{participant_name}\033[0m versus \033[34{opponent_name}\033[0m')
     command_line = ['docker', 'run', '--tty', '--rm']
     if gpu:
         command_line += ['--gpus=all', '--env', 'DISPLAY',
@@ -145,7 +145,8 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     participant_controller_connected = False
     opponent_controller_connected = False
     timeout = False
-
+    participant_line_count = 0
+    opponent_line_count = 0
     while webots_docker.poll() is None:
         fds = [webots_docker.stdout]
         if participant_docker:
@@ -159,9 +160,17 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         opponent_available = opponent_docker and opponent_docker.stdout in fd
         opponent_line = opponent_docker.stdout.readline().strip() if opponent_available else None
         if participant_line:
-            print(f'\033[31m{participant_line}\033[0m')
+            if participant_line_count < 100:
+                print(f'\033[31m{participant_line}\033[0m')
+            elif participant_line_count == 100:
+                print(f'Participant \033[31m{participant_name}\033[0m printed more than 100 lines, ignoring further prints')
+            participant_line_count += 1
         if opponent_line:
-            print(f'\033[34m{opponent_line}\033[0m')
+            if opponent_line_count < 100:
+                print(f'\033[34m{opponent_line}\033[0m')
+            elif opponent_line_count == 100:
+                print(f'Opponent \033[34m{opponent_name}\033[0m printed more than 100 lines, ignoring further prints')
+            opponent_line_count += 1
         if webots_line is None:
             continue
         print(f'\033[32m{webots_line}\033[0m')

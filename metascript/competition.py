@@ -67,13 +67,14 @@ class Participant:
 
 def competition(config):
     # Determine if GPU acceleration is available (typically on a self-hosted runner)
+    print('::group ::Host machine detection')
     if shutil.which('nvidia-docker'):
         version = subprocess.check_output(['nvidia-docker', '-v']).decode('utf-8').strip().split(' ')[2][:-1]
-        print(f'::notice ::GPU detected on runner machine: nvidia-docker version {version}')
+        print(f'GPU detected on runner machine: nvidia-docker version {version}')
         subprocess.check_output(['xhost', '+local:root'])
         gpu = True
     else:
-        print('::notice ::No GPU detected, running on CPU')
+        print('No GPU detected, running on CPU')
         gpu = False
 
     git.init()
@@ -157,7 +158,7 @@ def _get_opponent(participant):
         print(f'::notice ::Welcome {participant.repository} and good luck for the competition')
     while i > 0:
         o = participants['participants'][i - 1]
-        print(f'::notice ::Cloning \033[34mopponent\033[0m repository: {o["repository"]}')
+        print(f'Cloning \033[34mopponent\033[0m repository: {o["repository"]}')
         opponent = Participant(o['id'], o['repository'], o['private'], True)
         if opponent.data is not None:
             return opponent
@@ -172,7 +173,7 @@ def _get_opponent(participant):
 def _get_participant():
     input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
     split = input_participant.split(':')
-    print(f'::notice ::Cloning \033[31mparticipant\033[0m repository: {split[1]}')
+    print(f'Cloning \033[31mparticipant\033[0m repository: {split[1]}')
     participant = Participant(split[0], split[1], split[2] == 'true')
     return participant
 

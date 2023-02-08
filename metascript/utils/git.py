@@ -39,7 +39,6 @@ def push(message='Updated competition recordings'):
         if os.path.exists('storage'):
             subprocess.check_output(['git', 'add', '-A', 'storage'])
         print(subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT).decode('utf-8'))
-        print(subprocess.check_output(['git', 'pull', '--rebase'], stderr=subprocess.STDOUT).decode('utf-8'))
         print(subprocess.check_output(['git', 'push', '-f', github_repository]).decode('utf-8'))
     except subprocess.CalledProcessError:
         print('::notice ::Nothing to commit and push')

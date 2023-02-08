@@ -34,12 +34,12 @@ def push(message='Updated competition recordings'):
     )
     print(f'::group::Push new animations and ranking to https://github.com/{os.environ["GITHUB_REPOSITORY"]}')
     try:
-        print(subprocess.check_output(['git', 'pull', '--rebase'], stderr=subprocess.STDOUT).decode('utf-8'))
         if os.path.exists('participants.json'):
             subprocess.check_output(['git', 'add', '-A', 'participants.json'])
         if os.path.exists('storage'):
             subprocess.check_output(['git', 'add', '-A', 'storage'])
         print(subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT).decode('utf-8'))
+        print(subprocess.check_output(['git', 'pull', '--rebase'], stderr=subprocess.STDOUT).decode('utf-8'))
         print(subprocess.check_output(['git', 'push', '-f', github_repository]).decode('utf-8'))
     except subprocess.CalledProcessError:
         print('::notice ::Nothing to commit and push')

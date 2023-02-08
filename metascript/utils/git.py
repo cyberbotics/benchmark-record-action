@@ -34,6 +34,7 @@ def push(message='Updated competition recordings'):
     )
     print(f'::group::Push new animations and ranking to https://github.com/{os.environ["GITHUB_REPOSITORY"]}')
     try:
+        print(subprocess.check_output(['git', 'pull', '--rebase'])
         if os.path.exists('participants.json'):
             subprocess.check_output(['git', 'add', '-A', 'participants.json'])
         if os.path.exists('storage'):

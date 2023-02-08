@@ -122,9 +122,8 @@ def competition(config):
     _remove_directory(participant.controller_path)
     _remove_directory(animator_controller_destination_path)
 
-    # cleanup docker containers, images, networks and volumes not used in the last 24 hours
-    subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=24h'])
-    subprocess.check_output(['docker', 'volume', 'prune', '--force'])
+    # cleanup docker containers, images and networks not used in the last 30 days
+    subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
 
     if ALLOW_PUSH:
         git.push(message='record and update competition animations')

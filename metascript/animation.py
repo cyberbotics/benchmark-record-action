@@ -114,6 +114,11 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             print('::warning ::Missing or misconfigured Dockerfile while building the opponent controller container')
             performance = 1
 
+    webots_old_container_id = _get_container_id('recorder-webots')
+    if webots_old_container_id != '':  # A zombie webots container may still be there due to a previous crash
+        print('::warning ::Killing a Webots zombie process left by the previous job')
+        subprocess.run(['docker', 'kill', webots_old_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
     # Run Webots container with Popen to read the stdout
     print(f'::group::Running game in \033[32mWebots\033[0m: \033[31m{participant_name}\033[0m versus \033[34m{opponent_name}\033[0m')
     command_line = ['docker', 'run', '--tty', '--rm']

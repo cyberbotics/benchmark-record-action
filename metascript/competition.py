@@ -126,7 +126,8 @@ def competition(config):
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
 
     if ALLOW_PUSH:
-        git.push(message='record and update competition animations')
+        # git.push(message='record and update competition animations')
+        
     
     if failure:
         sys.exit(1)

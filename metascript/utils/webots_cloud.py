@@ -17,6 +17,7 @@
 import requests
 
 def upload_file(repository, token, file):
+    print(f'Posting: repository={repository} file={file}')
     data = {'repository': repository, 'token': token}
     with open(file, 'rb') as f:
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}

@@ -111,7 +111,7 @@ def competition(config):
                 opponent.log = os.environ['LOG_URL']
             _update_ranking(performance, participant, opponent)
             _update_animation_files(opponent if performance == 1 else participant)
-            _remove_directory(opponent.controller_path)
+            shutil.rmtree(opponent.controller_path)
             if performance != 1:  # draw or loose, stopping duals
                 break
     else:  # run a simple performance evaluation
@@ -119,8 +119,8 @@ def competition(config):
         higher_is_better = config['world']['higher-is-better'] if 'higher-is-better' in config['world'] else True
         _update_performance(performance, participant, higher_is_better)
         _update_animation_files(participant)
-    _remove_directory(participant.controller_path)
-    _remove_directory(animator_controller_destination_path)
+    shutil.rmtree(participant.controller_path)
+    shutil.rmtree(animator_controller_destination_path)
 
     # cleanup docker containers, images and networks not used in the last 30 days
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
@@ -179,7 +179,7 @@ def _get_participant():
 def _copy_animator_files():
     animator_controller_source = os.path.join('metascript', 'animator')
     animator_controller_destination = os.path.join('controllers', 'animator')
-    _copy_directory(animator_controller_source, animator_controller_destination)
+    shutil.copytree(animator_controller_source, animator_controller_destination)
     return animator_controller_destination
 
 
@@ -287,31 +287,6 @@ def _save_json(filename, object):
 
 
 def _update_animation_files(participant):
-    new_destination_directory = os.path.join('storage', 'wb_animation_' + participant.id)
-    _remove_directory(new_destination_directory)  # remove old animation
-    _copy_directory(TMP_ANIMATION_DIRECTORY, new_destination_directory)
-    _remove_directory(TMP_ANIMATION_DIRECTORY)
-    _cleanup_storage_files(new_destination_directory)
+    shutil.copy(os.path.join(TMP_ANIMATION_DIRECTORY, 'animation.json'), os.path.join(participant.id, 'animation.json')
+    shutil.rmtree(TMP_ANIMATION_DIRECTORY)
     return
-
-
-def _cleanup_storage_files(directory):
-    if Path(directory).exists():
-        for path in Path(directory).glob('*'):
-            path = str(path)
-            if path.endswith('.html') or path.endswith('.css'):
-                os.remove(path)
-            elif path.endswith('.json'):
-                os.rename(path, directory + '/animation.json')
-            elif path.endswith('.x3d'):
-                os.rename(path, directory + '/scene.x3d')
-
-
-def _remove_directory(directory):
-    if Path(directory).exists():
-        shutil.rmtree(directory)
-
-
-def _copy_directory(source, destination):
-    if Path(source).exists():
-        shutil.copytree(source, destination)

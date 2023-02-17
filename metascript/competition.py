@@ -126,6 +126,7 @@ def competition(config):
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
 
     if ALLOW_PUSH:
+        webots_cloud.upload(
         # git.push(message='record and update competition animations')
         
     
@@ -288,6 +289,8 @@ def _save_json(filename, object):
 
 
 def _update_animation_files(participant):
-    shutil.copy(os.path.join(TMP_ANIMATION_DIRECTORY, 'animation.json'), os.path.join(participant.id, 'animation.json')
+    folder = os.path.joint('storage', participant.id)
+    os.makedirs(folder)
+    shutil.copy(os.path.join(TMP_ANIMATION_DIRECTORY, 'animation.json'), os.path.join(folder, 'animation.json')
     shutil.rmtree(TMP_ANIMATION_DIRECTORY)
     return

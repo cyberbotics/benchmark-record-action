@@ -22,7 +22,7 @@ import subprocess
 import sys
 from pathlib import Path
 from .animation import record_animations, TMP_ANIMATION_DIRECTORY
-from .utils import git
+from .utils import git, webots_cloud
 
 ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
 

@@ -295,7 +295,7 @@ def _save_json(filename, object):
 
 
 def _update_animation_files(participant):
-    folder = os.path.joint('storage', participant.id)
+    folder = os.path.join('storage', participant.id)
     os.makedirs(folder)
     shutil.copy(os.path.join(TMP_ANIMATION_DIRECTORY, 'animation.json'), os.path.join(folder, 'animation.json'))
     shutil.rmtree(TMP_ANIMATION_DIRECTORY)

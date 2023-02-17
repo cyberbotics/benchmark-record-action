@@ -126,13 +126,15 @@ def competition(config):
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
 
     if ALLOW_PUSH:
-        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], 'participants.json')
+        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], 'participants.json', 'participants')
         os.chdir('storage')
         for f in os.listdir('.'):
             if f == '.' or f == '..':
                 continue
+            if f.startswith('wb_animation'):  # FIXME: should be removed
+                continue
             file = os.path.join(f, 'animation.json')
-            webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], file)
+            webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], file, 'animation')
         os.chdir('..')           
         # git.push(message='record and update competition animations')
     

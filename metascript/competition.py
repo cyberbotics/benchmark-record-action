@@ -129,7 +129,7 @@ def competition(config):
         webots_cloud.upload(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], 'participants.json')
         os.chdir('storage')
         for f in os.listdir('.'):
-            if f == '.' or f === '..':
+            if f == '.' or f == '..':
                 continue
             file = os.path.join(f, 'animation.json')
             webots_cloud.upload(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], file)

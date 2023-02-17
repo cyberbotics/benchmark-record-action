@@ -126,9 +126,15 @@ def competition(config):
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
 
     if ALLOW_PUSH:
-        webots_cloud.upload(
+        webots_cloud.upload(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], 'participants.json')
+        os.chdir('storage')
+        for f in os.listdir('.'):
+            if f == '.' or f === '..':
+                continue
+            file = os.path.join(f, 'animation.json')
+            webots_cloud.upload(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], file)
+        os.chdir('..')           
         # git.push(message='record and update competition animations')
-        
     
     if failure:
         sys.exit(1)

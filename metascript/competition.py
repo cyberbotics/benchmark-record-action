@@ -20,7 +20,6 @@ import os
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git, webots_cloud
 

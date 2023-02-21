@@ -137,7 +137,6 @@ def competition(config):
             webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], file, 'animation')
         os.chdir('..')
         # git.push(message='record and update competition animations')
-    
     if failure:
         sys.exit(1)
 

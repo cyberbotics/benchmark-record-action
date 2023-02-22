@@ -78,7 +78,7 @@ def competition(config):
 
     git.init()
 
-    response = requests.get(f'https://webots.cloud/storage/competition/{os.environ['GITHUB_REPOSITORY']}/participants.json')
+    response = requests.get(f'https://webots.cloud/storage/competition/{os.environ["GITHUB_REPOSITORY"]}/participants.json')
     open("participants.json", "w").write(response.content)
     
     # Parse input participant

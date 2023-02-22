@@ -17,6 +17,7 @@
 from datetime import datetime, timezone
 import json
 import os
+import requests
 import shutil
 import subprocess
 import sys
@@ -77,6 +78,9 @@ def competition(config):
 
     git.init()
 
+    response = requests.get('https://webots.cloud/storage/competition/cyberbotics/wrestling/participants.json')
+    open("participants.json", "w").write(response.content)
+    
     # Parse input participant
     participant = _get_participant()
     if participant.data is None:

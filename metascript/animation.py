@@ -121,7 +121,8 @@ def record_animations(gpu, config, participant_controller_path, participant_name
 
     # Run Webots container with Popen to read the stdout
     if opponent_controller_path:
-        print(f'::group::Running game in \033[32mWebots\033[0m: \033[31m{participant_name}\033[0m versus \033[34m{opponent_name}\033[0m')
+        print(f'::group::Running game in \033[32mWebots\033[0m: \033[31m{participant_name}\033[0m ' +
+              f'versus \033[34m{opponent_name}\033[0m')
     else:
         print(f'::group::Running evaluation in \033[32mWebots\033[0m of \033[31m{participant_name}\033[0m')
     command_line = ['docker', 'run', '--tty', '--rm']
@@ -224,7 +225,8 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             # time-duration competition completed with maximum time
             performance = float(world_config['max-duration'])
         else:  # competition failed: time limit reached
-            print(f'::error ::Your controller took more than {world_config["max-duration"]} seconds to complete the competition')
+            print(f'::error ::Your controller took more than {world_config["max-duration"]} seconds'
+                  ' to complete the competition')
             sys.exit(1)
     print('::endgroup::')
     if opponent_controller_path:

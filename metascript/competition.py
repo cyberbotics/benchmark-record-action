@@ -54,7 +54,8 @@ class Participant:
                 else:
                     country = self.data['country']
                     if country != 'demo' and len(country) != 2:
-                        print(f'{message}Bad country code in {url} (you should set a two-letter country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 for details)')
+                        print(f'{message}Bad country code in {url} (you should set a two-letter country code, see ' +
+                              'https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 for details)')
                         if not opponent:
                             sys.exit(1)
         else:
@@ -84,7 +85,9 @@ def competition(config):
     # Parse input participant
     participant = _get_participant()
     if participant.data is None:
-        print(f'::error ::Cannot parse https://github.com/{participant.repository}/blob/main/controllers/participant/participant.json, please provide or fix this file.')
+        print('::error ::Cannot parse ' +
+              f'https://github.com/{participant.repository}/blob/main/controllers/participant/participant.json, ' +
+              'please provide or fix this file.')
         sys.exit(1)
     performance = None
     animator_controller_destination_path = _copy_animator_files()
@@ -107,7 +110,8 @@ def competition(config):
                     _save_participants(participants)
                 break
             performance = int(record_animations(gpu, config, participant.controller_path, participant.data['name'],
-                                                opponent.controller_path, opponent.data['name'], True if performance is None else False))
+                                                opponent.controller_path, opponent.data['name'],
+                                                True if performance is None else False))
             if performance == -1:
                 failure = True
             elif performance == 1:
@@ -129,7 +133,8 @@ def competition(config):
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
 
     if ALLOW_PUSH:
-        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], 'participants.json', 'participants')
+        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], 'participants.json',
+                                 'participants')
         os.chdir('storage')
         for f in os.listdir('.'):
             if f == '.' or f == '..':
@@ -266,7 +271,8 @@ def _update_ranking(performance, participant, opponent):
             _update_participant(found_participant, opponent, rank + 1)
         else:  # insert participant at last but one position, move opponent to last position
             if found_opponent['performance'] != count - 1:
-                print(f'::error ::Opponent should be ranked last in participants.json ({found_opponent["performance"]} != {count - 1})')
+                print('::error ::Opponent should be ranked last in participants.json ' +
+                      f'({found_opponent["performance"]} != {count - 1})')
                 sys.exit(1)
             _update_participant(found_opponent, opponent, count)
             p = {}

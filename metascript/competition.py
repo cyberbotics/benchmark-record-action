@@ -24,7 +24,7 @@ import sys
 from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git, webots_cloud
 
-ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
+UPLOAD_PERFORMANCES = os.getenv('UPLOAD_PERFORMANCES', 'false') == 'true'
 
 
 class Participant:
@@ -33,7 +33,7 @@ class Participant:
         self.repository = repository
         self.private = private
         self.controller_path = os.path.join('controllers', id)
-        repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['INPUT_REPO_TOKEN'], self.repository)
+        repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['REPO_TOKEN'], self.repository)
         if git.clone(repo, self.controller_path):
             self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
             if self.data:  # sanity checks
@@ -132,8 +132,8 @@ def competition(config):
     # cleanup docker containers, images and networks not used in the last 30 days
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
 
-    if ALLOW_PUSH:
-        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], 'participants.json',
+    if UPLOAD_PERFORMANCES:
+        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], 'participants.json',
                                  'participants')
         if os.path.isdir('storage'):
             os.chdir('storage')
@@ -141,7 +141,7 @@ def competition(config):
                 if f == '.' or f == '..':
                     continue
                 file = os.path.join(f, 'animation.json')
-                webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], file, 'animation')
+                webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], file, 'animation')
             os.chdir('..')
     if failure:
         sys.exit(1)
@@ -187,7 +187,10 @@ def _get_participant():
     input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
     split = input_participant.split(':')
     print(f'Cloning \033[31mparticipant\033[0m repository: {split[1]}')
-    participant = Participant(split[0], split[1], split[2] == 'true')
+    participant = Participant(
+        os.environ['PARTICIPANT_REPO_ID'],
+        os.environ['PARTICIPANT_REPO_NAME'],
+        os.environ['PARTICIPANT_REPO_PRIVATE'] == 'true')
     return participant
 
 

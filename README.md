@@ -10,8 +10,19 @@ This composite action works with environment variables as input, two mandatory a
 
 ### Mandatory Input
 
+| Name | Description | Required | Default |
+| --- | --- | --- | --- |
+| `participant_repo_id` | The ID of the participant repository | true |  |
+| `participant_repo_name` | The name of the participant repository | true |  |
+| `participant_repo_private` | Whether the participant repository is private | true |  |
+| `log_url` | The URL of GitHub action logs | true |  |
+| `repo_token` | The GitHub token | true |  |
+| `upload_performances` | Whether to upload the performances to the cloud | false | `false` |
+
+<!--
 - INPUT_INDIVIDUAL_EVALUATION: information about the repository of the participant with the following format: `id:repository:private`, e.g., `348767863:omichel/my-competitor:true`.
 - INPUT_REPO_TOKEN: token used to fetch the participant repository, typically REPO_TOKEN. A more privileged token than GITHUB_TOKEN is needed to fetch controllers from private repositories.
+-->
 
 ### Optional Input
 

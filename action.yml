@@ -1,5 +1,25 @@
 name: 'Competition Record'
 description: 'Build and publish Webots animation and save competition score'
+inputs:
+  participant-repo-id:
+    description: 'The ID of the participant repository'
+    required: true
+  participant-repo-name:
+    description: 'The name of the participant repository'
+    required: true
+  participant-repo-private:
+    description: 'Whether the participant repository is private'
+    required: true
+  log-url:
+    description: 'The URL of GitHub action logs'
+    required: true
+  repo-token:
+    description: 'The GitHub token'
+    required: true
+  allow-push:
+    description: 'Whether to allow pushing to the participant repository'
+    required: false
+    default: 'false'
 branding:
   icon: 'play'
   color: 'red'
@@ -9,6 +29,7 @@ runs:
   steps:
     - name: Run the python meta script
       run: |
-        cp -r ${{ github.action_path }}/metascript .
-        python3 -u -m metascript
+        env
+#        cp -r ${{ github.action_path }}/metascript .
+#        python3 -u -m metascript
       shell: bash

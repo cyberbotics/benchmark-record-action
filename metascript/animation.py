@@ -23,7 +23,7 @@ TMP_ANIMATION_DIRECTORY = 'tmp'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-# return 1 if participant wins, 0 if participan loses and -1 if participant fails (due to an error)
+# return 1 if participant wins, 0 if participant loses and -1 if participant fails (due to an error)
 def record_animations(gpu, config, participant_controller_path, participant_name,
                       opponent_controller_path=None, opponent_name='', first_run=True):
     world_config = config['world']
@@ -214,7 +214,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         performance = -1
     if opponent_docker and not opponent_controller_connected:
         print('::warning ::Competition finished before the opponent controller connected to Webots: ' +
-              'the opponent controller failed conntected to Webots, therefore you won')
+              'the opponent controller failed to connect to Webots, therefore you won')
         performance = 1
 
     _close_containers()
@@ -249,7 +249,7 @@ def _get_realtime_stdout(process):
     return process.returncode
 
 
-def _close_containers():  # clearning containers possibly remaining after the last job
+def _close_containers():  # clearing containers possibly remaining after the last job
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['docker', 'exec', webots_container_id, 'pkill', '-SIGINT', 'webots-bin'])
@@ -259,5 +259,3 @@ def _close_containers():  # clearning containers possibly remaining after the la
     opponent_controller_container_id = _get_container_id('opponent-controller')
     if opponent_controller_container_id != '':
         subprocess.run(['docker', 'kill', opponent_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-    

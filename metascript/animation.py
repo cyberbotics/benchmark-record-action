@@ -81,7 +81,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
                 'docker', 'build',
                 '--tag', 'participant-controller',
                 '--file', f'{participant_controller_path}/controllers/Dockerfile',
-                '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/participant',
+                '--build-arg', 'WEBOTS_CONTROLLER_URL=participant',
                 f'{participant_controller_path}/controllers'
             ],
             stdout=subprocess.PIPE,
@@ -101,7 +101,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
                 'docker', 'build',
                 '--tag', 'opponent-controller',
                 '--file', f'{opponent_controller_path}/controllers/Dockerfile',
-                '--build-arg', 'WEBOTS_CONTROLLER_URL=tcp://172.17.0.1:3005/opponent',
+                '--build-arg', 'WEBOTS_CONTROLLER_URL=opponent',
                 f'{opponent_controller_path}/controllers'
             ],
             stdout=subprocess.PIPE,
@@ -132,11 +132,14 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     else:
         command_line += ['--init']
 
+    if opponent_controlller_path:
+        command_line += ['--volume', '/tmp/webots-1234/ipc/opponent:/tmp/webots-1234/ipc/opponent']
+
     command_line += [
+        '--volume', '/tmp/webots-1234/ipc/participant:/tmp/webots-1234/ipc/participant',
         '--mount', 'type=bind,' +
                    f'source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},' +
                    f'target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
-        '--publish', '3005:1234',
         '--env', 'CI=true',
         '--env', f'PARTICIPANT_NAME={participant_name}',
         '--env', f'OPPONENT_NAME={opponent_name}',
@@ -185,10 +188,12 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         print(f'\033[32m{webots_line}\033[0m')
         if "' extern controller: waiting for connection on ipc://" in webots_line:
             if participant_docker is None and "INFO: 'participant' " in webots_line:
-                participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'participant-controller'],
+                participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'participant-controller', '--volume',
+                                                       '/tmp/webots-1234/ipc/participant:/tmp/webots-1234/ipc/participant'],
                                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
             elif opponent_docker is None and "INFO: 'opponent' " in webots_line:
-                opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller'],
+                opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller', '--volume',
+                                                    '/tmp/webots-1234/ipc/opponent:/tmp/webots-1234/ipc/opponent'],
                                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
         elif "' extern controller: connected" in webots_line:
             if "INFO: 'participant' " in webots_line:

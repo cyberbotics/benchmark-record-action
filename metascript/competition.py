@@ -24,7 +24,7 @@ import sys
 from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git, webots_cloud
 
-UPLOAD_PERFORMANCES = os.getenv('UPLOAD_PERFORMANCES', 'false') == 'true'
+UPLOAD_PERFORMANCES = os.environ['UPLOAD_PERFORMANCES'] == 'True'
 
 
 class Participant:

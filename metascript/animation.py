@@ -185,10 +185,10 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         print(f'\033[32m{webots_line}\033[0m')
         if "' extern controller: waiting for connection on ipc://" in webots_line:
             if participant_docker is None and "INFO: 'participant' " in webots_line:
-                participant_docker = subprocess.Popen(['docker', 'run', '--rm', 'participant-controller'],
+                participant_docker = subprocess.Popen(['docker', 'run', '--gpus=all', '--rm', 'participant-controller'],
                                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
             elif opponent_docker is None and "INFO: 'opponent' " in webots_line:
-                opponent_docker = subprocess.Popen(['docker', 'run', '--rm', 'opponent-controller'],
+                opponent_docker = subprocess.Popen(['docker', 'run', '--gpus=all', '--rm', 'opponent-controller'],
                                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
         elif "' extern controller: connected" in webots_line:
             if "INFO: 'participant' " in webots_line:

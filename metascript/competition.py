@@ -54,8 +54,8 @@ class Participant:
                 else:
                     country = self.data['country']
                     if country != 'demo' and len(country) != 2:
-                        print(f'{message}Bad country code in {url} (you should set a two-letter country code, see ' +
-                              'https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 for details)')
+                        print(f'{message}Bad country code in {url} (you should set a two-letter country code, see '
+                              + 'https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 for details)')
                         if not opponent:
                             sys.exit(1)
         else:
@@ -81,13 +81,13 @@ def competition(config):
 
     response = requests.get(f'https://webots.cloud/storage/competition/{os.environ["GITHUB_REPOSITORY"]}/participants.json')
     open("participants.json", "wb").write(response.content)
-    
+
     # Parse input participant
     participant = _get_participant()
     if participant.data is None:
-        print('::error ::Cannot parse ' +
-              f'https://github.com/{participant.repository}/blob/main/controllers/participant/participant.json, ' +
-              'please provide or fix this file.')
+        print('::error ::Cannot parse '
+              + f'https://github.com/{participant.repository}/blob/main/controllers/participant/participant.json, '
+              + 'please provide or fix this file.')
         sys.exit(1)
     performance = None
     animator_controller_destination_path = _copy_animator_files()
@@ -184,9 +184,7 @@ def _get_opponent(participant):
 
 
 def _get_participant():
-    input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
-    split = input_participant.split(':')
-    print(f'Cloning \033[31mparticipant\033[0m repository: {split[1]}')
+    print(f'Cloning \033[31mparticipant\033[0m repository: {os.environ["PARTICIPANT_REPO_NAME"]}')
     participant = Participant(
         os.environ['PARTICIPANT_REPO_ID'],
         os.environ['PARTICIPANT_REPO_NAME'],
@@ -272,8 +270,8 @@ def _update_ranking(performance, participant, opponent):
             _update_participant(found_participant, opponent, rank + 1)
         else:  # insert participant at last but one position, move opponent to last position
             if found_opponent['performance'] != count - 1:
-                print('::error ::Opponent should be ranked last in participants.json ' +
-                      f'({found_opponent["performance"]} != {count - 1})')
+                print('::error ::Opponent should be ranked last in participants.json '
+                      + f'({found_opponent["performance"]} != {count - 1})')
                 sys.exit(1)
             _update_participant(found_opponent, opponent, count)
             p = {}

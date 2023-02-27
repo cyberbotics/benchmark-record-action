@@ -132,7 +132,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     else:
         command_line += ['--init']
 
-    if opponent_controlller_path:
+    if opponent_controller_path:
         command_line += ['--volume', '/tmp/webots-1234/ipc/opponent:/tmp/webots-1234/ipc/opponent']
 
     command_line += [

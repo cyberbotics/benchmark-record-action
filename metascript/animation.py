@@ -128,7 +128,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
     command_line = ['docker', 'run', '--tty', '--rm']
     if gpu:
         command_line += ['--gpus=all', '--env', 'DISPLAY',
-                         '--volume', '/tmp/.X11-unix:/tmp/.X11-unix:rw']
+                         '--volume', '/tmp/.X11-unix:/tmp/.X11-unix:ro']
     else:
         command_line += ['--init']
 

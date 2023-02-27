@@ -23,6 +23,7 @@ def init():
         subprocess.check_output(['git', 'config', '--global', 'user.name', 'webots.cloud'])
         subprocess.check_output(['git', 'config', '--global', 'user.email', '97463320+webots-cloud@users.noreply.github.com'])
 
+
 def clone(repo, path):
     try:
         subprocess.check_output(['git', 'clone', '--depth=1', '-q', repo, path])

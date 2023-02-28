@@ -35,7 +35,6 @@ runs:
   steps:
     - name: Run the python meta script
       run: |
-        env
         cp -r ${{ github.action_path }}/metascript .
         python3 -u -m metascript
       shell: bash

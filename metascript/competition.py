@@ -82,6 +82,7 @@ def competition(config):
     response = requests.get(
         f'https://benchmark.webots.cloud/storage/competition/{os.environ["GITHUB_REPOSITORY"]}/participants.json')
     open("participants.json", "wb").write(response.content)
+    print(response.content)
 
     # Parse input participant
     participant = _get_participant()

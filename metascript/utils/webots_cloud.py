@@ -20,5 +20,5 @@ import requests
 def upload_file(repository, token, file, name):
     data = {'path': file, 'repository': repository, 'token': token}
     with open(file, 'rb') as f:
-        response = requests.post('https://benchmark.webots.cloud/ajax/project/upload.php', files={name: f}, data=data)
+        response = requests.post('https://webots.cloud/ajax/project/upload.php', files={name: f}, data=data)
         print(response.text)

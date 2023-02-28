@@ -17,6 +17,7 @@
 from datetime import datetime, timezone
 import json
 import os
+import re
 import requests
 import shutil
 import subprocess
@@ -24,7 +25,8 @@ import sys
 from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git, webots_cloud
 
-UPLOAD_PERFORMANCES = os.environ['UPLOAD_PERFORMANCES'] == 'true'
+# YAML booleans are converted to strings by GitHub composite Actions, so we need to convert them back to booleans
+UPLOAD_PERFORMANCES = re.search("y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON", os.environ['UPLOAD_PERFORMANCES'])
 print("os.environ['UPLOAD_PERFORMANCES']", os.environ['UPLOAD_PERFORMANCES'])
 print("UPLOAD_PERFORMANCES", UPLOAD_PERFORMANCES)
 

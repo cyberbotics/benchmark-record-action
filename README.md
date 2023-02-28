@@ -22,7 +22,7 @@ Note that a more privileged token than `GITHUB_TOKEN` is required to fetch contr
 
 | Name | Description | Default |
 | --- | --- | --- |
-| `upload_performances` | Whether to upload the performances to the cloud | `false` |
+| `upload_performance` | Whether to upload the performance to webots.cloud | `false` |
 
 ## Python Code Pipeline
 
@@ -41,14 +41,14 @@ We then run Webots and the participant's controller inside Docker containers. We
 
 The animator records and saves the animation files and the competition performance in the temporary storage.
 
-If the competition is in a tournament format, the controller keeps on duelling the controller above it in the ranking until it loses in a bubble-sort logic.
+If the competition is in a ranking format, the controller keeps on dueling the controller above it in the ranking until it loses in a bubble-sort logic.
 
 The JSON animation file is renamed as `animation.json` and is moved to a directory `storage/{id}`.
 The `participants.json` file is also updated with the new recorded performance.
 
-### 3. Upload performances to webots.cloud (if UPLOAD_PERFORMANCES is set)
+### 3. Upload performance to webots.cloud (if UPLOAD_PERFORMANCE is set)
 
-If `UPLOAD_PERFORMANCES` is set, `animation.json` and the updated `participants.json` are uploaded to webots.cloud.
+If `UPLOAD_PERFORMANCE` is set, `animation.json` and the updated `participants.json` are uploaded to webots.cloud.
 
 ## Workflow
 
@@ -63,5 +63,5 @@ Here is a GitHub workflow snippet which uses the composite action:
     participant_repo_private: ${{env.PARTICIPANT_REPO_PRIVATE}}
     log_url: ${{ env.LOG_URL }}
     repo_token: ${{ secrets.REPO_TOKEN }}
-    upload_performances: false
+    upload_performance: false
 ```

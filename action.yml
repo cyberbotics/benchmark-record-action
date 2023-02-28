@@ -21,8 +21,8 @@ inputs:
     description: 'The GitHub token'
     required: true
 
-  upload_performances:
-    description: 'Whether to upload the performances to the cloud'
+  upload_performance:
+    description: 'Whether to upload the performance to the cloud'
     required: false
     default: 'false'
 
@@ -44,4 +44,4 @@ runs:
         PARTICIPANT_REPO_PRIVATE: ${{ inputs.participant_repo_private }}
         LOG_URL: ${{ inputs.log_url }}
         REPO_TOKEN: ${{ inputs.repo_token }}
-        UPLOAD_PERFORMANCES: ${{ inputs.upload_performances }}
+        UPLOAD_PERFORMANCE: ${{ inputs.upload_performance }}

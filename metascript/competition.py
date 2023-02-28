@@ -26,9 +26,7 @@ from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git, webots_cloud
 
 # YAML booleans are converted to strings by GitHub composite Actions, so we need to convert them back to booleans
-UPLOAD_PERFORMANCES = re.search("y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON", os.environ['UPLOAD_PERFORMANCES'])
-print("os.environ['UPLOAD_PERFORMANCES']", os.environ['UPLOAD_PERFORMANCES'])
-print("UPLOAD_PERFORMANCES", UPLOAD_PERFORMANCES)
+UPLOAD_PERFORMANCES = re.search(r"^(?:y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON)$", os.environ['UPLOAD_PERFORMANCES'])
 
 
 class Participant:
@@ -86,7 +84,6 @@ def competition(config):
     response = requests.get(
         f'https://benchmark.webots.cloud/storage/competition/{os.environ["GITHUB_REPOSITORY"]}/participants.json')
     open("participants.json", "wb").write(response.content)
-    print(response.content)
 
     # Parse input participant
     participant = _get_participant()

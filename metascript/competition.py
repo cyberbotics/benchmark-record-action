@@ -47,7 +47,7 @@ class Participant:
                     print(f'{message}Missing description in {url}')
                     if not opponent:
                         sys.exit(1)
-                elif 'country' not in self.data:
+                if 'country' not in self.data:
                     print(f'{message}Missing country code in {url}')
                     if not opponent:
                         sys.exit(1)
@@ -58,6 +58,8 @@ class Participant:
                               'https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 for details)')
                         if not opponent:
                             sys.exit(1)
+                if 'programming' not in self.data:
+                    self.data['programming'] = 'Python'
         else:
             self.data = None
         if opponent:
@@ -205,6 +207,7 @@ def _update_participant(p, participant, performance=None):
     p['name'] = participant.data['name']
     p['description'] = participant.data['description']
     p['country'] = participant.data['country']
+    p['programming'] = participant.data['programming']
     if participant.log is not None:
         p['log'] = participant.log
         p['date'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")

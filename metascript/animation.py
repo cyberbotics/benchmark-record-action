@@ -23,7 +23,7 @@ TMP_ANIMATION_DIRECTORY = 'tmp'
 PERFORMANCE_KEYWORD = 'performance:'
 
 
-# return 1 if participant wins, 0 if participan loses and -1 if participant fails (due to an error)
+# return 1 if participant wins, 0 if participant loses and -1 if participant fails (due to an error)
 def record_animations(gpu, config, participant_controller_path, participant_name,
                       opponent_controller_path=None, opponent_name='', first_run=True):
     world_config = config['world']
@@ -121,8 +121,8 @@ def record_animations(gpu, config, participant_controller_path, participant_name
 
     # Run Webots container with Popen to read the stdout
     if opponent_controller_path:
-        print(f'::group::Running game in \033[32mWebots\033[0m: \033[31m{participant_name}\033[0m ' +
-              f'versus \033[34m{opponent_name}\033[0m')
+        print(f'::group::Running game in \033[32mWebots\033[0m: \033[31m{participant_name}\033[0m '
+              + f'versus \033[34m{opponent_name}\033[0m')
     else:
         print(f'::group::Running evaluation in \033[32mWebots\033[0m of \033[31m{participant_name}\033[0m')
     command_line = ['docker', 'run', '--tty', '--rm']
@@ -137,9 +137,9 @@ def record_animations(gpu, config, participant_controller_path, participant_name
 
     command_line += [
         '--volume', '/tmp/webots-1234/ipc/participant:/tmp/webots-1234/ipc/participant',
-        '--mount', 'type=bind,' +
-                   f'source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},' +
-                   f'target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
+        '--mount', 'type=bind,'
+                   + f'source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},'
+                   + f'target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
         '--env', 'CI=true',
         '--env', f'PARTICIPANT_NAME={participant_name}',
         '--env', f'OPPONENT_NAME={opponent_name}',
@@ -216,16 +216,16 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         print(f'::error ::Webots container exited with code {webots_docker.returncode}')
         performance = -1
     if not participant_docker:
-        print('::error ::Competition finished before launching the participant controller: ' +
-              'check that the controller in the world file is named "participant"')
+        print('::error ::Competition finished before launching the participant controller: '
+              + 'check that the controller in the world file is named "participant"')
         performance = -1
     if not participant_controller_connected:
-        print('::error ::Competition finished before the participant controller connected to Webots: ' +
-              'your controller crashed. Please debug your controller locally before submitting it')
+        print('::error ::Competition finished before the participant controller connected to Webots: '
+              + 'your controller crashed. Please debug your controller locally before submitting it')
         performance = -1
     if opponent_docker and not opponent_controller_connected:
-        print('::warning ::Competition finished before the opponent controller connected to Webots: ' +
-              'the opponent controller failed conntected to Webots, therefore you won')
+        print('::warning ::Competition finished before the opponent controller connected to Webots: '
+              + 'the opponent controller failed to connect to Webots, therefore you won')
         performance = 1
 
     _close_containers()
@@ -260,15 +260,15 @@ def _get_realtime_stdout(process):
     return process.returncode
 
 
-def _close_containers():  # clearning containers possibly remaining after the last job
+def _close_containers():  # clearing containers possibly remaining after the last job
     webots_container_id = _get_container_id('recorder-webots')
     if webots_container_id != '':  # Closing Webots with SIGINT to trigger animation export
         subprocess.run(['docker', 'exec', webots_container_id, 'pkill', '-SIGINT', 'webots-bin'])
     participant_controller_container_id = _get_container_id('participant-controller')
     if participant_controller_container_id != '':
-        subprocess.run(['docker', 'kill', participant_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(
+            ['docker', 'kill', participant_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     opponent_controller_container_id = _get_container_id('opponent-controller')
     if opponent_controller_container_id != '':
-        subprocess.run(['docker', 'kill', opponent_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-    
+        subprocess.run(
+            ['docker', 'kill', opponent_controller_container_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

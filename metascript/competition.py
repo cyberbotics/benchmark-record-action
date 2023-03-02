@@ -17,6 +17,7 @@
 from datetime import datetime, timezone
 import json
 import os
+import re
 import requests
 import shutil
 import subprocess
@@ -24,7 +25,8 @@ import sys
 from .animation import record_animations, TMP_ANIMATION_DIRECTORY
 from .utils import git, webots_cloud
 
-ALLOW_PUSH = os.getenv('INPUT_ALLOW_PUSH', False)
+# YAML booleans are converted to strings by GitHub composite Actions, so we need to convert them back to booleans
+UPLOAD_PERFORMANCE = re.search(r"^(?:y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON)$", os.environ['UPLOAD_PERFORMANCE'])
 
 
 class Participant:
@@ -33,7 +35,7 @@ class Participant:
         self.repository = repository
         self.private = private
         self.controller_path = os.path.join('controllers', id)
-        repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['INPUT_REPO_TOKEN'], self.repository)
+        repo = 'https://{}:{}@github.com/{}'.format('Competition_Evaluator', os.environ['REPO_TOKEN'], self.repository)
         if git.clone(repo, self.controller_path):
             self.data = _load_json(os.path.join(self.controller_path, 'controllers', 'participant', 'participant.json'))
             if self.data:  # sanity checks
@@ -54,8 +56,8 @@ class Participant:
                 else:
                     country = self.data['country']
                     if country != 'demo' and len(country) != 2:
-                        print(f'{message}Bad country code in {url} (you should set a two-letter country code, see ' +
-                              'https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 for details)')
+                        print(f'{message}Bad country code in {url} (you should set a two-letter country code, see '
+                              + 'https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 for details)')
                         if not opponent:
                             sys.exit(1)
                 if 'programming' not in self.data:
@@ -81,15 +83,16 @@ def competition(config):
 
     git.init()
 
-    response = requests.get(f'https://webots.cloud/storage/competition/{os.environ["GITHUB_REPOSITORY"]}/participants.json')
+    response = requests.get(
+        f'https://webots.cloud/storage/competition/{os.environ["GITHUB_REPOSITORY"]}/participants.json')
     open("participants.json", "wb").write(response.content)
-    
+
     # Parse input participant
     participant = _get_participant()
     if participant.data is None:
-        print('::error ::Cannot parse ' +
-              f'https://github.com/{participant.repository}/blob/main/controllers/participant/participant.json, ' +
-              'please provide or fix this file.')
+        print('::error ::Cannot parse '
+              + f'https://github.com/{participant.repository}/blob/main/controllers/participant/participant.json, '
+              + 'please provide or fix this file.')
         sys.exit(1)
     performance = None
     animator_controller_destination_path = _copy_animator_files()
@@ -134,8 +137,8 @@ def competition(config):
     # cleanup docker containers, images and networks not used in the last 30 days
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
 
-    if ALLOW_PUSH:
-        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], 'participants.json',
+    if UPLOAD_PERFORMANCE:
+        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], 'participants.json',
                                  'participants')
         if os.path.isdir('storage'):
             os.chdir('storage')
@@ -143,7 +146,7 @@ def competition(config):
                 if f == '.' or f == '..':
                     continue
                 file = os.path.join(f, 'animation.json')
-                webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['INPUT_REPO_TOKEN'], file, 'animation')
+                webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], file, 'animation')
             os.chdir('..')
     if failure:
         sys.exit(1)
@@ -186,10 +189,11 @@ def _get_opponent(participant):
 
 
 def _get_participant():
-    input_participant = os.environ['INPUT_INDIVIDUAL_EVALUATION']
-    split = input_participant.split(':')
-    print(f'Cloning \033[31mparticipant\033[0m repository: {split[1]}')
-    participant = Participant(split[0], split[1], split[2] == 'true')
+    print(f'Cloning \033[31mparticipant\033[0m repository: {os.environ["PARTICIPANT_REPO_NAME"]}')
+    participant = Participant(
+        os.environ['PARTICIPANT_REPO_ID'],
+        os.environ['PARTICIPANT_REPO_NAME'],
+        os.environ['PARTICIPANT_REPO_PRIVATE'] == 'true')
     return participant
 
 
@@ -272,8 +276,8 @@ def _update_ranking(performance, participant, opponent):
             _update_participant(found_participant, opponent, rank + 1)
         else:  # insert participant at last but one position, move opponent to last position
             if found_opponent['performance'] != count - 1:
-                print('::error ::Opponent should be ranked last in participants.json ' +
-                      f'({found_opponent["performance"]} != {count - 1})')
+                print('::error ::Opponent should be ranked last in participants.json '
+                      + f'({found_opponent["performance"]} != {count - 1})')
                 sys.exit(1)
             _update_participant(found_opponent, opponent, count)
             p = {}

@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import requests
 import subprocess
 
 
@@ -24,25 +22,6 @@ def init():
     if result.returncode != 0:
         subprocess.check_output(['git', 'config', '--global', 'user.name', 'webots.cloud'])
         subprocess.check_output(['git', 'config', '--global', 'user.email', '97463320+webots-cloud@users.noreply.github.com'])
-
-
-def push(message='Updated competition recordings'):
-    github_repository = 'https://{}:{}@github.com/{}'.format(
-        os.environ['GITHUB_ACTOR'],
-        os.environ['INPUT_REPO_TOKEN'],
-        os.environ['GITHUB_REPOSITORY']
-    )
-    print(f'::group::Push new animations and ranking to https://github.com/{os.environ["GITHUB_REPOSITORY"]}')
-    try:
-        if os.path.exists('participants.json'):
-            subprocess.check_output(['git', 'add', '-A', 'participants.json'])
-        if os.path.exists('storage'):
-            subprocess.check_output(['git', 'add', '-A', 'storage'])
-        print(subprocess.check_output(['git', 'commit', '-m', message], stderr=subprocess.STDOUT).decode('utf-8'))
-        print(subprocess.check_output(['git', 'push', '-f', github_repository]).decode('utf-8'))
-    except subprocess.CalledProcessError:
-        print('::notice ::Nothing to commit and push')
-    print('::endgroup::')
 
 
 def clone(repo, path):

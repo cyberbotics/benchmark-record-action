@@ -151,6 +151,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
                      '--no-rendering', f'/usr/local/webots-project/{world_config["file"]}']
 
     webots_docker = subprocess.Popen(command_line, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+    print(' '.join(command_line))
 
     participant_docker = None
     opponent_docker = None
@@ -190,6 +191,10 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             command_line = ['docker', 'run', '--rm']
             if gpu:
                 command_line += ['--gpus', 'all']
+            if 'cpus' in world_config:
+                command_line += [f'--cpus="{world_config["cpus"]}"']
+            if 'memory' in world_config:
+                command_line += [f'--memory="{world_config["memory"]}"']
             command_line += ['--network', 'none', '--volume']
             if participant_docker is None and "INFO: 'participant' " in webots_line:
                 command_line += ['/tmp/webots-1234/ipc/participant:/tmp/webots-1234/ipc/participant',
@@ -201,6 +206,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
                                  'opponent-controller']
                 opponent_docker = subprocess.Popen(command_line,
                                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+            print(' '.join(command_line))
         elif "' extern controller: connected" in webots_line:
             if "INFO: 'participant' " in webots_line:
                 participant_controller_connected = True

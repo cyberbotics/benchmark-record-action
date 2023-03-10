@@ -187,7 +187,12 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         if webots_line is None:
             continue
         print(f'\033[32m{webots_line}\033[0m')
-        if "' extern controller: " in webots_line:
+        if "' extern controller: connected" in webots_line:
+            if webots_line.startswith("INFO: 'participant' "):
+                participant_controller_connected = True
+            elif webots_line.startswith("INFO: 'opponent' "):
+                opponent_controller_connected = True
+        elif "' extern controller: " in webots_line:
             command_line = ['docker', 'run', '--rm']
             if gpu:
                 command_line += ['--gpus', 'all']
@@ -208,11 +213,6 @@ def record_animations(gpu, config, participant_controller_path, participant_name
                 opponent_docker = subprocess.Popen(command_line,
                                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
                 print(' '.join(command_line))
-        elif "' extern controller: connected" in webots_line:
-            if "INFO: 'participant' " in webots_line:
-                participant_controller_connected = True
-            elif "INFO: 'opponent' " in webots_line:
-                opponent_controller_connected = True
         elif PERFORMANCE_KEYWORD in webots_line:
             performance = float(webots_line.strip().replace(PERFORMANCE_KEYWORD, ''))
             break

@@ -192,9 +192,9 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             if gpu:
                 command_line += ['--gpus', 'all']
             if 'cpus' in world_config:
-                command_line += [f'--cpus="{world_config["cpus"]}"']
+                command_line += [f'--cpus={world_config["cpus"]}']
             if 'memory' in world_config:
-                command_line += [f'--memory="{world_config["memory"]}"']
+                command_line += [f'--memory={world_config["memory"]}']
             command_line += ['--network', 'none', '--volume']
             if participant_docker is None and "INFO: 'participant' " in webots_line:
                 command_line += ['/tmp/webots-1234/ipc/participant:/tmp/webots-1234/ipc/participant',

@@ -152,7 +152,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         participant_cpuset_cpus = f'{webots_cpu_max + 1}-{webots_cpu_max + cpus}'
         opponent_cpuset_cpus = f'{webots_cpu_max + 1 + cpus}-{cpu_count - 1}'
 
-    command_line += [f'--cpuset-cpus="{webots_cpuset_cpus}"']
+    command_line += [f'--cpuset-cpus={webots_cpuset_cpus}']
 
     if gpu:
         command_line += ['--gpus', 'all', '--env', 'DISPLAY',
@@ -230,14 +230,14 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             if participant_docker is None and webots_line.startswith("INFO: 'participant' "):
                 command_line += ['/tmp/webots-1234/ipc/participant:/tmp/webots-1234/ipc/participant',
                                  'participant-controller']
-                command_line += [f'--cpuset-cpus="{participant_cpuset_cpus}"']
+                command_line += [f'--cpuset-cpus={participant_cpuset_cpus}']
                 participant_docker = subprocess.Popen(command_line,
                                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
                 print(' '.join(command_line))
             elif opponent_docker is None and webots_line.startswith("INFO: 'opponent' "):
                 command_line += ['/tmp/webots-1234/ipc/opponent:/tmp/webots-1234/ipc/opponent',
                                  'opponent-controller']
-                command_line += [f'--cpuset-cpus="{opponent_cpuset_cpus}"']
+                command_line += [f'--cpuset-cpus={opponent_cpuset_cpus}']
                 opponent_docker = subprocess.Popen(command_line,
                                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
                 print(' '.join(command_line))

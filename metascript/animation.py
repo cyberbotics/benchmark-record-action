@@ -135,24 +135,30 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         webots_cpuset_cpus = '0'
         participant_cpuset_cpus = '1'
         opponent_cpuset_cpus = '1'
-    elif cpu_count == 3:
-        webots_cpuset_cpus = '0'
-        participant_cpuset_cpus = '1'
-        opponent_cpuset_cpus = '2'
     elif cpu_count == 4:
         webots_cpuset_cpus = '0,1'
         participant_cpuset_cpus = '2'
         opponent_cpuset_cpus = '3'
-    else:
+    elif cpu_count >= 8:
         cpus = world_config['cpus'] if 'cpus' in world_config else 1
-        webots_cpu_max = cpu_count - 1 - cpus * 2 if opponent_controller_path else 1
-        if webots_cpu_max < 0:
-            webots_cpu_max = 0
-        webots_cpuset_cpus = f'0-{webots_cpu_max}' if webots_cpu_max > 0 else '0'
-        participant_cpuset_cpus = f'{webots_cpu_max + 1}-{webots_cpu_max + cpus}'
-        opponent_cpuset_cpus = f'{webots_cpu_max + 1 + cpus}-{cpu_count - 1}'
+        if cpus == 3:
+            webots_cpuset_cpus = '0,4'
+            participant_cpuset_cpus = '1,5,3'
+            opponent_cpuset_cpus = '2,6,7'
+        elif cpus == 2:
+            webots_cpuset_cpus = '0,3,4,7'
+            participant_cpuset_cpus = '1,5'
+            opponent_cpuset_cpus = '2,6'
+        if cpu_count != 8:
+            print(f'::warning ::CPU core count is {cpu_count}, using only 8 cores.')
+    else:
+        webots_cpuset_cpus = None
+        participant_cpuset_cpus = None
+        opponent_cpuset_cpus = None
+        print(f'::warning ::Unsupported CPU count value: {cpu_count}.')
 
-    command_line += [f'--cpuset-cpus={webots_cpuset_cpus}']
+    if webots_cpuset_cpus:
+        command_line += [f'--cpuset-cpus={webots_cpuset_cpus}']
 
     if gpu:
         command_line += ['--gpus', 'all', '--env', 'DISPLAY',
@@ -228,14 +234,18 @@ def record_animations(gpu, config, participant_controller_path, participant_name
                 command_line += [f'--memory={world_config["memory"]}']
             command_line += ['--network', 'none', '--volume']
             if participant_docker is None and webots_line.startswith("INFO: 'participant' "):
-                command_line += ['/tmp/webots-1234/ipc/participant:/tmp/webots-1234/ipc/participant',
-                                 f'--cpuset-cpus={participant_cpuset_cpus}', 'participant-controller']
+                command_line += ['/tmp/webots-1234/ipc/participant:/tmp/webots-1234/ipc/participant']
+                if participant_cpuset_cpus:
+                     command_line += [f'--cpuset-cpus={participant_cpuset_cpus}']
+                command_line += ['participant-controller']
                 participant_docker = subprocess.Popen(command_line,
                                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
                 print(' '.join(command_line))
             elif opponent_docker is None and webots_line.startswith("INFO: 'opponent' "):
-                command_line += ['/tmp/webots-1234/ipc/opponent:/tmp/webots-1234/ipc/opponent',
-                                 f'--cpuset-cpus={opponent_cpuset_cpus}', 'opponent-controller']
+                command_line += ['/tmp/webots-1234/ipc/opponent:/tmp/webots-1234/ipc/opponent']
+                if opponent_cpuset_cpus:
+                    command_line += [f'--cpuset-cpus={opponent_cpuset_cpus}']
+                command_line += ['opponent-controller']
                 opponent_docker = subprocess.Popen(command_line,
                                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
                 print(' '.join(command_line))

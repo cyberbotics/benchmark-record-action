@@ -149,13 +149,19 @@ def record_animations(gpu, config, participant_controller_path, participant_name
             webots_cpuset_cpus = '0,3,4,7'
             participant_cpuset_cpus = '1,5'
             opponent_cpuset_cpus = '2,6'
+        else:
+            webots_cpuset_cpus = '0,3,4,5,6,7'
+            participant_cpuset_cpus = '1'
+            opponent_cpuset_cpus = '2'
+            if cpus != 1:
+                print(f'::warning ::Unsupported number of CPUs for controllers: {cpus} (cpus in webots.yml)')
         if cpu_count != 8:
-            print(f'::warning ::CPU core count is {cpu_count}, using only 8 cores.')
+            print(f'::warning ::CPU core count is {cpu_count}, using only 8 cores')
     else:
         webots_cpuset_cpus = None
         participant_cpuset_cpus = None
         opponent_cpuset_cpus = None
-        print(f'::warning ::Unsupported CPU count value: {cpu_count}.')
+        print(f'::warning ::Unsupported CPU count value: {cpu_count}')
 
     if webots_cpuset_cpus:
         command_line += [f'--cpuset-cpus={webots_cpuset_cpus}']

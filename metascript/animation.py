@@ -173,10 +173,10 @@ def record_animations(gpu, config, participant_controller_path, participant_name
         command_line += ['--init']
 
     if opponent_controller_path:
-        command_line += ['--volume', '/tmp/webots-1234/ipc/opponent:/tmp/webots-1234/ipc/opponent']
+        command_line += ['--volume', '/tmp/webots/root/1234/ipc/opponent:/tmp/webots/root/1234/ipc/opponent']
 
     command_line += [
-        '--volume', '/tmp/webots-1234/ipc/participant:/tmp/webots-1234/ipc/participant',
+        '--volume', '/tmp/webots/root/1234/ipc/participant:/tmp/webots/root/1234/ipc/participant',
         '--mount', 'type=bind,'
                    + f'source={os.getcwd()}/{TMP_ANIMATION_DIRECTORY},'
                    + f'target=/usr/local/webots-project/{TMP_ANIMATION_DIRECTORY}',
@@ -240,7 +240,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
                 command_line += [f'--memory={world_config["memory"]}']
             command_line += ['--network', 'none', '--volume']
             if participant_docker is None and webots_line.startswith("INFO: 'participant' "):
-                command_line += ['/tmp/webots-1234/ipc/participant:/tmp/webots-1234/ipc/participant']
+                command_line += ['/tmp/webots/root/1234/ipc/participant:/tmp/webots/root/1234/ipc/participant']
                 if participant_cpuset_cpus:
                      command_line += [f'--cpuset-cpus={participant_cpuset_cpus}']
                 command_line += ['participant-controller']
@@ -248,7 +248,7 @@ def record_animations(gpu, config, participant_controller_path, participant_name
                                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
                 print(' '.join(command_line))
             elif opponent_docker is None and webots_line.startswith("INFO: 'opponent' "):
-                command_line += ['/tmp/webots-1234/ipc/opponent:/tmp/webots-1234/ipc/opponent']
+                command_line += ['/tmp/webots/root/1234/ipc/opponent:/tmp/webots/root/1234/ipc/opponent']
                 if opponent_cpuset_cpus:
                     command_line += [f'--cpuset-cpus={opponent_cpuset_cpus}']
                 command_line += ['opponent-controller']

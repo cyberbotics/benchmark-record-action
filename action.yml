@@ -13,6 +13,10 @@ inputs:
     description: 'Whether the participant repository is private'
     required: true
 
+  opponent_repo_name:
+    description: 'The name of the opponent repository selected by the participant'
+    required: false
+
   log_url:
     description: 'The URL of GitHub action logs'
     required: true
@@ -42,6 +46,7 @@ runs:
         PARTICIPANT_REPO_ID: ${{ inputs.participant_repo_id }}
         PARTICIPANT_REPO_NAME: ${{ inputs.participant_repo_name }}
         PARTICIPANT_REPO_PRIVATE: ${{ inputs.participant_repo_private }}
+        OPPONENT_REPO_NAME: ${{ inputs.opponent_repo_name }}
         LOG_URL: ${{ inputs.log_url }}
         REPO_TOKEN: ${{ inputs.repo_token }}
         UPLOAD_PERFORMANCE: ${{ inputs.upload_performance }}

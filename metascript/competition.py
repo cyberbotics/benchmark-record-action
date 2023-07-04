@@ -27,6 +27,7 @@ from .utils import git, webots_cloud
 
 # YAML booleans are converted to strings by GitHub composite Actions, so we need to convert them back to booleans
 UPLOAD_PERFORMANCE = re.search(r"^(?:y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON)$", os.environ['UPLOAD_PERFORMANCE'])
+OPPONENT_REPO_NAME = os.environ['OPPONENT_REPO_NAME']
 
 
 class Participant:
@@ -101,6 +102,9 @@ def competition(config):
         while True:
             opponent = _get_opponent(participant)
             if opponent is None:  # we reached the top of the ranking
+                if OPPONENT_REPO_NAME:
+                    print(f'::error ::Specified opponent was not found: {OPPONENT_REPO_NAME}')
+                    break
                 if performance is None:  # number 1 was modified, so no performance evaluation was run
                     # we still need to update the participant data in case they were modified
                     participants = _load_participants()
@@ -121,10 +125,13 @@ def competition(config):
                 failure = True
             elif performance == 1:
                 opponent.log = os.environ['LOG_URL']
-            _update_ranking(performance, participant, opponent)
+            if OPPONENT_REPO_NAME:
+                _update_friendly_game(performance, participant, opponent)
+            else:
+                _update_ranking(performance, participant, opponent)
             _update_animation_files(opponent if performance == 1 else participant)
             shutil.rmtree(opponent.controller_path)
-            if performance != 1:  # draw or loose, stopping duals
+            if performance != 1 or OPPONENT_REPO_NAME:  # draw, loose or friendly game: stop evaluations
                 break
     else:  # run a simple performance evaluation
         performance = record_animations(gpu, config, participant.controller_path, participant.data['name'])
@@ -138,15 +145,14 @@ def competition(config):
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
 
     if UPLOAD_PERFORMANCE:
-        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], 'participants.json',
-                                 'participants')
+        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], 'participants.json', 'participants')
         if os.path.isdir('storage'):
             os.chdir('storage')
             for f in os.listdir('.'):
                 if f == '.' or f == '..':
                     continue
-                file = os.path.join(f, 'animation.json')
-                webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], file, 'animation')
+                filename = os.path.join(f, 'friendly.json' if OPPONENT_REPO_NAME else 'animation.json')
+                webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], filename, 'animation')
             os.chdir('..')
     if failure:
         sys.exit(1)
@@ -160,6 +166,14 @@ def _get_opponent(participant):
         participants['participants'].append(p)
         _save_participants(participants)
         print(f'Welcome {participant.repository}, you are the first participant there')
+        return None
+
+    if OPPONENT_REPO_NAME:
+        for p in participants['participants']:
+            if p['repository'] == OPPONENT_REPO_NAME:
+                opponent = Participant(p['id'], p['repository'], p['private'], True)
+                if opponent.data is not None:
+                    return opponent
         return None
 
     i = 0
@@ -182,6 +196,11 @@ def _get_opponent(participant):
             return opponent
         print(f'{o["repository"]} is not participating any more, removing it')
         del participants['participants'][i - 1]
+        max = len(participants['participants'])
+        j = i
+        while j < max:  # update performance of controllers below the one deleted
+            participants['participants'][j]['performance'] -= 1
+            j += 1
         _save_participants(participants)
         i -= 1
     print(f'All opponents have left, {participant.repository} becomes number 1')
@@ -239,6 +258,24 @@ def _update_performance(performance, participant, higher_is_better):
             break
         i += 1
     participants['participants'].insert(i, np)
+    _save_participants(participants)
+
+
+def _update_friendly_game(performance, participant, opponent):
+    # set result and opponent name for a friendly game
+    participants = _load_participants()
+    opponent_name = None
+    for p in participants['participants']:
+        if p['id'] == opponent.id:
+            opponent_name = p['name']
+            break
+    if opponent_name is None:
+        print('::error ::Could not find opponent in a friendly game')
+        return
+    for p in participants['participants']:
+        if p['id'] == participant.id:
+            participant['friend'] = {'name': opponent_name, 'result': 'W' if performance == 1 else 'L'}
+            break
     _save_participants(participants)
 
 
@@ -312,6 +349,7 @@ def _save_json(filename, object):
 def _update_animation_files(participant):
     folder = os.path.join('storage', participant.id)
     os.makedirs(folder)
-    shutil.copy(os.path.join(TMP_ANIMATION_DIRECTORY, 'animation.json'), os.path.join(folder, 'animation.json'))
+    destination = 'friendly.json' if OPPONENT_REPO_NAME else 'animation.json'
+    shutil.copy(os.path.join(TMP_ANIMATION_DIRECTORY, 'animation.json'), os.path.join(folder, destination))
     shutil.rmtree(TMP_ANIMATION_DIRECTORY)
     return

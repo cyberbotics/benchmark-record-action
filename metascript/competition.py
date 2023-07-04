@@ -151,7 +151,7 @@ def competition(config):
             for f in os.listdir('.'):
                 if f == '.' or f == '..':
                     continue
-                filename = os.path.join(f, 'friendly.json' if OPPONENT_REPO_NAME else 'animation.json')
+                filename = os.path.join(f, 'animation.json')
                 webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], filename, 'animation')
             os.chdir('..')
     if failure:
@@ -347,9 +347,8 @@ def _save_json(filename, object):
 
 
 def _update_animation_files(participant):
-    folder = os.path.join('storage', participant.id)
+    folder = os.path.join('storage', ('f' is OPPONENT_REPO_NAME else '') + participant.id)
     os.makedirs(folder)
-    destination = 'friendly.json' if OPPONENT_REPO_NAME else 'animation.json'
-    shutil.copy(os.path.join(TMP_ANIMATION_DIRECTORY, 'animation.json'), os.path.join(folder, destination))
+    shutil.copy(os.path.join(TMP_ANIMATION_DIRECTORY, 'animation.json'), os.path.join(folder, 'animation.json'))
     shutil.rmtree(TMP_ANIMATION_DIRECTORY)
     return

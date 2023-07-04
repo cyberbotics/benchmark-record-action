@@ -151,7 +151,8 @@ def competition(config):
             for f in os.listdir('.'):
                 if f == '.' or f == '..':
                     continue
-                webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], 'animation.json', 'animation')
+                filename = os.path.join(f, 'animation.json')
+                webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], filename, 'animation')
             os.chdir('..')
     if failure:
         sys.exit(1)

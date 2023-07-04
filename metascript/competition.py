@@ -125,7 +125,9 @@ def competition(config):
                 failure = True
             elif performance == 1:
                 opponent.log = os.environ['LOG_URL']
-            if not OPPONENT_REPO_NAME:
+            if OPPONENT_REPO_NAME:
+                _update_friendly_game(performance, participant, opponent)
+            else:
                 _update_ranking(performance, participant, opponent)
             _update_animation_files(opponent if performance == 1 else participant)
             shutil.rmtree(opponent.controller_path)
@@ -143,9 +145,7 @@ def competition(config):
     subprocess.check_output(['docker', 'system', 'prune', '--force', '--filter', 'until=720h'])
 
     if UPLOAD_PERFORMANCE:
-        if not OPPONENT_REPO_NAME:
-            webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], 'participants.json',
-                                     'participants')
+        webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], 'participants.json', 'participants')
         if os.path.isdir('storage'):
             os.chdir('storage')
             for f in os.listdir('.'):
@@ -153,13 +153,6 @@ def competition(config):
                     continue
                 filename = os.path.join(f, 'friendly.json' if OPPONENT_REPO_NAME else 'animation.json')
                 webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], filename, 'animation')
-                if OPPONENT_REPO_NAME:
-                    filename = os.path.join(f, 'friend.txt')
-                    file = open(filename, 'w')
-                    result = 'W' if performance == 1 else 'L'
-                    file.write(result + opponent['name'] + '\n')
-                    file.close()
-                    webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], filename, 'animation')
             os.chdir('..')
     if failure:
         sys.exit(1)
@@ -265,6 +258,24 @@ def _update_performance(performance, participant, higher_is_better):
             break
         i += 1
     participants['participants'].insert(i, np)
+    _save_participants(participants)
+
+
+def _update_friendly_game(performance, participant, opponent):
+    # set result and opponent name for a friendly game
+    participants = _load_participants()
+    opponent_name = None
+    for p in participants['participants']:
+        if p['id'] == opponent.id:
+            opponent_name = p['name']
+            break
+    if opponent_name is None:
+        print('::error ::Could not find opponent in a friendly game')
+        return
+    for p in participants['participants']:
+        if p['id'] == participant.id:
+            participant['friend'] = {'name': opponent_name, 'result': 'W' if performance == 1 else 'L'}
+            break
     _save_participants(participants)
 
 

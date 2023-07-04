@@ -156,7 +156,8 @@ def competition(config):
                 if OPPONENT_REPO_NAME:
                     filename = os.path.join(f, 'friend.txt')
                     file = open(filename, 'w')
-                    file.write(opponent['name'] + '\n')
+                    result = 'W' if performance == 1 else 'L'
+                    file.write(result + opponent['name'] + '\n')
                     file.close()
                     webots_cloud.upload_file(os.environ['GITHUB_REPOSITORY'], os.environ['REPO_TOKEN'], filename, 'animation')
             os.chdir('..')

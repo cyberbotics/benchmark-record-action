@@ -274,7 +274,7 @@ def _update_friendly_game(performance, participant, opponent):
         return
     for p in participants['participants']:
         if p['id'] == participant.id:
-            participant['friend'] = {'name': opponent_name, 'result': 'W' if performance == 1 else 'L'}
+            p['friend'] = {'name': opponent_name, 'result': 'W' if performance == 1 else 'L'}
             break
     _save_participants(participants)
 

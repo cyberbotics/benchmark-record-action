@@ -129,7 +129,7 @@ def competition(config):
                 _update_friendly_game(performance, participant, opponent)
             else:
                 _update_ranking(performance, participant, opponent)
-            _update_animation_files(opponent if performance == 1 else participant)
+            _update_animation_files(participant if OPPONENT_REPO_NAME or performance != 1 else opponent)
             shutil.rmtree(opponent.controller_path)
             if performance != 1 or OPPONENT_REPO_NAME:  # draw, loose or friendly game: stop evaluations
                 break

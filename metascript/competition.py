@@ -232,7 +232,9 @@ def _update_participant(p, participant, performance=None):
     p['country'] = participant.data['country']
     p['programming'] = participant.data['programming']
     if 'friend' in participant.data:
-        p['friend'] = { 'name': participant.data['friend']['name'], 'result': participant.data['result'] }
+        p['friend'] = { 'name': participant.data['friend']['name'], 'result': participant.data['friend']['result'] }
+    elif 'friend' in p:
+        del p['friend']
     if participant.log is not None:
         p['log'] = participant.log
         p['date'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
